@@ -81,13 +81,17 @@ def paint_landscape(d, x0, y0, x1, y1):
     ], fill=VIOLET + (220,))
 
 
-def make_icon(size: int) -> Image.Image:
+def make_icon(size: int, rounded: bool = True) -> Image.Image:
     s = size * 4  # supersample for AA
     out = Image.new("RGBA", (s, s), (0, 0, 0, 0))
 
-    # Rounded gradient background
+    # Gradient background — rounded corners for normal extension icons,
+    # full square for the publisher / trader profile icon (no alpha allowed).
     bg = gradient_bg(s, INDIGO, VIOLET)
-    out.paste(bg, (0, 0), rounded_mask(s, int(s * 0.22)))
+    if rounded:
+        out.paste(bg, (0, 0), rounded_mask(s, int(s * 0.22)))
+    else:
+        out.paste(bg, (0, 0))
 
     # Optional inner glow / vignette for depth
     glow = Image.new("RGBA", (s, s), (0, 0, 0, 0))
@@ -153,3 +157,11 @@ for size in (16, 48, 128):
     img = make_icon(size)
     img.save(os.path.join(OUT, f"icon-{size}.png"))
     print(f"wrote icon-{size}.png")
+
+# Publisher / trader-symbol variant for the Web Store dashboard:
+# 128x128 RGB (no alpha), full-square gradient (no rounded corners since
+# alpha can't render the transparent corner area).
+TRADER = make_icon(128, rounded=False).convert("RGB")
+TRADER_OUT = os.path.normpath(os.path.join(OUT, "..", "webstore-assets", "developer-icon-128x128.png"))
+TRADER.save(TRADER_OUT)
+print(f"wrote {os.path.relpath(TRADER_OUT, os.path.dirname(OUT))}")
