@@ -1,0 +1,240 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Immich Companion — Settings</title>
+    <link rel="stylesheet" href="shared.css" />
+  </head>
+  <body class="options-body">
+    <div class="options-layout">
+      <aside class="sidebar">
+        <div class="brand">
+          <img src="../icons/icon-48.png" width="32" height="32" alt="" />
+          <div>
+            <div class="brand-name">Immich Companion</div>
+            <div class="brand-version" id="versionLabel">v0.1</div>
+          </div>
+        </div>
+        <nav id="nav">
+          <button class="nav-item active" data-section="connection">
+            <span class="nav-dot"></span> Connection
+          </button>
+          <button class="nav-item" data-section="save">
+            <span class="nav-dot"></span> Save to Immich
+          </button>
+          <button class="nav-item" data-section="newtab">
+            <span class="nav-dot"></span> New Tab
+          </button>
+          <button class="nav-item" data-section="search">
+            <span class="nav-dot"></span> Search &amp; Share
+          </button>
+          <button class="nav-item" data-section="features">
+            <span class="nav-dot"></span> Features
+          </button>
+          <button class="nav-item" data-section="about">
+            <span class="nav-dot"></span> About
+          </button>
+        </nav>
+        <div class="sidebar-footer">
+          <span id="connStatus" class="conn-status">Not connected</span>
+        </div>
+      </aside>
+
+      <main class="content">
+        <!-- Connection -->
+        <section id="section-connection" class="section active">
+          <header>
+            <h1>Connection</h1>
+            <p class="muted">Point the extension at your Immich server.</p>
+          </header>
+          <div class="grid two">
+            <label>
+              <span>Server URL</span>
+              <input id="serverUrl" type="url" placeholder="https://immich.example.com" autocomplete="off" />
+              <small class="muted">No trailing slash. Don't include <code>/api</code>.</small>
+            </label>
+            <label>
+              <span>API key</span>
+              <input id="apiKey" type="password" placeholder="••••••••••••••••" autocomplete="off" />
+              <small class="muted">Immich → Account Settings → API Keys.</small>
+            </label>
+          </div>
+          <div class="row">
+            <button id="save" class="primary">Save</button>
+            <button id="test" type="button">Test connection</button>
+            <span id="status" class="status"></span>
+          </div>
+        </section>
+
+        <!-- Save to Immich -->
+        <section id="section-save" class="section">
+          <header>
+            <h1>Save to Immich</h1>
+            <p class="muted">Right-click any image, video, or link to upload it.</p>
+          </header>
+          <label>
+            <span>Default album (optional)</span>
+            <div class="inline">
+              <select id="defaultAlbumId">
+                <option value="">— none —</option>
+              </select>
+              <button id="refreshAlbums" type="button">Refresh</button>
+            </div>
+            <small class="muted">If set, every saved item is added to this album.</small>
+          </label>
+        </section>
+
+        <!-- New Tab -->
+        <section id="section-newtab" class="section">
+          <header>
+            <h1>New Tab</h1>
+            <p class="muted">Random photo from your library, with an "On this day" memory strip.</p>
+          </header>
+
+          <label class="toggle">
+            <input id="featureNewtab" type="checkbox" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">
+              <strong>Replace Chrome's new tab page</strong>
+              <small class="muted">
+                Chrome doesn't allow extensions to give back the original new tab without uninstalling.
+                When off, the new tab shows a minimal page with just a clock and a Google search bar — or
+                redirects to the URL below if you set one. To fully restore Chrome's default new tab,
+                disable the extension at <code>chrome://extensions</code>.
+              </small>
+            </span>
+          </label>
+
+          <label>
+            <span>Fallback URL (used when "Replace new tab" is off)</span>
+            <input id="newtabFallbackUrl" type="url" placeholder="https://google.com (leave empty for clock + search)" />
+          </label>
+
+          <hr />
+
+          <label class="toggle">
+            <input id="newtabBackground" type="checkbox" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">
+              <strong>Photo background</strong>
+              <small class="muted">A random photo from your library fills the background.</small>
+            </span>
+          </label>
+
+          <label>
+            <span>Source for new tab photos</span>
+            <div class="inline">
+              <select id="newtabAlbumId">
+                <option value="">All photos</option>
+              </select>
+              <button id="refreshAlbums2" type="button">Refresh</button>
+            </div>
+            <small class="muted">Pick a specific album, or leave on "All photos" for full library randomness.</small>
+          </label>
+
+          <label>
+            <span>Auto-rotate background every</span>
+            <select id="newtabRotateSeconds">
+              <option value="0">Once per new tab (no auto-rotate)</option>
+              <option value="30">30 seconds</option>
+              <option value="60">1 minute</option>
+              <option value="300">5 minutes</option>
+              <option value="900">15 minutes</option>
+            </select>
+          </label>
+
+          <hr />
+
+          <label class="toggle">
+            <input id="newtabOnThisDay" type="checkbox" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">
+              <strong>"On this day" memory strip</strong>
+              <small class="muted">Photos taken on this date in past years, shown along the bottom.</small>
+            </span>
+          </label>
+        </section>
+
+        <!-- Search & Share -->
+        <section id="section-search" class="section">
+          <header>
+            <h1>Search &amp; Share</h1>
+          </header>
+          <label>
+            <span>Hosts to treat as Immich (for share toolbar)</span>
+            <input id="sharePathHosts" type="text" placeholder="immich.example.com, photos.example.org" />
+            <small class="muted">
+              Comma-separated. The Slideshow / Download-all toolbar appears on
+              <code>/share/...</code> URLs at these hosts. The host of your Server URL is included automatically.
+            </small>
+          </label>
+          <p class="muted callout">
+            <strong>Omnibox search:</strong> in the address bar, type <code>im</code> + Space + a query
+            (e.g. <code>im dog at the beach</code>) for live smart-search results.
+          </p>
+        </section>
+
+        <!-- Features -->
+        <section id="section-features" class="section">
+          <header>
+            <h1>Features</h1>
+            <p class="muted">Turn individual features off if you don't use them.</p>
+          </header>
+          <label>
+            <span>Theme</span>
+            <select id="theme">
+              <option value="auto">Match system</option>
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+            </select>
+          </label>
+          <label class="toggle">
+            <input id="featureContextMenus" type="checkbox" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">
+              <strong>Right-click menus</strong>
+              <small class="muted">"Save to Immich" and "Find similar" on images, videos, and links.</small>
+            </span>
+          </label>
+          <label class="toggle">
+            <input id="featureShareToolbar" type="checkbox" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">
+              <strong>Share-album toolbar</strong>
+              <small class="muted">Slideshow + Download-all on Immich share pages.</small>
+            </span>
+          </label>
+          <label class="toggle">
+            <input id="featureNotifications" type="checkbox" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">
+              <strong>Desktop notifications</strong>
+              <small class="muted">Confirmations when an upload finishes.</small>
+            </span>
+          </label>
+        </section>
+
+        <!-- About -->
+        <section id="section-about" class="section">
+          <header>
+            <h1>About</h1>
+          </header>
+          <p>Companion extension for self-hosted Immich.</p>
+          <ul class="features-list">
+            <li><strong>Save to Immich</strong> — right-click any image or video.</li>
+            <li><strong>Omnibox</strong> — <code>im</code> + Space + query in the address bar.</li>
+            <li><strong>Popup search</strong> — toolbar button → smart search of your library.</li>
+            <li><strong>New tab</strong> — random photo + "On this day".</li>
+            <li><strong>Share toolbar</strong> — Slideshow + Download-all on share pages.</li>
+          </ul>
+        </section>
+
+        <footer class="content-footer">
+          <button id="saveAll" class="primary">Save all changes</button>
+          <span id="globalStatus" class="status"></span>
+        </footer>
+      </main>
+    </div>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

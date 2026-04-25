@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="shared.css" />
+  </head>
+  <body class="popup">
+    <div class="popup-tabs">
+      <button class="popup-tab active" data-tab="search">Search</button>
+      <button class="popup-tab" data-tab="recent">Recent <span id="recentCount" class="badge"></span></button>
+      <button class="popup-tab" data-tab="upload">Upload</button>
+    </div>
+
+    <!-- Search panel -->
+    <div class="popup-panel active" data-panel="search">
+      <div class="search-row">
+        <input id="q" type="search" placeholder="Search your library…" autofocus />
+        <button id="open" type="button" title="Open in Immich">↗</button>
+      </div>
+      <div id="empty" class="results-state show">
+        <div>Type to search your library.</div>
+        <div class="hint">Smart search uses CLIP — try "dog at the beach" or "red sunset".</div>
+      </div>
+      <div id="results" class="results" hidden></div>
+    </div>
+
+    <!-- Recent uploads panel -->
+    <div class="popup-panel" data-panel="recent">
+      <div id="recentEmpty" class="results-state show">
+        <div>No uploads yet.</div>
+        <div class="hint">Right-click any image on the web → "Save to Immich".</div>
+      </div>
+      <ul id="recentList" class="recent-list" hidden></ul>
+      <div class="recent-footer">
+        <button id="clearRecent" type="button" class="link-button" hidden>Clear history</button>
+      </div>
+    </div>
+
+    <!-- Upload panel -->
+    <div class="popup-panel" data-panel="upload">
+      <div id="dropZone" class="drop-zone">
+        <div class="drop-icon">⬆</div>
+        <div class="drop-title">Drop files here to upload</div>
+        <div class="drop-hint">…or click to choose</div>
+        <input id="fileInput" type="file" multiple accept="image/*,video/*" hidden />
+      </div>
+      <ul id="uploadList" class="upload-list"></ul>
+    </div>
+
+    <div class="footer">
+      <span id="status"></span>
+      <button id="settings" type="button" class="icon-button" title="Settings">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        <span>Settings</span>
+      </button>
+    </div>
+
+    <!-- Whole-popup drop overlay (active during dragenter on any tab) -->
+    <div id="dropOverlay" class="drop-overlay" hidden>
+      <div class="drop-overlay-card">
+        <div class="drop-icon">⬆</div>
+        <div>Release to upload to Immich</div>
+      </div>
+    </div>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
