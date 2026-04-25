@@ -1,3 +1,123 @@
+/* Inline Immich result card on Google search pages. */
+.immich-companion-google-card {
+  background: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 12px;
+  padding: 14px 16px 10px;
+  margin: 0 0 18px 0 !important;
+  font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  color: #202124;
+  max-width: 760px;
+  box-sizing: border-box;
+}
+.immich-companion-google-card * { box-sizing: border-box; }
+
+@media (prefers-color-scheme: dark) {
+  .immich-companion-google-card {
+    background: #1f1f1f;
+    border-color: #3c4043;
+    color: #e8eaed;
+  }
+}
+
+.immich-companion-google-card .icc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.immich-companion-google-card .icc-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #5f6368;
+}
+@media (prefers-color-scheme: dark) {
+  .immich-companion-google-card .icc-brand { color: #9aa0a6; }
+}
+.immich-companion-google-card .icc-brand img {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  flex: 0 0 auto;
+}
+.immich-companion-google-card .icc-label {
+  font-weight: 500;
+  color: #202124;
+}
+@media (prefers-color-scheme: dark) {
+  .immich-companion-google-card .icc-label { color: #e8eaed; }
+}
+.immich-companion-google-card .icc-count {
+  background: rgba(124, 140, 255, 0.14);
+  color: #5b6cff;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 500;
+}
+.immich-companion-google-card .icc-view-all {
+  font-size: 13px;
+  color: #1a73e8 !important;
+  text-decoration: none !important;
+  white-space: nowrap;
+}
+.immich-companion-google-card .icc-view-all:hover {
+  text-decoration: underline !important;
+}
+@media (prefers-color-scheme: dark) {
+  .immich-companion-google-card .icc-view-all { color: #8ab4f8 !important; }
+}
+
+.immich-companion-google-card .icc-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 2px 8px;
+  scrollbar-width: thin;
+}
+.immich-companion-google-card .icc-strip::-webkit-scrollbar { height: 6px; }
+.immich-companion-google-card .icc-strip::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.15);
+  border-radius: 3px;
+}
+@media (prefers-color-scheme: dark) {
+  .immich-companion-google-card .icc-strip::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.18);
+  }
+}
+
+.immich-companion-google-card .icc-item {
+  flex: 0 0 auto;
+  width: 110px;
+  height: 110px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f1f3f4;
+  display: block;
+  text-decoration: none !important;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+  position: relative;
+}
+@media (prefers-color-scheme: dark) {
+  .immich-companion-google-card .icc-item { background: #2d2d2d; }
+}
+.immich-companion-google-card .icc-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+}
+.immich-companion-google-card .icc-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: inherit;
+}
+
 /* In-page toast container (top-right) for upload feedback. */
 .immich-companion-toasts {
   position: fixed;
