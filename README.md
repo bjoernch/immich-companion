@@ -7,6 +7,7 @@ A Chrome / Chromium extension that connects to your self-hosted [Immich](https:/
 - **Omnibox search** — type `im` + space + a query in the address bar for live CLIP-powered smart search.
 - **Toolbar popup** — search your library, view recent uploads, drag-and-drop files to upload.
 - **New tab** — random photo from your library as the background, "On this day" memory strip, optional auto-rotate, optional album source.
+- **Inline matches on Google** — an Immich result card appears at the top of Google search results when your library has matching photos. Search runs entirely between your browser and your Immich; nothing is sent to Google. See [PRIVACY.md](PRIVACY.md) for details.
 - **Share-album toolbar** — Slideshow + Download-all controls on your own Immich `/share/...` URLs.
 - **Light & dark themes**, customisable per-feature.
 
@@ -47,6 +48,36 @@ See [PRIVACY.md](PRIVACY.md). Short version: the only data the extension sees is
 ## Building Web Store assets
 
 The icons and promo tile are generated from `icons/make_icons.py` and `webstore-assets/make_assets.py`. Both need Pillow (`pip install Pillow`).
+
+## Building the extension zip
+
+```
+./build.sh
+```
+
+Writes `dist/immich-companion-<version>.zip` containing only the runtime files (manifest, JS, CSS, HTML, icon PNGs, LICENSE). Upload that zip to the Chrome Web Store.
+
+## Releases
+
+Push a tag matching the manifest version and the GitHub Action in `.github/workflows/release.yml` builds the zip and attaches it to a GitHub Release:
+
+```
+git tag v$(python3 -c "import json; print(json.load(open('manifest.json'))['version'])")
+git push --tags
+```
+
+### Optional: auto-publish to the Chrome Web Store
+
+Set these four repository secrets and the same workflow will also push the new build to the Web Store after tagging:
+
+| Secret                     | What it is                                                  |
+| -------------------------- | ----------------------------------------------------------- |
+| `WEBSTORE_EXTENSION_ID`    | The 32-char id shown in the Web Store dashboard after your first manual upload |
+| `WEBSTORE_CLIENT_ID`       | Google Cloud OAuth 2.0 client ID                            |
+| `WEBSTORE_CLIENT_SECRET`   | matching client secret                                      |
+| `WEBSTORE_REFRESH_TOKEN`   | long-lived refresh token from a one-time OAuth dance        |
+
+Step-by-step for the OAuth credentials: <https://developer.chrome.com/docs/webstore/using-api>. The first version still has to be uploaded manually so you can fill in the listing fields, screenshots, and privacy policy URL — automation only handles subsequent updates.
 
 ## License
 
