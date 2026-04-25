@@ -153,24 +153,44 @@
   // Runs only on google.<tld>/search pages. Pulls the user's query, runs CLIP
   // smart-search against the configured Immich server, and injects a card at
   // the top of the results column when there are matches.
-  if (/^(www\.)?google\.[a-z.]{2,}$/.test(location.host) && location.pathname === "/search") {
-    initGoogleInline().catch(() => {});
+  const TAG = "[immich-companion]";
+  const isGoogleSearch =
+    /^(www\.)?google\.[a-z.]{2,}$/.test(location.host) &&
+    location.pathname === "/search";
+  if (isGoogleSearch) {
+    console.debug(TAG, "Google search detected, host=", location.host);
+    initGoogleInline().catch((e) => console.warn(TAG, "init failed", e));
   }
 
   async function initGoogleInline() {
     const params = new URLSearchParams(location.search);
     const q = (params.get("q") || "").trim();
-    if (q.length < 2) return;
-    // Skip image / video / news / shopping tabs.
-    if (params.get("tbm")) return;
+    if (q.length < 2) {
+      console.debug(TAG, "skip: query too short");
+      return;
+    }
+    if (params.get("tbm")) {
+      console.debug(TAG, "skip: not the All tab (tbm=" + params.get("tbm") + ")");
+      return;
+    }
 
     const stored = await chrome.storage.local.get([
       "serverUrl", "apiKey", "featureGoogleInline",
     ]);
-    if (!stored.serverUrl || !stored.apiKey) return;
-    if (stored.featureGoogleInline === false) return;
+    if (!stored.serverUrl || !stored.apiKey) {
+      console.debug(TAG, "skip: not configured", {
+        hasUrl: Boolean(stored.serverUrl),
+        hasKey: Boolean(stored.apiKey),
+      });
+      return;
+    }
+    if (stored.featureGoogleInline === false) {
+      console.debug(TAG, "skip: featureGoogleInline=false");
+      return;
+    }
 
     const serverUrl = stored.serverUrl.replace(/\/+$/, "");
+    console.debug(TAG, "querying Immich for:", q);
     let items = [];
     try {
       const res = await fetch(`${serverUrl}/api/search/smart`, {
@@ -182,15 +202,25 @@
         },
         body: JSON.stringify({ query: q, size: 10 }),
       });
-      if (!res.ok) return;
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        console.warn(TAG, "search failed", res.status, text.slice(0, 200));
+        return;
+      }
       const data = await res.json();
       items = data?.assets?.items || [];
-    } catch {
+      console.debug(TAG, `got ${items.length} match(es)`);
+    } catch (e) {
+      console.warn(TAG, "search threw", e);
       return;
     }
-    if (!items.length) return;
+    if (!items.length) {
+      console.debug(TAG, "no matches, not injecting");
+      return;
+    }
     await waitForResults();
-    injectImmichCard(items, serverUrl, q);
+    const ok = injectImmichCard(items, serverUrl, q);
+    console.debug(TAG, ok ? "card injected" : "no insertion target found");
   }
 
   function waitForResults() {
@@ -208,11 +238,25 @@
   }
 
   function injectImmichCard(items, serverUrl, query) {
-    if (document.getElementById("immich-companion-google-card")) return;
-    const target = document.querySelector("#rso") ||
-                   document.querySelector("#search") ||
-                   document.querySelector("#center_col");
-    if (!target) return;
+    if (document.getElementById("immich-companion-google-card")) return true;
+    // Try several insertion points. Different Google layouts and locales use
+    // different containers; the first hit wins.
+    const selectors = [
+      "#rso",
+      "#search",
+      "#center_col",
+      "#main",
+      "[role='main']",
+    ];
+    let target = null;
+    for (const sel of selectors) {
+      target = document.querySelector(sel);
+      if (target) {
+        console.debug(TAG, "insertion target:", sel);
+        break;
+      }
+    }
+    if (!target) return false;
 
     const card = document.createElement("div");
     card.id = "immich-companion-google-card";
@@ -279,8 +323,8 @@
     }
     card.appendChild(strip);
 
-    // Place it as the first child of the results column.
     target.insertBefore(card, target.firstChild);
+    return true;
   }
 
   // ----- Share toolbar ----------------------------------------------------
