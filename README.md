@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="webstore-assets/banner-1280x400.png" alt="Immich Companion" width="100%" />
+</p>
+
 # Immich Companion
 
 A Chrome / Chromium extension that connects to your self-hosted [Immich](https://immich.app) server.

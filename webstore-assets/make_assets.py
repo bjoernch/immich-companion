@@ -108,6 +108,94 @@ def promo(width, height, title, subtitle, icon_size, title_size, subtitle_size):
     return img.convert("RGB")
 
 
+def scatter_photo_icons(canvas, count, color, alpha):
+    """Draw a few translucent photo-frame outlines around the canvas edges."""
+    import random
+    rng = random.Random(42)  # deterministic
+    w, h = canvas.size
+    layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    margin_x = int(w * 0.06)
+    margin_y = int(h * 0.06)
+    placed = []
+    for _ in range(count):
+        size = rng.randint(int(min(w, h) * 0.06), int(min(w, h) * 0.10))
+        x = rng.randint(margin_x, w - size - margin_x)
+        y = rng.randint(margin_y, h - size - margin_y)
+        # Avoid the centre block where the title sits
+        cx, cy = w / 2, h / 2
+        if abs(x + size / 2 - cx) < w * 0.30 and abs(y + size / 2 - cy) < h * 0.34:
+            continue
+        rot = rng.uniform(-18, 18)
+        # Draw a small rounded rectangle "photo" with a tiny mountain inside
+        ph = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+        pd = ImageDraw.Draw(ph)
+        r = max(2, size // 8)
+        pd.rounded_rectangle((0, 0, size - 1, size - 1), radius=r,
+                             outline=color + (alpha,), width=max(1, size // 18))
+        # tiny mountain
+        pd.polygon([
+            (size * 0.15, size * 0.8),
+            (size * 0.45, size * 0.45),
+            (size * 0.75, size * 0.8),
+        ], fill=color + (max(20, alpha - 60),))
+        # tiny sun
+        pd.ellipse((size * 0.65, size * 0.18, size * 0.85, size * 0.38),
+                   fill=color + (max(20, alpha - 60),))
+        ph = ph.rotate(rot, resample=Image.BICUBIC, expand=False)
+        layer.alpha_composite(ph, (x, y))
+        placed.append((x, y, size))
+    return Image.alpha_composite(canvas, layer)
+
+
+def promo_centered(width, height, title, subtitle, icon_size,
+                   title_size, subtitle_size, scatter_count=10):
+    """Centered hero layout — icon, big title, tagline, scattered photo icons."""
+    img = gradient_bg(width, height, INDIGO, VIOLET)
+    img = img.convert("RGBA")
+
+    # Atmospheric glows
+    overlay = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    g1 = soft_glow(int(width * 0.7), (255, 255, 255, 40), int(width * 0.10))
+    overlay.paste(g1, (-int(width * 0.15), -int(height * 0.4)), g1)
+    g2 = soft_glow(int(width * 0.5), (170, 100, 255, 90), int(width * 0.07))
+    overlay.paste(g2, (int(width * 0.55), int(height * 0.45)), g2)
+    img = Image.alpha_composite(img, overlay)
+
+    # Scattered photo-frame icons
+    img = scatter_photo_icons(img, scatter_count, (255, 255, 255), 90)
+
+    # Centre block: icon, title, subtitle stacked vertically
+    icon = Image.open(ICON_PATH).convert("RGBA").resize((icon_size, icon_size), Image.LANCZOS)
+    d = ImageDraw.Draw(img)
+
+    title_font = load_font(title_size)
+    subtitle_font = load_font(subtitle_size)
+
+    title_bbox = d.textbbox((0, 0), title, font=title_font)
+    subtitle_bbox = d.textbbox((0, 0), subtitle, font=subtitle_font)
+    title_w = title_bbox[2] - title_bbox[0]
+    title_h = title_bbox[3] - title_bbox[1]
+    subtitle_w = subtitle_bbox[2] - subtitle_bbox[0]
+    subtitle_h = subtitle_bbox[3] - subtitle_bbox[1]
+
+    gap_icon = int(height * 0.04)
+    gap_title = int(height * 0.025)
+    block_h = icon_size + gap_icon + title_h + gap_title + subtitle_h
+
+    icon_y = (height - block_h) // 2
+    title_y = icon_y + icon_size + gap_icon - title_bbox[1]
+    subtitle_y = title_y + title_h + gap_title
+
+    img.alpha_composite(icon, ((width - icon_size) // 2, icon_y))
+
+    d.text(((width - title_w) // 2 - title_bbox[0], title_y),
+           title, font=title_font, fill=TEXT)
+    d.text(((width - subtitle_w) // 2 - subtitle_bbox[0], subtitle_y),
+           subtitle, font=subtitle_font, fill=TEXT_DIM)
+
+    return img.convert("RGB")
+
+
 def screenshot_template(w=1280, h=800):
     img = gradient_bg(w, h, (16, 19, 28), (28, 32, 48))
     img = img.convert("RGBA")
@@ -128,23 +216,35 @@ def screenshot_template(w=1280, h=800):
 
 
 def main():
-    promo_small = promo(
+    # Small promo tile — centered hero design, photo-frame scatter
+    promo_small = promo_centered(
         440, 280,
         title="Immich Companion",
-        subtitle="Save the web to your library",
-        icon_size=140, title_size=30, subtitle_size=14,
+        subtitle="Save the web to your Immich library",
+        icon_size=80, title_size=30, subtitle_size=14, scatter_count=10,
     )
     promo_small.save(os.path.join(ROOT, "promo-tile-440x280.png"))
     print("wrote promo-tile-440x280.png")
 
-    promo_marq = promo(
+    # Marquee — same centered style at larger scale
+    promo_marq = promo_centered(
         1400, 560,
         title="Immich Companion",
-        subtitle="Save, share and search your self-hosted Immich",
-        icon_size=320, title_size=92, subtitle_size=36,
+        subtitle="Save, share, and search your self-hosted Immich library",
+        icon_size=180, title_size=84, subtitle_size=32, scatter_count=20,
     )
     promo_marq.save(os.path.join(ROOT, "promo-marquee-1400x560.png"))
     print("wrote promo-marquee-1400x560.png")
+
+    # Wide repo banner for the README header (16:5 aspect)
+    banner = promo_centered(
+        1280, 400,
+        title="Immich Companion",
+        subtitle="A browser companion for your self-hosted Immich",
+        icon_size=110, title_size=64, subtitle_size=24, scatter_count=14,
+    )
+    banner.save(os.path.join(ROOT, "banner-1280x400.png"))
+    print("wrote banner-1280x400.png")
 
     template = screenshot_template()
     template.save(os.path.join(ROOT, "screenshot-template-1280x800.png"))
