@@ -149,9 +149,143 @@
     return false;
   });
 
+  // ----- Google inline results --------------------------------------------
+  // Runs only on google.<tld>/search pages. Pulls the user's query, runs CLIP
+  // smart-search against the configured Immich server, and injects a card at
+  // the top of the results column when there are matches.
+  if (/^(www\.)?google\.[a-z.]{2,}$/.test(location.host) && location.pathname === "/search") {
+    initGoogleInline().catch(() => {});
+  }
+
+  async function initGoogleInline() {
+    const params = new URLSearchParams(location.search);
+    const q = (params.get("q") || "").trim();
+    if (q.length < 2) return;
+    // Skip image / video / news / shopping tabs.
+    if (params.get("tbm")) return;
+
+    const stored = await chrome.storage.local.get([
+      "serverUrl", "apiKey", "featureGoogleInline",
+    ]);
+    if (!stored.serverUrl || !stored.apiKey) return;
+    if (stored.featureGoogleInline === false) return;
+
+    const serverUrl = stored.serverUrl.replace(/\/+$/, "");
+    let items = [];
+    try {
+      const res = await fetch(`${serverUrl}/api/search/smart`, {
+        method: "POST",
+        headers: {
+          "x-api-key": stored.apiKey,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ query: q, size: 10 }),
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      items = data?.assets?.items || [];
+    } catch {
+      return;
+    }
+    if (!items.length) return;
+    await waitForResults();
+    injectImmichCard(items, serverUrl, q);
+  }
+
+  function waitForResults() {
+    return new Promise((resolve) => {
+      if (document.querySelector("#rso, #search, #center_col")) return resolve();
+      const obs = new MutationObserver(() => {
+        if (document.querySelector("#rso, #search, #center_col")) {
+          obs.disconnect();
+          resolve();
+        }
+      });
+      obs.observe(document.documentElement, { childList: true, subtree: true });
+      setTimeout(() => { obs.disconnect(); resolve(); }, 4000);
+    });
+  }
+
+  function injectImmichCard(items, serverUrl, query) {
+    if (document.getElementById("immich-companion-google-card")) return;
+    const target = document.querySelector("#rso") ||
+                   document.querySelector("#search") ||
+                   document.querySelector("#center_col");
+    if (!target) return;
+
+    const card = document.createElement("div");
+    card.id = "immich-companion-google-card";
+    card.className = "immich-companion-google-card";
+
+    const header = document.createElement("div");
+    header.className = "icc-header";
+    const brand = document.createElement("div");
+    brand.className = "icc-brand";
+    const logo = document.createElement("img");
+    logo.src = chrome.runtime.getURL("icons/icon-48.png");
+    logo.alt = "";
+    const label = document.createElement("span");
+    label.className = "icc-label";
+    label.textContent = "From your Immich library";
+    const count = document.createElement("span");
+    count.className = "icc-count";
+    count.textContent = `${items.length} match${items.length === 1 ? "" : "es"}`;
+    brand.appendChild(logo);
+    brand.appendChild(label);
+    brand.appendChild(count);
+    header.appendChild(brand);
+
+    const viewAll = document.createElement("a");
+    viewAll.className = "icc-view-all";
+    viewAll.href = `${serverUrl}/search?query=${encodeURIComponent(query)}`;
+    viewAll.target = "_blank";
+    viewAll.rel = "noopener";
+    viewAll.textContent = "View all in Immich →";
+    header.appendChild(viewAll);
+
+    card.appendChild(header);
+
+    const strip = document.createElement("div");
+    strip.className = "icc-strip";
+    for (const a of items) {
+      const link = document.createElement("a");
+      link.className = "icc-item";
+      link.href = `${serverUrl}/photos/${a.id}`;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.title = a.originalFileName || a.id;
+      const img = document.createElement("img");
+      img.alt = "";
+      img.loading = "lazy";
+      link.appendChild(img);
+      strip.appendChild(link);
+
+      // Authenticated thumbnail via background (img tags can't send the
+      // x-api-key header). Background returns bytes; we make a blob URL.
+      chrome.runtime.sendMessage(
+        { type: "thumb", assetId: a.id, size: "thumbnail" },
+        (res) => {
+          if (chrome.runtime.lastError) return;
+          if (!res?.ok) return;
+          try {
+            const blob = new Blob([new Uint8Array(res.data)], {
+              type: res.contentType || "image/jpeg",
+            });
+            img.src = URL.createObjectURL(blob);
+          } catch {}
+        },
+      );
+    }
+    card.appendChild(strip);
+
+    // Place it as the first child of the results column.
+    target.insertBefore(card, target.firstChild);
+  }
+
   // ----- Share toolbar ----------------------------------------------------
   const { serverUrl, sharePathHosts, featureShareToolbar } =
-    await chrome.storage.sync.get([
+    await chrome.storage.local.get([
       "serverUrl",
       "sharePathHosts",
       "featureShareToolbar",

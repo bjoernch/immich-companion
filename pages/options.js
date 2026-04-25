@@ -9,6 +9,7 @@ const TOGGLE_KEYS = [
   "featureContextMenus",
   "featureShareToolbar",
   "featureNotifications",
+  "featureGoogleInline",
 ];
 const TEXT_KEYS = [
   "serverUrl",
