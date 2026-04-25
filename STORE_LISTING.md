@@ -157,10 +157,33 @@ Diese Erweiterung ist eine inoffizielle Community-Erweiterung und steht in keine
 
 ---
 
-## Single purpose statement
+## Single purpose statement / Alleiniger Zweck
+
+The Web Store reviewer cares that the extension has *one* purpose. The trick: frame every feature as a different way of doing the same thing — bridging the browser and the user's Immich server.
+
+### English (recommended)
 
 ```
-Companion for self-hosted Immich servers — save, search and share photos and videos.
+Browser integration for a self-hosted Immich photo server.
+
+Every feature in the extension serves the same single purpose: giving the user read and write access to their own Immich instance from inside their browser. Right-clicking an image saves it to Immich (write). The toolbar popup, the omnibox, and the inline card on Google search results read the Immich library so it can be searched without leaving the current tab. The new tab page surfaces a random photo and "On this day" memories — again, reading from Immich. There is no functionality unrelated to the Immich integration.
+```
+
+### Deutsch
+
+```
+Browser-Integration für einen selbstgehosteten Immich-Foto-Server.
+
+Alle Funktionen der Erweiterung dienen demselben einen Zweck: dem Nutzer Lese- und Schreibzugriff auf seine eigene Immich-Instanz direkt aus dem Browser zu ermöglichen. Ein Rechtsklick auf ein Bild speichert es in Immich (Schreibzugriff). Das Symbolleisten-Popup, die Adresszeilen-Suche und die eingebettete Trefferkarte auf Google-Suchseiten lesen die Immich-Bibliothek, damit man sie suchen kann, ohne den aktuellen Tab zu verlassen. Die Neuer-Tab-Seite zeigt ein zufälliges Foto und „An diesem Tag"-Erinnerungen — ebenfalls aus Immich gelesen. Es gibt keine Funktion, die nichts mit der Immich-Integration zu tun hat.
+```
+
+### Short version (if the field is single-line)
+
+```
+Browser companion for a self-hosted Immich photo server: save, search and view your library from any tab.
+```
+```
+Browser-Begleiter für einen selbstgehosteten Immich-Foto-Server: speichern, durchsuchen und ansehen aus jedem Tab.
 ```
 
 ---
@@ -187,75 +210,142 @@ Installiere die Erweiterung, wenn du Immich bereits selbst betreibst und nicht m
 
 ---
 
-## Permission justifications
+## Permission justifications / Begründungen für Berechtigungen
 
-Paste each one into the corresponding field in the dashboard (the dashboard prompts per permission).
+Each field on the dashboard accepts up to 1 000 characters. Paste verbatim. German versions match the dashboard's UI language.
 
-### `host_permissions: <all_urls>`
+### Hostberechtigung — `<all_urls>`
 
 ```
-Required for two purposes: (1) when the user right-clicks an image or video on any website and chooses "Save to Immich", the extension fetches that asset's URL and uploads it to the user's configured Immich server; (2) the optional "Show Immich matches on Google" feature injects a result card on google.<tld>/search pages with photos from the user's library that match their query. The host permission is the only way to either fetch arbitrary image URLs or run a content script on user-chosen pages.
+<all_urls> wird aus zwei klar benannten Gründen benötigt, die beide direkt dem alleinigen Zweck der Erweiterung dienen:
+
+1) Wenn der Nutzer auf einer beliebigen Webseite per Rechtsklick auf ein Bild oder Video „In Immich speichern" auswählt, muss die Erweiterung die URL dieser Datei abrufen können, um sie an den vom Nutzer konfigurierten Immich-Server hochzuladen. Da der Nutzer diese Aktion auf jeder beliebigen Seite auslösen kann, ist eine breite Host-Berechtigung der einzige Weg, das zu unterstützen.
+
+2) Die optionale Funktion „Immich-Treffer auf Google anzeigen" fügt eine Karte mit passenden Fotos aus der Bibliothek des Nutzers über den Google-Suchergebnissen ein. Dafür läuft ein Content-Skript auf google.<tld>/search-Seiten.
+
+Die Erweiterung liest oder protokolliert keine anderen Inhalte besuchter Seiten und sendet keine Informationen über sie an Dritte. Sämtliche Netzwerkanfragen gehen ausschließlich an den vom Nutzer konfigurierten Immich-Server.
 ```
 
 ### `contextMenus`
 
 ```
-Adds "Save image to Immich", "Save image to Immich & copy share link", "Save video to Immich", and "Save video to Immich & copy share link" to the right-click menu when the user clicks on an image or video.
+Fügt dem Rechtsklick-Menü vier Einträge hinzu, wenn der Nutzer auf ein Bild oder Video klickt: „In Immich speichern", „In Immich speichern & Link kopieren", „Video in Immich speichern" und „Video in Immich speichern & Link kopieren". Ohne diese Berechtigung gäbe es keinen Weg, die zentrale Funktion der Erweiterung — Inhalte per Rechtsklick in die Immich-Bibliothek zu speichern — bereitzustellen. Die Einträge können in den Einstellungen abgeschaltet werden.
 ```
 
 ### `storage`
 
 ```
-Stores the user's Immich server URL, API key, feature toggles, theme preference, and the most recent 30 uploads (filename, asset id, share link if any) locally in chrome.storage.local. No remote storage, no sync.
+Speichert die vom Nutzer eingegebene Immich-Server-URL, den API-Schlüssel, die Funktions-Schalter (z. B. „Treffer auf Google anzeigen" an/aus), die Theme-Einstellung, das Standard-Album sowie die Liste der letzten 30 Uploads (Dateiname, Asset-ID, Teilungslink falls vorhanden) lokal über chrome.storage.local. Es gibt keinen Cloud-Speicher, keine geräteübergreifende Synchronisierung und keinen externen Backend-Dienst — alle Daten bleiben auf dem Gerät des Nutzers.
 ```
 
 ### `notifications`
 
 ```
-Shows a desktop notification when an upload to Immich completes (or fails). Can be disabled in extension settings.
+Zeigt eine Desktop-Benachrichtigung an, sobald ein Upload zum Immich-Server abgeschlossen ist — mit unterschiedlichen Texten je nach Ergebnis (Erfolg, bereits in der Bibliothek vorhanden, Fehler mit Fehlermeldung). Diese ergänzen die in-page Toasts und sind nützlich, wenn der Quell-Tab nicht mehr im Vordergrund ist. Vom Nutzer in den Einstellungen vollständig abschaltbar.
 ```
 
-### `activeTab`, `scripting`
+### `activeTab`
 
 ```
-Used to render in-page upload progress toasts on the source tab when the user saves an asset, and to write the share link to the clipboard when "Save & share" is used (clipboard access requires running in the active tab's context).
+Wird verwendet, um die in-page Upload-Toasts (oben rechts) im aktiven Tab anzuzeigen, in dem der Nutzer die Speichern-Aktion ausgelöst hat. Außerdem nötig, damit der nach einer „Speichern & teilen"-Aktion erzeugte öffentliche Immich-Teilungslink in die Zwischenablage geschrieben werden kann (Browser verlangen für Zwischenablage-Zugriff einen Bezug zum aktiven Tab).
+```
+
+### `scripting`
+
+```
+Wird zusammen mit activeTab verwendet, um die Upload-Fortschritts- und Erfolgs-Toasts in den aktiven Tab einzublenden, der die Speichern-Aktion ausgelöst hat. Die Erweiterung führt ausschließlich extension-eigenen Code aus, der mit der Erweiterung mitgeliefert wird — es wird kein Remote-Code geladen oder ausgeführt.
 ```
 
 ### `alarms`
 
 ```
-Schedules a periodic (every 5 minutes) connection check to the user's Immich server, so the toolbar icon can show whether the server is currently reachable.
+Plant eine periodische Verbindungsprüfung (alle 5 Minuten) zum vom Nutzer konfigurierten Immich-Server. Anhand des Ergebnisses wird der Status-Indikator auf dem Symbolleisten-Icon aktualisiert, sodass der Nutzer sofort erkennt, ob sein Server gerade erreichbar ist (z. B. nach einem Heimnetzwerk-Ausfall). Es werden keine anderen Hosts kontaktiert.
 ```
 
 ### `clipboardWrite`
 
 ```
-Writes the public Immich share link to the user's clipboard after a "Save & share" action so it can be pasted into other apps.
+Schreibt den nach einer „Speichern & teilen"-Aktion erstellten öffentlichen Immich-Teilungslink in die Zwischenablage, damit der Nutzer ihn sofort in eine andere Anwendung (Chat, E-Mail, Notiz) einfügen kann. Wird ausschließlich für diesen einen Zweck verwendet — die Erweiterung liest niemals Inhalte aus der Zwischenablage und schreibt nichts ohne explizite Nutzeraktion.
+```
+
+---
+
+### Remote Code question — "Nutzt du Remote Code?"
+
+Answer: **Nein, ich verwende "Remote Code" nicht** / **No, I do not use remote code**.
+
+#### Justification (Deutsch, ~ 990 chars)
+
+```
+Die Erweiterung lädt oder führt keinerlei Remote-Code aus. Sämtliches JavaScript, HTML und CSS ist im Erweiterungspaket enthalten und wird unverändert ausgeführt. Es gibt keine eval()-Aufrufe, kein dynamisches new Function() mit Strings aus dem Netzwerk, keine externen <script>-Tags und kein dynamisches Nachladen von JavaScript-Modulen oder Bibliotheken über das Internet.
+
+Die Netzwerkkommunikation der Erweiterung beschränkt sich auf zwei Arten von Anfragen: (1) JSON- und Multipart-Upload-Anfragen an den vom Nutzer konfigurierten Immich-Server (Asset-Upload, Suche, Albumverwaltung, Teilungslink-Erstellung) und (2) das Herunterladen von Bild-/Video-Inhalten von einer beliebigen Webseite zum Zweck des Hochladens an Immich, ausgelöst durch den Nutzer per Rechtsklick.
+
+Der Inhalt dieser Antworten wird ausschließlich als Daten verarbeitet (JSON, Bild-Bytes als Blob-URLs zur Anzeige) — niemals als ausführbarer Code interpretiert.
+```
+
+#### English
+
+```
+The extension does not load or execute any remote code. All JavaScript, HTML, and CSS is bundled inside the extension package and runs unmodified. There are no eval() calls, no dynamic new Function() construction from network strings, no external <script> tags, and no dynamic loading of JS modules or libraries from the internet.
+
+The extension's network traffic is limited to two kinds of requests: (1) JSON and multipart upload requests to the user-configured Immich server (asset upload, smart search, album operations, share-link creation) and (2) downloading image/video content from arbitrary webpages for the purpose of uploading it to Immich, triggered by an explicit user right-click.
+
+Response bodies are processed strictly as data (JSON, image bytes rendered via blob URLs) — never interpreted as executable code.
+```
+
+---
+
+### English permission justifications (kept for reference)
+
+```
+host_permissions <all_urls>:
+Required for two purposes: (1) when the user right-clicks an image or video on any website and chooses "Save to Immich", the extension fetches that asset's URL and uploads it to the user's configured Immich server; (2) the optional "Show Immich matches on Google" feature injects a result card on google.<tld>/search pages with photos from the user's library that match their query. The extension does not read or log content from visited pages and does not transmit information about them anywhere — all network traffic goes only to the Immich server the user configures.
+
+contextMenus:
+Adds four entries to the right-click menu when the user clicks an image or video: "Save to Immich", "Save to Immich & copy share link", and the same two for videos. The extension's core functionality requires this.
+
+storage:
+Stores the user's Immich server URL, API key, feature toggles, theme preference, default album, and the most recent 30 uploads locally via chrome.storage.local. No remote storage, no sync.
+
+notifications:
+Shows a desktop notification when an upload to Immich completes (success / duplicate / error with the actual error message). Disableable in settings.
+
+activeTab:
+Renders the in-page upload toasts on the source tab and lets the share link be written to the clipboard after "Save & share" (browsers gate clipboard access on the active tab).
+
+scripting:
+Paired with activeTab to inject the toast UI into the source tab. Only ships extension-bundled code — no remote code execution.
+
+alarms:
+Schedules a periodic (every 5 minutes) connection check to the configured Immich server so the toolbar icon's status badge stays accurate. No other hosts are contacted.
+
+clipboardWrite:
+Writes the public Immich share link to the clipboard after "Save & share" actions only. The extension never reads the clipboard.
 ```
 
 ---
 
 ## Privacy policy URL
 
-The Web Store requires a publicly reachable URL. The repo is private, so a few options:
+Public gist hosting the contents of PRIVACY.md:
 
-1. **Public gist (recommended)** — fastest. Run from the repo root:
+```
+https://gist.github.com/bjoernch/d4b5faceb57ce2c1acd1986be729e7a0
+```
 
-   ```
-   gh gist create --public --filename PRIVACY.md --desc "Privacy policy — Immich Companion (Chrome extension)" PRIVACY.md
-   ```
+Paste that into the dashboard's "Privacy policy URL" field. Update the gist if PRIVACY.md ever changes:
 
-   The command prints a URL like `https://gist.github.com/bjoernch/<id>`. Paste it into the Web Store dashboard's "Privacy policy URL" field.
+```
+gh gist edit d4b5faceb57ce2c1acd1986be729e7a0 PRIVACY.md
+```
 
-2. **Make the repo public** — simplest if you don't mind the source being open. Use:
+## Data Usage form
 
-   ```
-   gh repo edit --visibility public --accept-visibility-change-consequences
-   ```
+The extension collects nothing in the Web Store's sense (no backend, no analytics, no telemetry — all data either stays in chrome.storage.local on the user's device or goes only to the user's own Immich server). Recommended answers:
 
-   Then the URL is `https://github.com/bjoernch/immich-companion/blob/main/PRIVACY.md`.
-
-3. **GitHub Pages on a separate public repo** — host PRIVACY.md from a public repo of your choosing.
+- **Categories**: leave all 9 unchecked.
+- **Three confirmations**: tick all three (no sale, only for stated purpose, not for credit-worthiness).
 
 ---
 
