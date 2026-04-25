@@ -2,86 +2,51 @@
   <img src="webstore-assets/banner-1280x400.png" alt="Immich Companion" width="100%" />
 </p>
 
-# Immich Companion
+<p align="center">
+  <strong>A browser companion for your self-hosted <a href="https://immich.app">Immich</a> server.</strong><br/>
+  <em>Coming soon to the Chrome Web Store.</em>
+</p>
 
-A Chrome / Chromium extension that connects to your self-hosted [Immich](https://immich.app) server.
+---
 
-- **Save to Immich** — right-click any image or video on the web → upload it to your library, optionally to a default album.
-- **Save & share** — same as above, but also creates a public share link and copies it to your clipboard.
-- **Omnibox search** — type `im` + space + a query in the address bar for live CLIP-powered smart search.
-- **Toolbar popup** — search your library, view recent uploads, drag-and-drop files to upload.
-- **New tab** — random photo from your library as the background, "On this day" memory strip, optional auto-rotate, optional album source.
-- **Inline matches on Google** — an Immich result card appears at the top of Google search results when your library has matching photos. Search runs entirely between your browser and your Immich; nothing is sent to Google. See [PRIVACY.md](PRIVACY.md) for details.
-- **Share-album toolbar** — Slideshow + Download-all controls on your own Immich `/share/...` URLs.
-- **Light & dark themes**, customisable per-feature.
+## Features
 
-Everything runs against your own server. No third-party services involved.
+### Save the web to your library
+Right-click any image or video on any website to upload it directly to your Immich server. Optionally adds every saved item to a default album.
 
-## Install (development)
+### Save & share
+One click uploads the asset, creates a public Immich share link, and copies it to your clipboard — ready to paste anywhere.
 
-1. Clone the repo.
-2. Open `chrome://extensions` and enable **Developer mode**.
-3. **Load unpacked** → pick the cloned folder.
-4. The welcome tab opens automatically — paste your Immich server URL and API key.
+### Smart search, everywhere
+- **Address bar** — type `im` + space + a query for live CLIP-powered results.
+- **Toolbar popup** — masonry grid of search results, your recent uploads, and a drag-and-drop file uploader.
+- **Google search results** — when you Google something, photos in your library that match the query appear in a card at the top of the results. The search runs entirely between your browser and your Immich; nothing is sent to Google.
 
-## API key
+### New tab as a memory feed
+A random photo from your library greets you on every new tab, with an "On this day" strip showing memories from past years. Pick a specific album as the source, choose an auto-rotate interval, or turn it off entirely.
 
-Create one in **Immich → Account Settings → API Keys**.
+### Polished little things
+Dark and light themes, keyboard shortcut (`Ctrl+Shift+L` / `⌘+Shift+L`), connection-status badge on the toolbar icon, in-page upload toasts, share-album toolbar (Slideshow + Download-all) on your Immich `/share/...` URLs.
 
-The welcome page shows the exact scopes the extension uses. The minimal set is:
-
-| Scope                  | Why                                                      |
-| ---------------------- | -------------------------------------------------------- |
-| `asset.upload`         | Save images and videos to your library                    |
-| `asset.read`           | Show search results, thumbnails, new-tab background       |
-| `asset.view`           | Open assets when clicked                                  |
-| `album.read`           | List albums in the settings dropdowns                     |
-| `albumAsset.create`    | Add saved items to your default album (optional)          |
-| `sharedLink.create`    | "Save & share" — create a public link                     |
-
-If your Immich version (≤ 1.106) only offers all-or-nothing keys, that works too.
-
-## Keyboard shortcut
-
-`Ctrl+Shift+L` (`⌘+Shift+L` on Mac) opens the popup. Re-bind at `chrome://extensions/shortcuts`.
+---
 
 ## Privacy
 
-See [PRIVACY.md](PRIVACY.md). Short version: the only data the extension sees is what you type into Settings (server URL + API key) and the URLs of items you explicitly save. Everything is sent only to the Immich server you configured. Nothing is sent anywhere else, ever.
+The extension transmits data **only** to the Immich server you configure. No analytics, no third-party services, no tracking. Your API key stays in `chrome.storage.local` on your device.
 
-## Building Web Store assets
+→ [Full privacy policy](PRIVACY.md)
 
-The icons and promo tile are generated from `icons/make_icons.py` and `webstore-assets/make_assets.py`. Both need Pillow (`pip install Pillow`).
+---
 
-## Building the extension zip
+## Install (while the Web Store listing is in review)
 
-```
-./build.sh
-```
+1. Download the latest zip from the [Releases](https://github.com/bjoernch/immich-companion/releases) page and unzip it.
+2. Open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked**, and pick the unzipped folder.
+3. The welcome page opens automatically — paste your Immich server URL and API key.
 
-Writes `dist/immich-companion-<version>.zip` containing only the runtime files (manifest, JS, CSS, HTML, icon PNGs, LICENSE). Upload that zip to the Chrome Web Store.
+You need an [Immich](https://immich.app) instance you can sign into. The welcome page shows the exact API-key scopes to grant.
 
-## Releases
-
-Push a tag matching the manifest version and the GitHub Action in `.github/workflows/release.yml` builds the zip and attaches it to a GitHub Release:
-
-```
-git tag v$(python3 -c "import json; print(json.load(open('manifest.json'))['version'])")
-git push --tags
-```
-
-### Optional: auto-publish to the Chrome Web Store
-
-Set these four repository secrets and the same workflow will also push the new build to the Web Store after tagging:
-
-| Secret                     | What it is                                                  |
-| -------------------------- | ----------------------------------------------------------- |
-| `WEBSTORE_EXTENSION_ID`    | The 32-char id shown in the Web Store dashboard after your first manual upload |
-| `WEBSTORE_CLIENT_ID`       | Google Cloud OAuth 2.0 client ID                            |
-| `WEBSTORE_CLIENT_SECRET`   | matching client secret                                      |
-| `WEBSTORE_REFRESH_TOKEN`   | long-lived refresh token from a one-time OAuth dance        |
-
-Step-by-step for the OAuth credentials: <https://developer.chrome.com/docs/webstore/using-api>. The first version still has to be uploaded manually so you can fill in the listing fields, screenshots, and privacy policy URL — automation only handles subsequent updates.
+---
 
 ## License
 
