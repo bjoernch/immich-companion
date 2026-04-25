@@ -1,0 +1,131 @@
+/* In-page toast container (top-right) for upload feedback. */
+.immich-companion-toasts {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 2147483647;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+}
+.immich-companion-toast {
+  pointer-events: auto;
+  min-width: 240px;
+  max-width: 360px;
+  background: rgba(20, 22, 30, 0.96);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 3px solid #7c8cff;
+  border-radius: 10px;
+  padding: 10px 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  transform: translateX(120%);
+  opacity: 0;
+  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 220ms;
+}
+.immich-companion-toast.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+.immich-companion-toast.success { border-left-color: #4ade80; }
+.immich-companion-toast.error { border-left-color: #ff6b6b; }
+.immich-companion-toast.info { border-left-color: #7c8cff; }
+.immich-companion-toast .icon {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 1px;
+}
+.immich-companion-toast.success .icon { background: rgba(74, 222, 128, 0.18); color: #4ade80; }
+.immich-companion-toast.error .icon { background: rgba(255, 107, 107, 0.18); color: #ff6b6b; }
+.immich-companion-toast.info .icon { background: rgba(124, 140, 255, 0.18); color: #7c8cff; }
+.immich-companion-toast .body { flex: 1 1 auto; min-width: 0; }
+.immich-companion-toast .title { font-weight: 600; margin-bottom: 2px; }
+.immich-companion-toast .msg {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 12.5px;
+  word-break: break-word;
+}
+.immich-companion-toast .close {
+  all: unset;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 2px;
+}
+.immich-companion-toast .close:hover { color: #fff; }
+.immich-companion-toast .actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+.immich-companion-toast .actions:empty { display: none; }
+.immich-companion-toast .tact {
+  all: unset;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.immich-companion-toast .tact:hover { background: rgba(255, 255, 255, 0.16); }
+
+.immich-companion-toast .progress {
+  position: absolute;
+  left: 0; bottom: 0;
+  height: 2px;
+  background: currentColor;
+  border-radius: 0 0 10px 10px;
+  width: 100%;
+  transform-origin: left;
+  animation: immich-spin 1.2s linear infinite;
+  opacity: 0.5;
+}
+@keyframes immich-spin {
+  0% { transform: scaleX(0); }
+  50% { transform: scaleX(0.8); }
+  100% { transform: scaleX(1); opacity: 0; }
+}
+
+/* The toolbar styles are scoped under .immich-companion-toolbar in shared.css.
+   Re-declared here because content scripts can't import shared.css directly. */
+.immich-companion-toolbar {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 2147483647;
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  background: rgba(20, 22, 30, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  font: 13px/1 -apple-system, system-ui, sans-serif;
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.immich-companion-toolbar button {
+  all: unset;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #2a2f3d;
+  color: #fff;
+}
+.immich-companion-toolbar button:hover {
+  background: #3a4255;
+}

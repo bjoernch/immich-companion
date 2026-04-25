@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>New Tab</title>
+    <link rel="stylesheet" href="shared.css" />
+  </head>
+  <body class="newtab">
+    <div id="bg" class="bg"></div>
+    <div class="content">
+      <div class="top">
+        <div id="clock" class="clock">—:—</div>
+        <div id="meta" class="meta"></div>
+      </div>
+
+      <!-- Visible only in minimal mode (extension new-tab override turned off). -->
+      <form id="minimalSearch" class="minimal-search" hidden>
+        <input type="search" name="q" placeholder="Search Google or type a URL" autofocus />
+      </form>
+
+      <div id="otd" class="otd-bar" hidden>
+        <h2>On this day</h2>
+        <div id="otd-strip" class="otd-strip"></div>
+      </div>
+    </div>
+    <div id="toast" class="toast" hidden></div>
+    <div id="setup" class="setup" hidden>
+      <div class="card">
+        <h1>Connect Immich</h1>
+        <p class="muted">Add your server URL and API key to enable the new tab background and memories.</p>
+        <div id="diag" class="diag"></div>
+        <div class="setup-actions">
+          <button id="openSettings" class="primary">Open settings</button>
+          <button id="recheck" type="button">Re-check</button>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="newtab.js"></script>
+  </body>
+</html>
