@@ -29,110 +29,130 @@ English (en). Add German if you also localize the listing — the extension UI i
 
 ## Detailed description (English)
 
-Paste verbatim into the Web Store dashboard's "Detailed description" field. Plain text with blank-line paragraph breaks — the Store does not render Markdown. ~4 700 chars; 16 384 char limit.
+Paste verbatim into the Web Store dashboard's "Detailed description" field. Plain text with blank-line paragraph breaks — the Store does not render Markdown.
 
 ```
-Immich Companion is the missing browser extension for your self-hosted Immich photo library. It lets you save anything you find on the web straight to your library with one click, search your photos from anywhere in the browser, and turn every new tab into a quiet feed of your own memories.
+Right-click any image or video to save it directly to your self-hosted Immich server.
+
+---
+
+Immich Companion is a browser companion for your self-hosted Immich photo library. It lets you save images and videos from any webpage with one right-click, search your photos from anywhere in the browser, and turn every new tab into a feed of your own memories.
 
 It is built for people who already run Immich at home or on their own server. There is no cloud component, no account to create, no telemetry. The extension talks to one place and one place only: the Immich server URL you enter on first run.
 
-WHAT YOU CAN DO
+SIMPLE AND FAST
+- Right-click any image or video and select "Save to Immich" or "Save & share"
+- Files are uploaded instantly to your server
+- In-page toasts confirm each upload — green on success, blue on duplicate, red with the actual error message on failure
+- "Save & share" creates a public Immich share link and copies it to your clipboard in one click
 
-• Right-click any image or video on any webpage to upload it to your Immich library. The extension fetches the asset, sends it to your server, and shows an in-page toast when it is done — green for success, blue for "already in your library", red on failure with the actual error message. Optionally, every saved item is added to a default album you pick once in settings.
+SEARCH ANYWHERE
+- Toolbar popup with a masonry-grid CLIP smart search
+- Address-bar search — type "im" plus a space plus a query for live suggestions
+- Inline matches on Google search pages — matching photos appear in a card above Google's results, without any data ever traveling through Google's servers
+- "Recent" tab in the popup with one-click "Open in Immich" and "Copy link" actions
+- Drag and drop files onto the popup to upload them straight from your computer
 
-• "Save & share" — same as Save, plus the extension creates a public Immich share link for the asset and copies it to your clipboard. One right-click, paste anywhere, done.
+A NEW TAB WORTH OPENING
+- A random photo from your library on every new tab
+- An optional "On this day" memory strip with photos from past years
+- Pick a specific album as the background source
+- Optional auto-rotate every 30 seconds to 15 minutes
+- Or turn the new tab override off entirely — a minimal clock and Google search bar replaces it
 
-• Smart search from the toolbar icon. The popup has three tabs:
-  – Search: a masonry grid of CLIP-powered results. Try natural-language queries like "dog at the beach", "red sunset", or "kitchen at night".
-  – Recent: your last thirty uploads with one-click "Open in Immich" and "Copy link" buttons.
-  – Upload: a drag-and-drop area plus a file picker for uploading files straight from your computer.
+ORGANIZED
+- Optional default album for every save
+- Automatic duplicate detection (using Immich's hash-based dedup, surfaced in the toast)
+- Recent uploads kept locally in the popup for quick access
 
-• Smart search from the address bar. Type "im" followed by a space and a query for live suggestions in the omnibox. Press Enter to open the full search results on your Immich.
+BEAUTIFUL
+- Clean modern interface that matches Immich's design language
+- Dark and light themes, plus a "match system" option
+- Connection status indicator on the toolbar icon (red when the server is unreachable)
+- Polished first-run onboarding that walks through creating an API key
 
-• Inline matches on Google. When you do a Google search, photos in your library that match the query show up in a small card at the top of the results page, with thumbnails you can click to open in Immich. The search runs directly between your browser and your Immich server — Google's network is not involved at any point. Toggleable in settings; off means zero requests on Google pages.
-
-• A new tab page that opens to a random photo from your library, with an optional "On this day" strip of memories from past years along the bottom. Choose a specific album as the source, set an auto-rotate interval, or turn the override off entirely. When the override is off, the new tab shows a minimal page with a clock and a Google search bar (Chrome does not allow extensions to give back the original new tab without uninstalling — this is the closest a browser extension can do).
-
-• A share-album toolbar that appears on your own Immich /share/... URLs, with Slideshow and Download-all controls.
-
-POLISHED LITTLE THINGS
-
-• Dark theme by default, with light and "match system" options.
-• Keyboard shortcut Ctrl+Shift+L (Cmd+Shift+L on Mac) opens the popup. Re-bindable at chrome://extensions/shortcuts.
-• A small badge on the toolbar icon turns red when the server is unreachable, so you notice immediately if something is down — checked every five minutes in the background.
-• An onboarding tab on first install walks you through creating an API key in Immich and lists the exact scopes the extension needs (asset.upload, asset.read, asset.view, album.read, albumAsset.create, sharedLink.create). Click any scope name to copy it.
-
-PRIVACY
-
-The extension stores your Immich server URL and API key locally in chrome.storage.local. It never sends them anywhere except, in one direction, to the Immich server you configured. There is no backend service, no analytics, no third-party SDK, no tracking. The extension does not read your browsing history, does not contact any other host, and does not collect data of any kind.
-
-The Google integration deserves a specific note. When it is enabled, the extension's content script reads the query from the URL of a Google search page, asks the extension's own background process to query your Immich, and renders the results in an injected card. The HTTP request goes directly from your browser to your Immich server — Google's servers do not see it. The result card lives in Google's page DOM, so theoretically Google's JavaScript could observe a hostname (yours) and the opaque UUIDs of matching assets in link href attributes. Image bytes never appear in Google's page; thumbnails are referenced by in-memory blob URLs only. To eliminate even that theoretical exposure, turn the feature off in settings.
-
-The full privacy policy is linked below.
+PRIVATE AND SECURE
+- All data goes directly to YOUR Immich server
+- No analytics, no third-party tracking, no telemetry, no telemetry pixels
+- API key stored locally in chrome.storage.local
+- The full privacy policy spells out exactly what every permission is used for and what theoretical exposures exist (the Google integration in particular)
+- Open source — verify the code yourself
 
 REQUIREMENTS
+- A self-hosted Immich server (https://immich.app)
+- An API key from your Immich account (the welcome page lists the exact required scopes)
+- Chrome or Chromium 114 or newer
 
-• A working Immich server you can sign into and an API key.
-• Chrome / Chromium 114 or newer.
+Perfect for Immich users who want to save inspiration, memes, references, family photos and screenshots from the web straight to their library — without downloading and re-uploading every time.
 
-OPEN SOURCE
+---
 
-MIT-licensed. Source code on GitHub.
+This is an unofficial community extension and is not affiliated with the Immich project.
 ```
 
 ---
 
 ## Detailed description (German / Deutsch)
 
-Optional — Deutsch als zusätzliche Listing-Sprache hinzufügen. ~5 100 Zeichen.
+Optional — Deutsch als zusätzliche Listing-Sprache.
 
 ```
-Immich Companion ist die fehlende Browser-Erweiterung für deine selbstgehostete Immich-Foto-Bibliothek. Sie speichert alles, was du im Web findest, mit einem Klick direkt in deine Bibliothek, durchsucht deine Fotos aus jeder Stelle im Browser und macht aus jedem neuen Tab einen ruhigen Feed deiner eigenen Erinnerungen.
+Speichere mit einem Rechtsklick Bilder und Videos direkt auf deinem selbstgehosteten Immich-Server.
 
-Die Erweiterung ist für Menschen gebaut, die Immich bereits zu Hause oder auf einem eigenen Server betreiben. Es gibt keine Cloud-Komponente, kein Konto zum Anlegen, keine Telemetrie. Die Erweiterung spricht mit genau einer Adresse: der Immich-Server-URL, die du beim ersten Start einträgst.
+---
 
-WAS DU TUN KANNST
+Immich Companion ist eine Browser-Erweiterung für deine selbstgehostete Immich-Foto-Bibliothek. Mit einem Rechtsklick speicherst du Bilder und Videos von jeder Webseite, durchsuchst deine Fotos aus jeder Stelle im Browser und machst aus jedem neuen Tab einen Feed deiner eigenen Erinnerungen.
 
-• Rechtsklick auf ein Bild oder Video auf einer beliebigen Webseite, um es in deine Immich-Bibliothek hochzuladen. Die Erweiterung lädt die Datei herunter, sendet sie an deinen Server und zeigt einen kleinen Hinweis im Tab — grün bei Erfolg, blau bei "schon in der Bibliothek", rot mit der genauen Fehlermeldung im Fehlerfall. Optional wird jedes gespeicherte Element automatisch in ein Standard-Album hinzugefügt, das du einmal in den Einstellungen festlegst.
+Die Erweiterung ist für Menschen gebaut, die Immich bereits zu Hause oder auf einem eigenen Server betreiben. Es gibt keine Cloud-Komponente, kein Konto zum Anlegen, keine Telemetrie. Die Erweiterung kommuniziert mit genau einer Adresse: der Immich-Server-URL, die du beim ersten Start einträgst.
 
-• "Speichern & teilen" — wie Speichern, plus die Erweiterung erstellt einen öffentlichen Immich-Teilungslink und kopiert ihn in die Zwischenablage. Ein Rechtsklick, irgendwo einfügen, fertig.
+EINFACH UND SCHNELL
+- Rechtsklick auf ein Bild oder Video, "In Immich speichern" oder "Speichern & teilen" wählen
+- Dateien werden sofort auf deinen Server hochgeladen
+- Hinweis-Toasts bestätigen jeden Upload — grün bei Erfolg, blau bei Duplikat, rot mit der genauen Fehlermeldung im Fehlerfall
+- "Speichern & teilen" erstellt einen öffentlichen Immich-Teilungslink und kopiert ihn mit einem Klick in die Zwischenablage
 
-• Intelligente Suche per Symbolleisten-Icon. Das Popup hat drei Tabs:
-  – Suche: ein masonry-Raster mit CLIP-Suchergebnissen. Probiere natürliche Anfragen wie "Hund am Strand", "roter Sonnenuntergang" oder "Küche bei Nacht".
-  – Verlauf: deine letzten dreißig Uploads mit "In Immich öffnen"- und "Link kopieren"-Buttons.
-  – Hochladen: ein Drag-and-Drop-Bereich plus Dateiauswahl, um Dateien direkt vom Computer hochzuladen.
+ÜBERALL SUCHEN
+- Symbolleisten-Popup mit masonry-Raster und CLIP-basierter intelligenter Suche
+- Adresszeilen-Suche — tippe "im" plus Leerzeichen plus Anfrage für Live-Vorschläge
+- Inline-Treffer auf Google-Suchseiten — passende Fotos aus deiner Bibliothek erscheinen in einer Karte über Googles Ergebnissen, ohne dass irgendwelche Daten Googles Server berühren
+- "Verlauf"-Tab im Popup mit "In Immich öffnen"- und "Link kopieren"-Buttons
+- Drag and Drop von Dateien auf das Popup, um sie direkt vom Computer hochzuladen
 
-• Intelligente Suche aus der Adresszeile. Tippe "im" gefolgt von einem Leerzeichen und einer Anfrage, um Live-Vorschläge zu erhalten. Enter öffnet die vollständigen Ergebnisse auf deinem Immich.
+EIN NEUER TAB, DER SICH LOHNT
+- Ein zufälliges Foto aus deiner Bibliothek auf jedem neuen Tab
+- Optionaler "An diesem Tag"-Streifen mit Fotos aus vergangenen Jahren
+- Bestimmtes Album als Quelle wählbar
+- Optionaler Auto-Wechsel alle 30 Sekunden bis 15 Minuten
+- Oder die Tab-Übernahme ganz abschalten — eine minimale Seite mit Uhrzeit und Google-Suchleiste tritt an die Stelle
 
-• Inline-Treffer in Google. Wenn du etwas googlest, erscheinen passende Fotos aus deiner Bibliothek in einer kleinen Karte oben in den Suchergebnissen, mit klickbaren Vorschaubildern. Die Suche läuft direkt zwischen deinem Browser und deinem Immich-Server — Googles Netzwerk ist zu keinem Zeitpunkt beteiligt. In den Einstellungen abschaltbar; aus heißt null Anfragen auf Google-Seiten.
+ORGANISIERT
+- Optionales Standard-Album für jeden Upload
+- Automatische Duplikat-Erkennung (mit Immichs hash-basierter Dedup, im Toast sichtbar)
+- Letzte Uploads lokal im Popup gespeichert für schnellen Zugriff
 
-• Eine neue-Tab-Seite mit einem zufälligen Foto aus deiner Bibliothek als Hintergrund und optional einem "An diesem Tag"-Streifen mit Erinnerungen aus vergangenen Jahren am unteren Rand. Wähle ein bestimmtes Album als Quelle, lege ein Auto-Wechsel-Intervall fest oder schalte die Übernahme komplett aus. Bei abgeschalteter Übernahme zeigt der neue Tab eine minimale Seite mit Uhrzeit und Google-Suchleiste (Chrome erlaubt Erweiterungen nicht, die ursprüngliche neue Tab-Seite zurückzugeben, ohne dass du die Erweiterung deinstallierst — das ist das Beste, was eine Browser-Erweiterung tun kann).
+GESTALTUNG
+- Schlichte, moderne Oberfläche, die sich in Immichs Designsprache einfügt
+- Dunkles und helles Design, plus "Systemeinstellung folgen"
+- Verbindungsstatus-Indikator auf dem Symbolleisten-Icon (rot, wenn der Server nicht erreichbar ist)
+- Polierte Willkommensseite, die durch die Erstellung eines API-Schlüssels führt
 
-• Eine Teilungs-Album-Werkzeugleiste, die auf deinen eigenen Immich-/share/-URLs erscheint, mit Diashow- und Alle-herunterladen-Buttons.
-
-KLEINE FEINHEITEN
-
-• Dunkles Design standardmäßig, mit hellem und "Systemeinstellung folgen" als Alternativen.
-• Tastenkürzel Strg+Umschalt+L (Cmd+Umschalt+L auf dem Mac) öffnet das Popup. Unter chrome://extensions/shortcuts neu zuweisbar.
-• Ein kleiner Indikator auf dem Symbolleisten-Icon wird rot, wenn der Server nicht erreichbar ist — alle fünf Minuten im Hintergrund geprüft.
-• Eine Willkommensseite beim ersten Start führt dich durch die Erstellung eines API-Schlüssels in Immich und listet die exakten Berechtigungen, die die Erweiterung benötigt (asset.upload, asset.read, asset.view, album.read, albumAsset.create, sharedLink.create). Klick auf einen Scope-Namen kopiert ihn.
-
-DATENSCHUTZ
-
-Die Erweiterung speichert deine Immich-Server-URL und deinen API-Schlüssel lokal in chrome.storage.local. Sie sendet sie nirgendwo hin, außer — in eine Richtung — an den Immich-Server, den du konfiguriert hast. Es gibt keinen Backend-Dienst, keine Analyse, keine Drittanbieter-SDKs, kein Tracking. Die Erweiterung liest deinen Browserverlauf nicht, kontaktiert keine anderen Hosts und sammelt keinerlei Daten.
-
-Die Google-Integration verdient eine spezifische Anmerkung. Wenn sie aktiviert ist, liest das Content-Skript der Erweiterung die Anfrage aus der URL einer Google-Suchseite, lässt den Hintergrund-Prozess der Erweiterung deine Immich abfragen und rendert die Ergebnisse in einer eingefügten Karte. Die HTTP-Anfrage geht direkt von deinem Browser an deinen Immich-Server — Googles Server sehen sie nicht. Die Ergebnis-Karte lebt im DOM der Google-Seite, also könnte Googles JavaScript theoretisch deinen Server-Hostnamen und die opaken UUIDs passender Assets in href-Attributen beobachten. Bild-Bytes erscheinen niemals auf der Google-Seite; Vorschaubilder werden nur über In-Memory-blob-URLs referenziert. Um auch diese theoretische Exposition auszuschließen, schalte die Funktion in den Einstellungen aus.
-
-Die vollständige Datenschutzerklärung ist unten verlinkt.
+PRIVAT UND SICHER
+- Alle Daten gehen direkt an DEINEN Immich-Server
+- Keine Analyse, kein Drittanbieter-Tracking, keine Telemetrie, keine Tracking-Pixel
+- API-Schlüssel lokal in chrome.storage.local gespeichert
+- Die vollständige Datenschutzerklärung erläutert exakt, wofür jede Berechtigung verwendet wird und welche theoretischen Expositionen bestehen (insbesondere bei der Google-Integration)
+- Open Source — Code selbst überprüfen
 
 VORAUSSETZUNGEN
+- Ein selbstgehosteter Immich-Server (https://immich.app)
+- Ein API-Schlüssel aus deinem Immich-Konto (die Willkommensseite listet die exakten benötigten Berechtigungen)
+- Chrome oder Chromium 114 oder neuer
 
-• Ein laufender Immich-Server, bei dem du dich anmelden kannst, und ein API-Schlüssel.
-• Chrome / Chromium 114 oder neuer.
+Ideal für Immich-Nutzer, die Inspiration, Memes, Referenzen, Familienfotos und Screenshots aus dem Web direkt in ihre Bibliothek speichern wollen — ohne jedes Mal herunterladen und wieder hochladen zu müssen.
 
-OPEN SOURCE
+---
 
-MIT-Lizenz. Quellcode auf GitHub.
+Diese Erweiterung ist eine inoffizielle Community-Erweiterung und steht in keiner Verbindung zum Immich-Projekt.
 ```
 
 ---
