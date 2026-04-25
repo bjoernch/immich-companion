@@ -54,30 +54,28 @@ chrome.storage.onChanged.addListener(async (changes, area) => {
 
 // --- Context menus ---------------------------------------------------------
 
-async function rebuildContextMenus() {
-  await chrome.contextMenus.removeAll();
+// Serialize concurrent rebuild calls — onInstalled + onStartup + storage
+// change can fire simultaneously and race on removeAll/create.
+let rebuildQueue = Promise.resolve();
+function rebuildContextMenus() {
+  rebuildQueue = rebuildQueue.then(doRebuildContextMenus).catch(() => {});
+  return rebuildQueue;
+}
+async function doRebuildContextMenus() {
+  await new Promise((r) => chrome.contextMenus.removeAll(r));
   const cfg = await getConfig();
   if (cfg.featureContextMenus === false) return;
-  chrome.contextMenus.create({
-    id: MENU.SAVE_IMAGE,
-    title: "Save image to Immich",
-    contexts: ["image"],
-  });
-  chrome.contextMenus.create({
-    id: MENU.SAVE_AND_SHARE_IMAGE,
-    title: "Save image to Immich & copy share link",
-    contexts: ["image"],
-  });
-  chrome.contextMenus.create({
-    id: MENU.SAVE_VIDEO,
-    title: "Save video to Immich",
-    contexts: ["video"],
-  });
-  chrome.contextMenus.create({
-    id: MENU.SAVE_AND_SHARE_VIDEO,
-    title: "Save video to Immich & copy share link",
-    contexts: ["video"],
-  });
+  const create = (props) =>
+    new Promise((resolve) => {
+      chrome.contextMenus.create(props, () => {
+        void chrome.runtime.lastError; // ignore "duplicate id" if it slips through
+        resolve();
+      });
+    });
+  await create({ id: MENU.SAVE_IMAGE, title: "Save image to Immich", contexts: ["image"] });
+  await create({ id: MENU.SAVE_AND_SHARE_IMAGE, title: "Save image to Immich & copy share link", contexts: ["image"] });
+  await create({ id: MENU.SAVE_VIDEO, title: "Save video to Immich", contexts: ["video"] });
+  await create({ id: MENU.SAVE_AND_SHARE_VIDEO, title: "Save video to Immich & copy share link", contexts: ["video"] });
 }
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
@@ -333,6 +331,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           contentType: res.headers.get("content-type"),
           data: Array.from(new Uint8Array(buf)),
         });
+      } else if (msg?.type === "smart-search") {
+        const r = await smartSearch(msg.query, msg.size || 10);
+        sendResponse({ ok: true, data: r });
       } else if (msg?.type === "config-updated") {
         await rebuildContextMenus();
         await updateBadge();

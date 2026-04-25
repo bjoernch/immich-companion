@@ -193,25 +193,23 @@
     console.debug(TAG, "querying Immich for:", q);
     let items = [];
     try {
-      const res = await fetch(`${serverUrl}/api/search/smart`, {
-        method: "POST",
-        headers: {
-          "x-api-key": stored.apiKey,
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({ query: q, size: 10 }),
+      // Route through the background service worker — it has the host
+      // permissions and isn't subject to the host page's mixed-content / CORS
+      // rules. The API key never leaves the background context.
+      const res = await new Promise((resolve, reject) => {
+        chrome.runtime.sendMessage(
+          { type: "smart-search", query: q, size: 10 },
+          (r) => {
+            if (chrome.runtime.lastError) return reject(new Error(chrome.runtime.lastError.message));
+            if (!r?.ok) return reject(new Error(r?.error || "no response"));
+            resolve(r);
+          },
+        );
       });
-      if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        console.warn(TAG, "search failed", res.status, text.slice(0, 200));
-        return;
-      }
-      const data = await res.json();
-      items = data?.assets?.items || [];
+      items = res.data?.assets?.items || [];
       console.debug(TAG, `got ${items.length} match(es)`);
     } catch (e) {
-      console.warn(TAG, "search threw", e);
+      console.warn(TAG, "search via background failed:", e.message || e);
       return;
     }
     if (!items.length) {
