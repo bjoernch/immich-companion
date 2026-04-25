@@ -1,0 +1,88 @@
+name: Release
+
+# Triggered when you push a tag like v0.3.0. Builds the extension zip and
+# attaches it to a GitHub Release. If the WEBSTORE_* secrets are set, also
+# uploads the zip to the Chrome Web Store.
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:    # allow manual runs from the Actions tab
+    inputs:
+      publish_to_webstore:
+        description: 'Also publish to Chrome Web Store (requires secrets)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write       # to create the GitHub Release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version from manifest.json
+        id: meta
+        run: |
+          VERSION=$(python3 -c "import json; print(json.load(open('manifest.json'))['version'])")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "zip=immich-companion-${VERSION}.zip" >> "$GITHUB_OUTPUT"
+
+      - name: Verify tag matches manifest version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TAG="${GITHUB_REF#refs/tags/v}"
+          if [ "$TAG" != "${{ steps.meta.outputs.version }}" ]; then
+            echo "Tag v$TAG does not match manifest version ${{ steps.meta.outputs.version }}" >&2
+            exit 1
+          fi
+
+      - name: Build zip
+        run: |
+          chmod +x build.sh
+          ./build.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.meta.outputs.zip }}
+          path: dist/${{ steps.meta.outputs.zip }}
+          if-no-files-found: error
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/${{ steps.meta.outputs.zip }}
+          generate_release_notes: true
+
+      # ----------------------------------------------------------------
+      # Optional: publish to Chrome Web Store. Skipped unless the four
+      # secrets below are set in the repo (Settings → Secrets → Actions):
+      #   WEBSTORE_EXTENSION_ID    — printed in the dashboard after the
+      #                              first manual upload
+      #   WEBSTORE_CLIENT_ID       — Google Cloud OAuth client ID
+      #   WEBSTORE_CLIENT_SECRET   — Google Cloud OAuth client secret
+      #   WEBSTORE_REFRESH_TOKEN   — long-lived OAuth refresh token
+      # See README.md "Publishing" for how to obtain these.
+      # ----------------------------------------------------------------
+      - name: Publish to Chrome Web Store
+        if: >-
+          (startsWith(github.ref, 'refs/tags/v') || inputs.publish_to_webstore == true)
+          && env.WEBSTORE_EXTENSION_ID != ''
+        env:
+          WEBSTORE_EXTENSION_ID: ${{ secrets.WEBSTORE_EXTENSION_ID }}
+          WEBSTORE_CLIENT_ID: ${{ secrets.WEBSTORE_CLIENT_ID }}
+          WEBSTORE_CLIENT_SECRET: ${{ secrets.WEBSTORE_CLIENT_SECRET }}
+          WEBSTORE_REFRESH_TOKEN: ${{ secrets.WEBSTORE_REFRESH_TOKEN }}
+        uses: mnao305/chrome-extension-upload@v5.0.0
+        with:
+          file-path: dist/${{ steps.meta.outputs.zip }}
+          extension-id: ${{ env.WEBSTORE_EXTENSION_ID }}
+          client-id: ${{ env.WEBSTORE_CLIENT_ID }}
+          client-secret: ${{ env.WEBSTORE_CLIENT_SECRET }}
+          refresh-token: ${{ env.WEBSTORE_REFRESH_TOKEN }}
+          publish: true

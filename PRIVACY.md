@@ -28,6 +28,29 @@ The extension talks **only to the Immich server URL you configure**. Specificall
 - No advertising or tracking SDKs.
 - No browsing history is read or sent anywhere.
 
+## Google search integration
+
+The extension has an optional feature ("Show Immich matches on Google", on by default, toggleable in Settings → Features) that displays an inline result card on Google search pages with photos from your library that match the query.
+
+**No Immich data ever travels through Google's network.** When you search Google, the extension's content script reads your query from the URL and asks the extension's background service worker to perform a CLIP smart search against your Immich server. The HTTP request goes directly from the background service worker to your Immich server — Google's servers are not involved.
+
+**What appears in Google's page DOM** (theoretically inspectable by their JavaScript, though their analytics do not in practice scrape arbitrary DOM nodes injected by extensions):
+
+- The HTML of the result card.
+- Each thumbnail as a `blob:` URL — these reference image bytes held only in your browser's memory, not transmitted anywhere.
+- A "View all in Immich" link with your Immich server URL in the `href`.
+- Each thumbnail link with the Immich asset UUID in the `href`.
+
+**What does *not* appear in Google's page or travel to Google:**
+
+- Your API key. It stays in `chrome.storage.local` and is only added to the request header inside the background service worker.
+- Image bytes, file names, EXIF, location, dates, or any other metadata.
+- Any network traffic to your Immich server.
+
+**Worst-case theoretical exposure**, if Google were to actively scrape extension-injected DOM (which they don't): your Immich server's hostname and the opaque UUIDs of matching assets. Nothing more.
+
+To turn the feature off entirely (no requests fired on Google pages, no DOM injection): toggle **Show Immich matches on Google** off in Settings → Features.
+
 ## Required browser permissions
 
 | Permission                           | Reason                                                                  |
