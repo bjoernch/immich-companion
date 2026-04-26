@@ -704,12 +704,18 @@ kbd {
   display: block;
   break-inside: avoid;
   margin: 0 0 6px;
-  background: var(--panel-2);
+  background: linear-gradient(90deg, var(--panel-2) 0%, var(--panel-3) 50%, var(--panel-2) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
   border-radius: 8px;
   overflow: hidden;
   position: relative;
   text-decoration: none;
   transition: transform 120ms ease, box-shadow 120ms ease;
+}
+.popup .results a.loaded {
+  background: var(--panel-2);
+  animation: none;
 }
 .popup .results a:hover {
   transform: translateY(-1px);
@@ -717,10 +723,13 @@ kbd {
 }
 .popup .results img {
   width: 100%;
-  height: auto;
+  height: 100%;
   display: block;
-  background: var(--panel-3);
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 200ms ease;
 }
+.popup .results a.loaded img { opacity: 1; }
 .popup .results .meta-overlay {
   position: absolute;
   left: 0; right: 0; bottom: 0;
@@ -733,6 +742,47 @@ kbd {
   pointer-events: none;
 }
 .popup .results a:hover .meta-overlay { opacity: 1; }
+
+/* Quick-action buttons revealed on hover */
+.popup .results .actions-overlay {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity 130ms ease, transform 130ms ease;
+}
+.popup .results a:hover .actions-overlay,
+.popup .results a:focus-within .actions-overlay {
+  opacity: 1;
+  transform: translateY(0);
+}
+.popup .results .action-btn {
+  all: unset;
+  cursor: pointer;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  color: white;
+  backdrop-filter: blur(4px);
+  transition: background 120ms ease, transform 80ms ease;
+}
+.popup .results .action-btn:hover {
+  background: var(--accent-strong);
+  border-color: var(--accent);
+}
+.popup .results .action-btn:active { transform: scale(0.94); }
+.popup .results .action-btn.done { background: rgba(74, 222, 128, 0.85); border-color: var(--ok); }
+.popup .results .action-btn.err  { background: rgba(255, 107, 107, 0.85); border-color: var(--danger); }
+.popup .results .action-btn.busy { cursor: wait; }
+.popup .results .action-btn .spin { animation: spin 0.9s linear infinite; transform-origin: 50% 50%; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .popup .pagination {
   display: flex;

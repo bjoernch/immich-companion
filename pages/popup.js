@@ -12,6 +12,15 @@ import {
   clearRecentUploads,
 } from "../lib/immich.js";
 
+// Inline SVG icons used in the result quick-actions overlay.
+const ICON = {
+  copy: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+  download: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  check: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  x: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+  spinner: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="spin"><path d="M12 2a10 10 0 0 1 10 10" /></svg>',
+};
+
 const $ = (id) => document.getElementById(id);
 
 // ---- Tabs ------------------------------------------------------------------
@@ -129,29 +138,117 @@ function renderResultsPage() {
 
   setResultsState();
   results.innerHTML = "";
-  for (const a of items) {
-    const link = document.createElement("a");
-    link.href = viewUrl(currentCfg.serverUrl, a.id);
-    link.target = "_blank";
-    link.rel = "noopener";
-    link.title = a.originalFileName || a.id;
-    const img = document.createElement("img");
-    img.alt = "";
-    img.loading = "lazy";
-    const date = fmtDate(a.exifInfo?.dateTimeOriginal || a.fileCreatedAt);
-    link.appendChild(img);
-    if (date) {
-      const meta = document.createElement("div");
-      meta.className = "meta-overlay";
-      meta.textContent = date;
-      link.appendChild(meta);
-    }
-    results.appendChild(link);
-    loadThumb(a.id, "preview").then((u) => (img.src = u)).catch(() => {});
-  }
+  for (const a of items) results.appendChild(buildResultCard(a));
   results.scrollTop = 0;
 
   renderPagination(total, pages);
+}
+
+function buildResultCard(asset) {
+  const link = document.createElement("a");
+  link.href = viewUrl(currentCfg.serverUrl, asset.id);
+  link.target = "_blank";
+  link.rel = "noopener";
+  link.title = asset.originalFileName || asset.id;
+  link.className = "result-card";
+
+  // Reserve the card's final dimensions via aspect-ratio so masonry doesn't
+  // reflow when the thumbnail fetches arrive at varying times.
+  const w = asset.exifInfo?.imageWidth || asset.exifInfo?.exifImageWidth || 4;
+  const h = asset.exifInfo?.imageHeight || asset.exifInfo?.exifImageHeight || 3;
+  link.style.aspectRatio = `${w} / ${h}`;
+
+  const img = document.createElement("img");
+  img.alt = "";
+  img.loading = "lazy";
+  img.addEventListener("load", () => link.classList.add("loaded"));
+  img.addEventListener("error", () => link.classList.add("loaded", "failed"));
+  link.appendChild(img);
+
+  const date = fmtDate(asset.exifInfo?.dateTimeOriginal || asset.fileCreatedAt);
+  if (date) {
+    const meta = document.createElement("div");
+    meta.className = "meta-overlay";
+    meta.textContent = date;
+    link.appendChild(meta);
+  }
+
+  // Hover quick actions
+  const actions = document.createElement("div");
+  actions.className = "actions-overlay";
+  actions.appendChild(makeActionButton("Copy share link", ICON.copy,
+    (btn) => copyShareLinkAction(asset, btn)));
+  actions.appendChild(makeActionButton("Download original", ICON.download,
+    (btn) => downloadOriginalAction(asset, btn)));
+  link.appendChild(actions);
+
+  loadThumb(asset.id, "preview").then((u) => (img.src = u)).catch(() => {
+    link.classList.add("loaded", "failed");
+  });
+
+  return link;
+}
+
+function makeActionButton(title, iconSvg, handler) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "action-btn";
+  btn.title = title;
+  btn.innerHTML = iconSvg;
+  btn.addEventListener("click", async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (btn.classList.contains("busy")) return;
+    btn.classList.add("busy");
+    const original = btn.innerHTML;
+    btn.innerHTML = ICON.spinner;
+    try {
+      await handler(btn);
+      btn.innerHTML = ICON.check;
+      btn.classList.remove("busy");
+      btn.classList.add("done");
+      setTimeout(() => {
+        btn.classList.remove("done");
+        btn.innerHTML = original;
+      }, 1400);
+    } catch (err) {
+      btn.innerHTML = ICON.x;
+      btn.classList.remove("busy");
+      btn.classList.add("err");
+      btn.title = err?.message || String(err);
+      setTimeout(() => {
+        btn.classList.remove("err");
+        btn.innerHTML = original;
+        btn.title = title;
+      }, 2400);
+    }
+  });
+  return btn;
+}
+
+async function copyShareLinkAction(asset, _btn) {
+  const link = await createShareLink([asset.id]);
+  const url = shareUrl(currentCfg.serverUrl, link.key);
+  await navigator.clipboard.writeText(url);
+}
+
+async function downloadOriginalAction(asset, _btn) {
+  // Fetch the original via the API (with x-api-key header) and trigger a
+  // download from the resulting blob — <a download> can't send the header.
+  const res = await fetch(
+    `${currentCfg.serverUrl}/api/assets/${asset.id}/original`,
+    { headers: { "x-api-key": currentCfg.apiKey } },
+  );
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = asset.originalFileName || `immich-${asset.id}`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 
 function renderPagination(total, pages) {
