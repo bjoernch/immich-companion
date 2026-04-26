@@ -179,7 +179,10 @@ function buildResultCard(asset) {
   // Hover quick actions
   const actions = document.createElement("div");
   actions.className = "actions-overlay";
-  actions.appendChild(makeActionButton("Copy image to clipboard", ICON.image,
+  const copyTitle = currentCfg.clipboardCopyOriginal
+    ? "Copy original to clipboard"
+    : "Copy preview to clipboard";
+  actions.appendChild(makeActionButton(copyTitle, ICON.image,
     (btn) => copyImageAction(asset, btn)));
   actions.appendChild(makeActionButton("Share link (copy)", ICON.share,
     (btn) => shareLinkAction(asset, btn)));
@@ -238,12 +241,19 @@ async function shareLinkAction(asset, _btn) {
 }
 
 async function copyImageAction(asset, _btn) {
-  // Fetch a high-quality preview thumbnail (medium-large JPEG) — full
-  // originals can be 10s of MB which is too heavy for clipboard.
-  const res = await fetch(
-    `${currentCfg.serverUrl}/api/assets/${asset.id}/thumbnail?size=preview`,
-    { headers: { "x-api-key": currentCfg.apiKey } },
-  );
+  // Source URL depends on the user's setting. Preview (default) is a
+  // medium-large JPEG that always works. Original respects exact bytes
+  // but can be very large and may be a format Chrome can't decode for
+  // the clipboard (HEIC, RAW, AVIF) — in that case the canvas-based
+  // PNG fallback below tries to rescue it.
+  const useOriginal = currentCfg.clipboardCopyOriginal === true;
+  const url = useOriginal
+    ? `${currentCfg.serverUrl}/api/assets/${asset.id}/original`
+    : `${currentCfg.serverUrl}/api/assets/${asset.id}/thumbnail?size=preview`;
+
+  const res = await fetch(url, {
+    headers: { "x-api-key": currentCfg.apiKey },
+  });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   let blob = await res.blob();
 

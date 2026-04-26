@@ -10,6 +10,7 @@ const TOGGLE_KEYS = [
   "featureShareToolbar",
   "featureNotifications",
   "featureGoogleInline",
+  "clipboardCopyOriginal",
 ];
 const TEXT_KEYS = [
   "serverUrl",
