@@ -734,6 +734,44 @@ kbd {
 }
 .popup .results a:hover .meta-overlay { opacity: 1; }
 
+.popup .pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.popup .pagination[hidden] { display: none; }
+.popup .pagination button {
+  all: unset;
+  cursor: pointer;
+  min-width: 28px;
+  padding: 5px 9px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  text-align: center;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  transition: background 120ms, border-color 120ms;
+  box-sizing: border-box;
+}
+.popup .pagination button:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--panel-3);
+}
+.popup .pagination button.active {
+  background: linear-gradient(180deg, var(--accent), var(--accent-strong));
+  border-color: var(--accent-strong);
+  color: white;
+  font-weight: 500;
+}
+.popup .pagination button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 .popup .skeleton {
   display: block;
   break-inside: avoid;
