@@ -14,8 +14,8 @@ import {
 
 // Inline SVG icons used in the result quick-actions overlay.
 const ICON = {
-  // image (copy the picture itself to clipboard)
-  image: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>',
+  // clipboard (copy the picture itself to clipboard)
+  clipboard: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>',
   // share (create + copy public link)
   share: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>',
   download: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
@@ -182,7 +182,7 @@ function buildResultCard(asset) {
   const copyTitle = currentCfg.clipboardCopyOriginal
     ? "Copy original to clipboard"
     : "Copy preview to clipboard";
-  actions.appendChild(makeActionButton(copyTitle, ICON.image,
+  actions.appendChild(makeActionButton(copyTitle, ICON.clipboard,
     (btn) => copyImageAction(asset, btn)));
   actions.appendChild(makeActionButton("Share link (copy)", ICON.share,
     (btn) => shareLinkAction(asset, btn)));

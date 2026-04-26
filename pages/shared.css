@@ -473,13 +473,17 @@ kbd {
 
 .popup {
   width: 420px;
-  min-height: 320px;
+  height: 580px;
   padding: 0;
   background: var(--bg);
   position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .popup-tabs {
+  flex: 0 0 auto;
   display: flex;
   gap: 2px;
   padding: 10px 10px 0;
@@ -517,9 +521,28 @@ kbd {
 .popup-panel {
   display: none;
   padding: 12px 14px 16px;
-  min-height: 240px;
 }
-.popup-panel.active { display: block; }
+.popup-panel.active {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.popup-panel > .search-row,
+.popup-panel > #pagination,
+.popup-panel > .recent-footer,
+.popup-panel > #dropZone {
+  flex: 0 0 auto;
+}
+.popup-panel > #empty,
+.popup-panel > #results,
+.popup-panel > #recentEmpty,
+.popup-panel > #recentList,
+.popup-panel > #uploadList {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 0;
+}
 
 .popup .search-row {
   display: flex;
@@ -530,8 +553,24 @@ kbd {
 }
 .popup .search-row button {
   flex: 0 0 auto;
-  padding: 8px 10px;
+  padding: 0;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 120ms, color 120ms, background 120ms;
 }
+.popup .search-row button:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  background: var(--panel-3);
+}
+.popup .search-row button svg { display: block; }
 
 /* Recent uploads list */
 .recent-list {
@@ -687,8 +726,6 @@ kbd {
   margin-top: 12px;
   column-count: 2;
   column-gap: 6px;
-  max-height: 420px;
-  overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
   scrollbar-color: var(--panel-3) transparent;
