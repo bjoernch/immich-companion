@@ -13,6 +13,21 @@ import {
   clearRecentUploads,
 } from "../lib/immich.js";
 
+// Parse an SVG string into a Node so we can append it without using
+// innerHTML. Mozilla's AMO validator flags every `el.innerHTML = ...`
+// assignment (even of trusted, hardcoded strings), so all dynamic markup
+// in this file is built via DOM APIs only.
+function svgNode(svgString) {
+  const doc = new DOMParser().parseFromString(svgString, "image/svg+xml");
+  return doc.documentElement.cloneNode(true);
+}
+
+// Replace an element's contents with a single DOM node (or text).
+function setOnly(el, child) {
+  el.replaceChildren();
+  if (child != null) el.appendChild(typeof child === "string" ? document.createTextNode(child) : child);
+}
+
 // Inline SVG icons used in the result quick-actions overlay.
 const ICON = {
   // clipboard (copy the picture itself to clipboard)
@@ -70,11 +85,41 @@ function pageKey(p) { return `${currentMode}:${currentQuery}:${p}`; }
 // without re-fetching the same image bytes when paging back and forth.
 const thumbCache = new Map();
 
-function setEmptyState(html) {
-  empty.innerHTML = html;
+function setEmptyState(content) {
+  empty.replaceChildren();
+  if (typeof content === "string") {
+    const div = document.createElement("div");
+    div.textContent = content;
+    empty.appendChild(div);
+  } else {
+    empty.appendChild(content);
+  }
   empty.classList.add("show");
   gallery.hidden = true;
   pagination.hidden = true;
+}
+
+// Build a small "title + (optional) link" empty-state block as DOM nodes.
+function emptyStateNode(title, action) {
+  const wrap = document.createElement("div");
+  const t = document.createElement("div");
+  t.textContent = title;
+  wrap.appendChild(t);
+  if (action) {
+    const a = document.createElement("a");
+    a.href = "#";
+    a.textContent = action.label;
+    a.addEventListener("click", (e) => { e.preventDefault(); action.onClick(); });
+    wrap.appendChild(a);
+  }
+  return wrap;
+}
+
+function emptyStateError(message) {
+  const div = document.createElement("div");
+  div.style.color = "var(--danger)";
+  div.textContent = message;
+  return div;
 }
 function setResultsState() {
   empty.classList.remove("show");
@@ -102,7 +147,7 @@ async function loadThumb(assetId, size = "thumbnail") {
 }
 
 function renderSkeletons(n = 8) {
-  results.innerHTML = "";
+  results.replaceChildren();
   setResultsState();
   const heights = [120, 160, 90, 140, 180, 110, 200, 130];
   for (let i = 0; i < n; i++) {
@@ -173,8 +218,7 @@ async function loadPage(page) {
   try {
     const cfg = await getConfig();
     if (!isConfigured(cfg)) {
-      setEmptyState('<div>Server not configured.</div><a href="#" id="goSettings">Open settings</a>');
-      $("goSettings").addEventListener("click", openOptions);
+      setEmptyState(emptyStateNode("Server not configured.", { label: "Open settings", onClick: openOptions }));
       status.textContent = "";
       return;
     }
@@ -197,9 +241,17 @@ async function loadPage(page) {
         loadingPage = false;
         return loadPage(page - 1);
       }
-      setEmptyState(currentMode === "search"
-        ? `<div>No matches for <strong>${escapeHtml(currentQuery)}</strong>.</div>`
-        : "<div>No items in your library yet.</div>");
+      if (currentMode === "search") {
+        const wrap = document.createElement("div");
+        wrap.appendChild(document.createTextNode("No matches for "));
+        const s = document.createElement("strong");
+        s.textContent = currentQuery;
+        wrap.appendChild(s);
+        wrap.appendChild(document.createTextNode("."));
+        setEmptyState(wrap);
+      } else {
+        setEmptyState("No items in your library yet.");
+      }
       return;
     }
     renderResultsPage();
@@ -207,7 +259,7 @@ async function loadPage(page) {
     if (nextPage) prefetchPage(parseInt(nextPage, 10));
   } catch (e) {
     if (myReq !== inflight) return;
-    setEmptyState(`<div style="color: var(--danger)">${escapeHtml(e.message)}</div>`);
+    setEmptyState(emptyStateError(e.message));
   } finally {
     loadingPage = false;
   }
@@ -278,7 +330,7 @@ function renderResultsPage() {
   status.textContent = label;
 
   setResultsState();
-  results.innerHTML = "";
+  results.replaceChildren();
 
   const groups = groupByMonth(currentResults);
   for (const g of groups) {
@@ -306,7 +358,7 @@ function renderResultsPage() {
 }
 
 function renderPagination() {
-  pagination.innerHTML = "";
+  pagination.replaceChildren();
   // Hide if there's only ever been one page (page 1 with no nextPage)
   if (currentApiPage === 1 && !nextPage) {
     pagination.hidden = true;
@@ -343,7 +395,7 @@ function renderPagination() {
 }
 
 function renderTimelineScrubber(groups) {
-  timeline.innerHTML = "";
+  timeline.replaceChildren();
   if (groups.length <= 1) {
     timeline.style.visibility = "hidden";
     return;
@@ -428,31 +480,30 @@ function makeActionButton(title, iconSvg, handler) {
   btn.type = "button";
   btn.className = "action-btn";
   btn.title = title;
-  btn.innerHTML = iconSvg;
+  setOnly(btn, svgNode(iconSvg));
   btn.addEventListener("click", async (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (btn.classList.contains("busy")) return;
     btn.classList.add("busy");
-    const original = btn.innerHTML;
-    btn.innerHTML = ICON.spinner;
+    setOnly(btn, svgNode(ICON.spinner));
     try {
       await handler(btn);
-      btn.innerHTML = ICON.check;
+      setOnly(btn, svgNode(ICON.check));
       btn.classList.remove("busy");
       btn.classList.add("done");
       setTimeout(() => {
         btn.classList.remove("done");
-        btn.innerHTML = original;
+        setOnly(btn, svgNode(iconSvg));
       }, 1400);
     } catch (err) {
-      btn.innerHTML = ICON.x;
+      setOnly(btn, svgNode(ICON.x));
       btn.classList.remove("busy");
       btn.classList.add("err");
       btn.title = err?.message || String(err);
       setTimeout(() => {
         btn.classList.remove("err");
-        btn.innerHTML = original;
+        setOnly(btn, svgNode(iconSvg));
         btn.title = title;
       }, 2400);
     }
@@ -604,7 +655,7 @@ async function loadRecents() {
 
   if (!list.length) {
     emp.classList.add("show");
-    ul.innerHTML = "";   // also empty the DOM, not just hide it
+    ul.replaceChildren();   // also empty the DOM, not just hide it
     ul.hidden = true;
     clear.hidden = true;
     return;
@@ -617,7 +668,7 @@ async function loadRecents() {
     loadRecents();
   };
 
-  ul.innerHTML = "";
+  ul.replaceChildren();
   const cfg = await getConfig();
   for (const item of list) {
     const li = document.createElement("li");
