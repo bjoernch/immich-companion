@@ -1,10 +1,9 @@
 <p align="center">
-  <img src="webstore-assets/banner-1280x400.png" alt="Immich Companion" width="100%" />
+  <img src="webstore-assets/github-hero.png" alt="Immich Companion — your photo library follows you around the web" width="100%" />
 </p>
 
 <p align="center">
-  <strong>A browser companion for your self-hosted <a href="https://immich.app">Immich</a> server.</strong><br/>
-  <em>Coming soon to the Chrome Web Store and Firefox AddOn Store.</em>
+  <em>Coming soon to the Chrome Web Store and Firefox Add-on Store.</em>
 </p>
 
 ---
