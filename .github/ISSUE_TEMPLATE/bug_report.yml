@@ -1,0 +1,139 @@
+name: Bug report
+description: Something is broken or not working as documented
+title: "[bug] "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. The more specific you can be, the faster it gets fixed.
+
+        Before submitting, please:
+        - Make sure you're on the **latest release** ([releases](https://github.com/bjoernch/immich-companion/releases)).
+        - Search [existing issues](https://github.com/bjoernch/immich-companion/issues?q=is%3Aissue) — someone may have hit the same thing.
+
+  - type: input
+    id: extension-version
+    attributes:
+      label: Extension version
+      description: Shown in the sidebar of the Settings page (or in `chrome://extensions` / `about:addons`).
+      placeholder: "e.g. 0.5.1"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      options:
+        - Google Chrome
+        - Microsoft Edge
+        - Brave
+        - Vivaldi / Opera / other Chromium
+        - Mozilla Firefox
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: browser-version
+    attributes:
+      label: Browser version
+      description: e.g. Chrome 142.0.7444.51, Firefox 144.0.2.
+      placeholder: "e.g. 142.0.7444.51"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: "e.g. macOS 26.0, Windows 11, Ubuntu 24.04"
+    validations:
+      required: true
+
+  - type: input
+    id: immich-version
+    attributes:
+      label: Immich server version
+      description: Shown at the bottom of the Immich web UI, or via `GET /api/server/about`.
+      placeholder: "e.g. 1.119.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: feature
+    attributes:
+      label: Which feature is affected?
+      options:
+        - Save to Immich (right-click on image / video)
+        - Save & share (right-click → copy share link)
+        - Toolbar popup — search
+        - Toolbar popup — recent uploads tab
+        - Toolbar popup — upload tab (drag-and-drop)
+        - Toolbar popup — gallery / pagination
+        - Hover quick actions (copy / share / download)
+        - New tab page (background, on-this-day, photo details)
+        - Omnibox search ("im" + space + query)
+        - Inline matches on Google search pages
+        - Share-album toolbar (Slideshow / Download-all)
+        - Settings / onboarding
+        - Other / not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: As specific as possible — the exact sequence of clicks / inputs.
+      placeholder: |
+        1. Right-click an image on https://example.com
+        2. Choose "Save image to Immich & copy share link"
+        3. …
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+      placeholder: "The popup showed an error toast saying ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected to happen
+      placeholder: "I expected the share link to be copied to my clipboard."
+    validations:
+      required: true
+
+  - type: textarea
+    id: console
+    attributes:
+      label: Browser console output (optional but very helpful)
+      description: |
+        Open the DevTools console on the relevant page (popup → right-click the popup → Inspect → Console; new tab → F12; options page → F12). Copy any red errors or any line starting with `[immich-companion]`.
+      render: text
+
+  - type: textarea
+    id: extras
+    attributes:
+      label: Screenshots, GIFs, or notes
+      description: Drag images directly into this field.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-flight checklist
+      options:
+        - label: I'm on the latest release
+          required: true
+        - label: I searched existing issues for duplicates
+          required: true
+        - label: My API key has the required scopes (the welcome page lists them)
+          required: true
+        - label: My Immich server is reachable from the browser (loading the web UI works)
+          required: true
