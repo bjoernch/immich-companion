@@ -1,6 +1,11 @@
-# Chrome Web Store — Listing Copy
+# Store listings — Chrome Web Store and Firefox AMO
 
-Paste these into the relevant fields of the Web Store dashboard. Everything below is ready to copy verbatim.
+The same description copy works for both Chrome Web Store (CWS) and Firefox Add-on store (AMO). Where the two stores differ, both variants are noted. Build artifacts come from `./build.sh`:
+
+- `dist/immich-companion-chrome-<version>.zip` — upload to the Chrome Web Store dashboard.
+- `dist/immich-companion-firefox-<version>.zip` — upload to the Firefox AMO dashboard.
+
+Both files contain the same code; only the manifest differs slightly (Firefox build strips Chrome-only `minimum_chrome_version`).
 
 ---
 
@@ -19,11 +24,26 @@ Save, share and search your self-hosted Immich library from any browser tab. Upl
 
 ## Category
 
-`Productivity` (primary). Alternative: `Photos`.
+- **Chrome Web Store**: `Productivity` (primary). Alternative: `Photos`.
+- **Firefox AMO**: `Photos, Music & Videos` (primary). Alternative: `Productivity`.
 
 ## Language
 
 English (en). Add German if you also localize the listing — the extension UI itself is currently English-only.
+
+## Firefox AMO-specific fields
+
+In addition to the shared description, AMO asks for:
+
+- **"Notes for reviewers"** (private to Mozilla):
+  ```
+  This extension talks only to a self-hosted Immich server (https://immich.app) that the user enters during onboarding. There is no developer backend, no analytics, no third-party services. To test the extension end-to-end you need an Immich server with API key access. A demo server is at https://demo.immich.app — create a free account, generate an API key under Account Settings → API Keys, and paste both into the extension's onboarding screen.
+
+  No remote code is loaded. All sources match the public GitHub repository at https://github.com/bjoernch/immich-companion (release v<version>).
+  ```
+- **"Source code submission"**: AMO requires the source for review on extensions that contain minified or transpiled code. This extension ships only hand-written JS/HTML/CSS — no build step beyond zipping the files in build.sh. You can either:
+  - Upload `dist/immich-companion-firefox-<version>.zip` as both the listed package AND the source (since they're identical), or
+  - Point the reviewer to the corresponding tag on GitHub.
 
 ---
 
@@ -46,15 +66,20 @@ SIMPLE AND FAST
 - In-page toasts confirm each upload — green on success, blue on duplicate, red with the actual error message on failure
 - "Save & share" creates a public Immich share link and copies it to your clipboard in one click
 
-SEARCH ANYWHERE
-- Toolbar popup with a masonry-grid CLIP smart search
+A LIBRARY VIEW THAT FEELS LIKE A PHONE GALLERY
+- The toolbar popup opens straight to the most recent items in your library — masonry layout, grouped by month with sticky date headers and a thin year scrubber on the right edge
+- Click any year on the scrubber to jump straight to that point in your library
+- Smart search runs from the same input — up to 250 CLIP results per query, grouped on the same timeline
+- Three quick actions on every result, revealed on hover: copy the image straight to your clipboard, copy a public share link, or download the original — each with inline progress, success, and error feedback
+- Choose whether the clipboard action copies the medium-size preview (default, fast and always works) or the full-resolution original
 - Address-bar search — type "im" plus a space plus a query for live suggestions
 - Inline matches on Google search pages — matching photos appear in a card above Google's results, without any data ever traveling through Google's servers
-- "Recent" tab in the popup with one-click "Open in Immich" and "Copy link" actions
+- "Recent uploads" tab tracks the items you saved through the extension, with one-click open and copy-link actions
 - Drag and drop files onto the popup to upload them straight from your computer
 
 A NEW TAB WORTH OPENING
 - A random photo from your library on every new tab
+- An optional row of photo details under the date: camera, lens, ISO, aperture, shutter, focal length, dimensions, file size — whatever EXIF data Immich has for that photo
 - An optional "On this day" memory strip with photos from past years
 - Pick a specific album as the background source
 - Optional auto-rotate every 30 seconds to 15 minutes
@@ -111,15 +136,20 @@ EINFACH UND SCHNELL
 - Hinweis-Toasts bestätigen jeden Upload — grün bei Erfolg, blau bei Duplikat, rot mit der genauen Fehlermeldung im Fehlerfall
 - "Speichern & teilen" erstellt einen öffentlichen Immich-Teilungslink und kopiert ihn mit einem Klick in die Zwischenablage
 
-ÜBERALL SUCHEN
-- Symbolleisten-Popup mit masonry-Raster und CLIP-basierter intelligenter Suche
+EINE BIBLIOTHEK-ANSICHT WIE IN EINER MOBILEN GALERIE-APP
+- Das Symbolleisten-Popup öffnet sich direkt mit den neuesten Items deiner Bibliothek — masonry-Layout, gruppiert nach Monat mit fixierten Datums-Headern und einem schmalen Jahres-Scrubber am rechten Rand
+- Klick auf ein Jahr im Scrubber springt direkt zu diesem Punkt in deiner Bibliothek
+- Intelligente Suche läuft aus demselben Eingabefeld — bis zu 250 CLIP-Treffer pro Anfrage, in derselben Timeline gruppiert
+- Drei Schnellaktionen auf jedem Treffer (per Hover): Bild direkt in die Zwischenablage kopieren, öffentlichen Teilungslink kopieren, oder Original herunterladen — mit Fortschritt, Erfolgs- und Fehler-Feedback
+- Wähle, ob die Zwischenablage-Aktion das mittelgroße Vorschaubild (Standard, schnell, funktioniert immer) oder das Original in voller Auflösung kopiert
 - Adresszeilen-Suche — tippe "im" plus Leerzeichen plus Anfrage für Live-Vorschläge
 - Inline-Treffer auf Google-Suchseiten — passende Fotos aus deiner Bibliothek erscheinen in einer Karte über Googles Ergebnissen, ohne dass irgendwelche Daten Googles Server berühren
-- "Verlauf"-Tab im Popup mit "In Immich öffnen"- und "Link kopieren"-Buttons
+- "Letzte Uploads"-Tab zeigt die Dateien, die du über die Erweiterung gespeichert hast, mit Ein-Klick-Öffnen und Link-kopieren
 - Drag and Drop von Dateien auf das Popup, um sie direkt vom Computer hochzuladen
 
 EIN NEUER TAB, DER SICH LOHNT
 - Ein zufälliges Foto aus deiner Bibliothek auf jedem neuen Tab
+- Optionale Foto-Details unter dem Datum: Kamera, Objektiv, ISO, Blende, Verschlusszeit, Brennweite, Auflösung, Dateigröße — alles, was Immich an EXIF-Daten für das Foto hat
 - Optionaler "An diesem Tag"-Streifen mit Fotos aus vergangenen Jahren
 - Bestimmtes Album als Quelle wählbar
 - Optionaler Auto-Wechsel alle 30 Sekunden bis 15 Minuten
@@ -373,7 +403,7 @@ Already generated by `webstore-assets/make_assets.py`:
 
 ---
 
-## Build the submission zip
+## Build the submission zips
 
 From the repo root:
 
@@ -381,6 +411,12 @@ From the repo root:
 ./build.sh
 ```
 
-That writes `dist/immich-companion-<version>.zip` containing only the runtime files (manifest, JS, CSS, HTML, icon PNGs, LICENSE). Excluded: `.git`, dev files, README/PRIVACY/STORE_LISTING markdown, the `webstore-assets/` folder, Python source, and any `.DS_Store` / `__pycache__` cruft.
+Produces three files in `dist/`:
 
-Upload that zip on the Web Store dashboard.
+- `immich-companion-chrome-<version>.zip` — Chrome / Edge / Brave / Chromium-based browsers.
+- `immich-companion-firefox-<version>.zip` — Firefox AMO. Identical contents; manifest has Chrome-only `minimum_chrome_version` stripped.
+- `immich-companion-<version>.zip` — alias of the Chrome build for the GitHub Action and older paths.
+
+Each zip contains only runtime files (manifest, JS, CSS, HTML, icon PNGs, LICENSE). Excluded: `.git`, dev markdown, the `webstore-assets/` folder, Python source, and any `.DS_Store` / `__pycache__` cruft.
+
+Upload the matching zip to each store.

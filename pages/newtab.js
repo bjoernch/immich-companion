@@ -71,14 +71,17 @@ async function pickAndRender(cfg) {
     bg.style.opacity = "1";
   }, 50);
 
-  const date = asset.exifInfo?.dateTimeOriginal || asset.fileCreatedAt;
-  const place = [asset.exifInfo?.city, asset.exifInfo?.country].filter(Boolean).join(", ");
+  const exif = asset.exifInfo || {};
+  const date = exif.dateTimeOriginal || asset.fileCreatedAt;
+  const place = [exif.city, exif.country].filter(Boolean).join(", ");
   const meta = $("meta");
   meta.innerHTML = "";
+
   const dateEl = document.createElement("div");
   dateEl.textContent = fmtDate(new Date());
   dateEl.style.fontWeight = "500";
   meta.appendChild(dateEl);
+
   if (date || place) {
     const sub = document.createElement("div");
     const parts = [];
@@ -88,12 +91,58 @@ async function pickAndRender(cfg) {
     sub.style.opacity = "0.85";
     meta.appendChild(sub);
   }
+
+  if (cfg.newtabShowMetadata !== false) {
+    const lines = buildExifLines(exif);
+    for (const line of lines) {
+      const el = document.createElement("div");
+      el.className = "meta-detail";
+      el.textContent = line;
+      meta.appendChild(el);
+    }
+  }
+
   const link = document.createElement("a");
   link.href = viewUrl(cfg.serverUrl, asset.id);
   link.textContent = "Open in Immich →";
   link.target = "_blank";
   link.rel = "noopener";
   meta.appendChild(link);
+}
+
+function buildExifLines(exif) {
+  const lines = [];
+  // Camera + lens
+  const cam = [exif.make, exif.model].filter(Boolean).join(" ").trim();
+  if (cam) lines.push(cam);
+  if (exif.lensModel && exif.lensModel !== cam) lines.push(exif.lensModel);
+
+  // Exposure
+  const settings = [];
+  if (exif.iso) settings.push(`ISO ${exif.iso}`);
+  if (exif.fNumber) settings.push(`f/${exif.fNumber}`);
+  if (exif.exposureTime) settings.push(`${exif.exposureTime}s`);
+  if (exif.focalLength) settings.push(`${Math.round(exif.focalLength)}mm`);
+  if (settings.length) lines.push(settings.join(" · "));
+
+  // Dimensions + file size
+  const dimsParts = [];
+  if (exif.exifImageWidth && exif.exifImageHeight) {
+    dimsParts.push(`${exif.exifImageWidth} × ${exif.exifImageHeight}`);
+  } else if (exif.imageWidth && exif.imageHeight) {
+    dimsParts.push(`${exif.imageWidth} × ${exif.imageHeight}`);
+  }
+  if (exif.fileSizeInByte) dimsParts.push(formatBytes(exif.fileSizeInByte));
+  if (dimsParts.length) lines.push(dimsParts.join(" · "));
+
+  return lines;
+}
+
+function formatBytes(n) {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  if (n < 1024 * 1024 * 1024) return `${(n / 1024 / 1024).toFixed(1)} MB`;
+  return `${(n / 1024 / 1024 / 1024).toFixed(2)} GB`;
 }
 
 async function loadBackground(cfg) {

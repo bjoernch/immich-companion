@@ -43,27 +43,24 @@ document.querySelectorAll(".popup-tab").forEach((btn) => {
 const results = $("results");
 const empty = $("empty");
 const status = $("status");
-const pagination = $("pagination");
+const gallery = $("gallery");
+const timeline = $("timeline");
 let debounce;
 let lastQuery = "";
 let inflight = 0;
 
-// Pagination state
-const PAGE_SIZE = 8;
 let currentResults = [];
-let currentPage = 0;
 let currentCfg = null;
 let currentMode = "recent"; // "recent" | "search"
 
 function setEmptyState(html) {
   empty.innerHTML = html;
   empty.classList.add("show");
-  results.hidden = true;
-  pagination.hidden = true;
+  gallery.hidden = true;
 }
 function setResultsState() {
   empty.classList.remove("show");
-  results.hidden = false;
+  gallery.hidden = false;
 }
 
 async function loadThumb(assetId, size = "preview") {
@@ -120,7 +117,6 @@ async function runSearch(q) {
     const r = await smartSearch(q, 250);
     if (myReq !== inflight) return;
     currentResults = r?.assets?.items || [];
-    currentPage = 0;
     if (!currentResults.length) {
       status.textContent = "";
       setEmptyState(`<div>No matches for <strong>${escapeHtml(q)}</strong>.</div>`);
@@ -153,7 +149,6 @@ async function showRecentLibrary() {
     const r = await metadataSearch({ order: "desc" }, 250);
     if (myReq !== inflight) return;
     currentResults = r?.assets?.items || [];
-    currentPage = 0;
     if (!currentResults.length) {
       status.textContent = "";
       setEmptyState("<div>No items in your library yet.</div>");
@@ -167,24 +162,90 @@ async function showRecentLibrary() {
   }
 }
 
+// Group items by year+month using their best-available date (EXIF
+// dateTimeOriginal first, then fileCreatedAt). Returns an array of
+// { key: 'YYYY-MM', label: 'Month YYYY', year, items: [...] } in
+// reverse chronological order so the newest month shows first.
+function groupByMonth(items) {
+  const groups = new Map();
+  for (const a of items) {
+    const iso = a.exifInfo?.dateTimeOriginal || a.fileCreatedAt || a.fileModifiedAt;
+    const d = iso ? new Date(iso) : new Date();
+    const y = d.getFullYear();
+    const m = d.getMonth();
+    const key = `${y}-${String(m + 1).padStart(2, "0")}`;
+    if (!groups.has(key)) {
+      const label = d.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+      groups.set(key, { key, label, year: y, month: m, items: [] });
+    }
+    groups.get(key).items.push(a);
+  }
+  return Array.from(groups.values()).sort((a, b) => b.key.localeCompare(a.key));
+}
+
 function renderResultsPage() {
   const total = currentResults.length;
-  const pages = Math.ceil(total / PAGE_SIZE);
-  const start = currentPage * PAGE_SIZE;
-  const items = currentResults.slice(start, start + PAGE_SIZE);
-
   const label = currentMode === "recent"
     ? `Most recent · ${total} item${total === 1 ? "" : "s"}`
     : `${total} result${total === 1 ? "" : "s"}`;
-  const pageInfo = pages > 1 ? ` · page ${currentPage + 1} of ${pages}` : "";
-  status.textContent = `${label}${pageInfo}`;
+  status.textContent = label;
 
   setResultsState();
   results.innerHTML = "";
-  for (const a of items) results.appendChild(buildResultCard(a));
+
+  const groups = groupByMonth(currentResults);
+  for (const g of groups) {
+    const section = document.createElement("section");
+    section.className = "tl-group";
+    section.dataset.key = g.key;
+    section.dataset.year = String(g.year);
+
+    const header = document.createElement("header");
+    header.className = "tl-group-header";
+    header.textContent = g.label;
+    section.appendChild(header);
+
+    const grid = document.createElement("div");
+    grid.className = "tl-group-grid";
+    for (const a of g.items) grid.appendChild(buildResultCard(a));
+    section.appendChild(grid);
+
+    results.appendChild(section);
+  }
   results.scrollTop = 0;
 
-  renderPagination(total, pages);
+  renderTimelineScrubber(groups);
+}
+
+function renderTimelineScrubber(groups) {
+  timeline.innerHTML = "";
+  if (groups.length <= 1) {
+    timeline.style.visibility = "hidden";
+    return;
+  }
+  timeline.style.visibility = "";
+  // Show one tick per unique year, label only on year boundaries to keep it
+  // tidy in a thin strip.
+  const seenYears = new Set();
+  for (const g of groups) {
+    const tick = document.createElement("button");
+    tick.type = "button";
+    tick.className = "tl-tick";
+    tick.dataset.key = g.key;
+    if (!seenYears.has(g.year)) {
+      seenYears.add(g.year);
+      tick.classList.add("year");
+      tick.textContent = String(g.year);
+      tick.title = g.label;
+    } else {
+      tick.title = g.label;
+    }
+    tick.addEventListener("click", () => {
+      const target = results.querySelector(`.tl-group[data-key="${g.key}"]`);
+      if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    timeline.appendChild(tick);
+  }
 }
 
 function buildResultCard(asset) {
@@ -354,41 +415,6 @@ async function downloadOriginalAction(asset, _btn) {
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 
-function renderPagination(total, pages) {
-  pagination.innerHTML = "";
-  if (pages <= 1) {
-    pagination.hidden = true;
-    return;
-  }
-  pagination.hidden = false;
-
-  const mkBtn = (label, onClick, opts = {}) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.textContent = label;
-    if (opts.active) b.classList.add("active");
-    if (opts.disabled) b.disabled = true;
-    if (onClick) b.addEventListener("click", onClick);
-    pagination.appendChild(b);
-    return b;
-  };
-
-  mkBtn("‹", () => { if (currentPage > 0) { currentPage--; renderResultsPage(); } },
-        { disabled: currentPage === 0 });
-
-  // Show up to 5 page numbers, sliding window around current page.
-  const window_ = 5;
-  let start = Math.max(0, currentPage - Math.floor(window_ / 2));
-  let end = Math.min(pages, start + window_);
-  start = Math.max(0, end - window_);
-  for (let i = start; i < end; i++) {
-    mkBtn(String(i + 1), () => { currentPage = i; renderResultsPage(); },
-          { active: i === currentPage });
-  }
-
-  mkBtn("›", () => { if (currentPage < pages - 1) { currentPage++; renderResultsPage(); } },
-        { disabled: currentPage >= pages - 1 });
-}
 
 $("q").addEventListener("input", (e) => {
   const q = e.target.value.trim();
@@ -430,6 +456,9 @@ function openOptions(e) {
   chrome.runtime.openOptionsPage();
 }
 $("settings").addEventListener("click", openOptions);
+$("github").addEventListener("click", () => {
+  chrome.tabs.create({ url: "https://github.com/bjoernch/immich-companion" });
+});
 
 // ---- Recent uploads --------------------------------------------------------
 
@@ -450,6 +479,7 @@ async function loadRecents() {
 
   if (!list.length) {
     emp.classList.add("show");
+    ul.innerHTML = "";   // also empty the DOM, not just hide it
     ul.hidden = true;
     clear.hidden = true;
     return;

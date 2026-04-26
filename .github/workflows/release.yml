@@ -30,6 +30,8 @@ jobs:
           VERSION=$(python3 -c "import json; print(json.load(open('manifest.json'))['version'])")
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "zip=immich-companion-${VERSION}.zip" >> "$GITHUB_OUTPUT"
+          echo "chrome_zip=immich-companion-chrome-${VERSION}.zip" >> "$GITHUB_OUTPUT"
+          echo "firefox_zip=immich-companion-firefox-${VERSION}.zip" >> "$GITHUB_OUTPUT"
 
       - name: Verify tag matches manifest version
         if: startsWith(github.ref, 'refs/tags/v')
@@ -45,18 +47,27 @@ jobs:
           chmod +x build.sh
           ./build.sh
 
-      - name: Upload artifact
+      - name: Upload Chrome artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.meta.outputs.zip }}
-          path: dist/${{ steps.meta.outputs.zip }}
+          name: ${{ steps.meta.outputs.chrome_zip }}
+          path: dist/${{ steps.meta.outputs.chrome_zip }}
+          if-no-files-found: error
+
+      - name: Upload Firefox artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.meta.outputs.firefox_zip }}
+          path: dist/${{ steps.meta.outputs.firefox_zip }}
           if-no-files-found: error
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/${{ steps.meta.outputs.zip }}
+          files: |
+            dist/${{ steps.meta.outputs.chrome_zip }}
+            dist/${{ steps.meta.outputs.firefox_zip }}
           generate_release_notes: true
 
       # ----------------------------------------------------------------
