@@ -31,18 +31,21 @@
     if (!entry) {
       const el = document.createElement("div");
       el.className = `immich-companion-toast ${kind}`;
-      el.innerHTML = `
-        <div class="icon"></div>
-        <div class="body">
-          <div class="title"></div>
-          <div class="msg"></div>
-          <div class="actions"></div>
-        </div>
-        <button class="close" type="button" aria-label="Dismiss">×</button>
-      `;
+      const icon = document.createElement("div"); icon.className = "icon";
+      const body = document.createElement("div"); body.className = "body";
+      const titleEl = document.createElement("div"); titleEl.className = "title";
+      const msgEl = document.createElement("div"); msgEl.className = "msg";
+      const actionsEl = document.createElement("div"); actionsEl.className = "actions";
+      body.append(titleEl, msgEl, actionsEl);
+      const close = document.createElement("button");
+      close.type = "button";
+      close.className = "close";
+      close.setAttribute("aria-label", "Dismiss");
+      close.textContent = "×";
+      el.append(icon, body, close);
       host.appendChild(el);
       requestAnimationFrame(() => el.classList.add("show"));
-      el.querySelector(".close").addEventListener("click", () => dismiss(id));
+      close.addEventListener("click", () => dismiss(id));
       entry = { el };
       toasts.set(id, entry);
     }
@@ -55,7 +58,7 @@
     el.querySelector(".msg").textContent = message || "";
 
     const actions = el.querySelector(".actions");
-    actions.innerHTML = "";
+    actions.replaceChildren();
     if (link?.url) {
       const open = document.createElement("a");
       open.className = "tact";

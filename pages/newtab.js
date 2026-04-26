@@ -37,7 +37,7 @@ async function loadThumbViaBg(assetId, size = "preview") {
 
 function showToast(msg, link) {
   const t = $("toast");
-  t.innerHTML = "";
+  t.replaceChildren();
   t.appendChild(document.createTextNode(msg));
   if (link) {
     const a = document.createElement("a");
@@ -91,7 +91,7 @@ async function pickAndRender(cfg) {
   const date = exif.dateTimeOriginal || asset.fileCreatedAt;
   const place = [exif.city, exif.country].filter(Boolean).join(", ");
   const meta = $("meta");
-  meta.innerHTML = "";
+  meta.replaceChildren();
 
   const dateEl = document.createElement("div");
   dateEl.textContent = fmtDate(new Date());
@@ -191,7 +191,7 @@ async function loadOnThisDayStrip(cfg) {
     const groups = await onThisDay(new Date(), cfg.newtabAlbumId || "");
     if (!groups.length) return;
     const strip = $("otd-strip");
-    strip.innerHTML = "";
+    strip.replaceChildren();
     let count = 0;
     for (const g of groups) {
       const yearsAgo = new Date().getFullYear() - g.year;
@@ -265,7 +265,7 @@ function diagRow(parent, label, status, detail) {
 async function showSetupOverlay(reason) {
   $("setup").hidden = false;
   const diag = $("diag");
-  diag.innerHTML = "";
+  diag.replaceChildren();
 
   // Always show a build marker so the user can confirm they're on the latest code.
   const marker = document.createElement("div");

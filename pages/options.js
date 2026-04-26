@@ -89,7 +89,7 @@ async function populateAlbums(selectId, selectedId = "", placeholder = "— none
   const sel = $(selectId);
   if (!sel) return;
   const prev = sel.value;
-  sel.innerHTML = "";
+  sel.replaceChildren();
   const opt0 = document.createElement("option");
   opt0.value = "";
   opt0.textContent = placeholder;
