@@ -45,21 +45,26 @@ const empty = $("empty");
 const status = $("status");
 const gallery = $("gallery");
 const timeline = $("timeline");
+const pagination = $("pagination");
 let debounce;
 let lastQuery = "";
 let inflight = 0;
+
+const PAGE_SIZE = 50;
 
 let currentResults = [];
 let currentCfg = null;
 let currentMode = "recent"; // "recent" | "search"
 let currentQuery = "";
+let currentApiPage = 1;
 let nextPage = null;        // string from Immich API ("2", "3"...) or null
-let loadingMore = false;
+let loadingPage = false;
 
 function setEmptyState(html) {
   empty.innerHTML = html;
   empty.classList.add("show");
   gallery.hidden = true;
+  pagination.hidden = true;
 }
 function setResultsState() {
   empty.classList.remove("show");
@@ -101,44 +106,24 @@ function escapeHtml(s) {
 }
 
 async function runSearch(q) {
-  const myReq = ++inflight;
   currentMode = "search";
   currentQuery = q;
-  nextPage = null;
-  status.textContent = "Searching…";
-  renderSkeletons();
-  try {
-    const cfg = await getConfig();
-    if (!isConfigured(cfg)) {
-      setEmptyState('<div>Server not configured.</div><a href="#" id="goSettings">Open settings</a>');
-      $("goSettings").addEventListener("click", openOptions);
-      status.textContent = "";
-      return;
-    }
-    currentCfg = cfg;
-    const r = await smartSearch(q, 250, 1);
-    if (myReq !== inflight) return;
-    currentResults = r?.assets?.items || [];
-    nextPage = r?.assets?.nextPage || null;
-    if (!currentResults.length) {
-      status.textContent = "";
-      setEmptyState(`<div>No matches for <strong>${escapeHtml(q)}</strong>.</div>`);
-      return;
-    }
-    renderResultsPage();
-  } catch (e) {
-    if (myReq !== inflight) return;
-    status.textContent = "";
-    setEmptyState(`<div style="color: var(--danger)">${escapeHtml(e.message)}</div>`);
-  }
+  await loadPage(1);
 }
 
 async function showRecentLibrary() {
-  const myReq = ++inflight;
   currentMode = "recent";
   currentQuery = "";
-  nextPage = null;
-  status.textContent = "Loading recent…";
+  await loadPage(1);
+}
+
+// Single source of truth for fetching one page from the server. Used by
+// both the search and recent flows, plus the numbered pagination buttons.
+async function loadPage(page) {
+  if (page < 1 || loadingPage) return;
+  loadingPage = true;
+  const myReq = ++inflight;
+  status.textContent = page === 1 ? "Loading…" : `Loading page ${page}…`;
   renderSkeletons();
   try {
     const cfg = await getConfig();
@@ -149,66 +134,36 @@ async function showRecentLibrary() {
       return;
     }
     currentCfg = cfg;
-    const r = await metadataSearch({ order: "desc", page: 1 }, 250);
+    let r;
+    if (currentMode === "search") {
+      r = await smartSearch(currentQuery, PAGE_SIZE, page);
+    } else {
+      r = await metadataSearch({ order: "desc", page }, PAGE_SIZE);
+    }
     if (myReq !== inflight) return;
     currentResults = r?.assets?.items || [];
     nextPage = r?.assets?.nextPage || null;
+    currentApiPage = page;
     if (!currentResults.length) {
-      status.textContent = "";
-      setEmptyState("<div>No items in your library yet.</div>");
+      // Out of bounds — drop back to the previous page if we paged off the end.
+      if (page > 1) {
+        loadingPage = false;
+        return loadPage(page - 1);
+      }
+      setEmptyState(currentMode === "search"
+        ? `<div>No matches for <strong>${escapeHtml(currentQuery)}</strong>.</div>`
+        : "<div>No items in your library yet.</div>");
       return;
     }
     renderResultsPage();
+    results.scrollTop = 0;
   } catch (e) {
     if (myReq !== inflight) return;
-    status.textContent = "";
     setEmptyState(`<div style="color: var(--danger)">${escapeHtml(e.message)}</div>`);
-  }
-}
-
-// Triggered when the user scrolls near the bottom of the gallery. Fetches
-// the next page from Immich and appends to the existing results.
-async function loadMoreItems() {
-  if (loadingMore || !nextPage) return;
-  loadingMore = true;
-  const prevStatus = status.textContent;
-  status.textContent = `${prevStatus} · loading more…`;
-  try {
-    const page = parseInt(nextPage, 10);
-    if (!page) return;
-    let r;
-    if (currentMode === "search") {
-      r = await smartSearch(currentQuery, 250, page);
-    } else {
-      r = await metadataSearch({ order: "desc", page }, 250);
-    }
-    const newItems = r?.assets?.items || [];
-    nextPage = r?.assets?.nextPage || null;
-    if (newItems.length) {
-      // Dedup defensively in case the server replays an asset id.
-      const seen = new Set(currentResults.map((a) => a.id));
-      const additions = newItems.filter((a) => !seen.has(a.id));
-      if (additions.length) {
-        const oldScroll = results.scrollTop;
-        currentResults = currentResults.concat(additions);
-        renderResultsPage();
-        results.scrollTop = oldScroll;
-      }
-    }
-  } catch (e) {
-    console.warn("[immich-companion] loadMore failed:", e);
   } finally {
-    loadingMore = false;
+    loadingPage = false;
   }
 }
-
-// Attach scroll listener once. Loads more when within 300 px of the bottom.
-results.addEventListener("scroll", () => {
-  if (!nextPage || loadingMore) return;
-  if (results.scrollTop + results.clientHeight >= results.scrollHeight - 300) {
-    loadMoreItems();
-  }
-});
 
 // Group items by year+month using their best-available date (EXIF
 // dateTimeOriginal first, then fileCreatedAt). Returns an array of
@@ -244,13 +199,10 @@ function groupByMonth(items) {
 
 function renderResultsPage() {
   const total = currentResults.length;
-  // We request size=250 from Immich. If we got exactly that many back the
-  // server probably has more — say so explicitly so the count isn't
-  // mistaken for the total library size.
-  const capped = total >= 250 ? "+" : "";
+  const lastSuffix = nextPage ? "" : " (last)";
   const label = currentMode === "recent"
-    ? `Most recent · showing ${total}${capped}`
-    : `${total}${capped} match${total === 1 ? "" : "es"}`;
+    ? `Most recent · page ${currentApiPage}${lastSuffix}`
+    : `${total} match${total === 1 ? "" : "es"} on page ${currentApiPage}${lastSuffix}`;
   status.textContent = label;
 
   setResultsState();
@@ -278,6 +230,44 @@ function renderResultsPage() {
   results.scrollTop = 0;
 
   renderTimelineScrubber(groups);
+  renderPagination();
+}
+
+function renderPagination() {
+  pagination.innerHTML = "";
+  // Hide if there's only ever been one page (page 1 with no nextPage)
+  if (currentApiPage === 1 && !nextPage) {
+    pagination.hidden = true;
+    return;
+  }
+  pagination.hidden = false;
+
+  const mkBtn = (label, onClick, opts = {}) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = label;
+    if (opts.active) b.classList.add("active");
+    if (opts.disabled) b.disabled = true;
+    if (onClick && !opts.disabled) b.addEventListener("click", onClick);
+    pagination.appendChild(b);
+    return b;
+  };
+
+  mkBtn("‹", () => loadPage(currentApiPage - 1), { disabled: currentApiPage === 1 });
+
+  // Sliding window: show 2 pages before and 2 after current. Don't show
+  // pages past the last known one (no nextPage means we're already there).
+  const start = Math.max(1, currentApiPage - 2);
+  const end = nextPage ? currentApiPage + 2 : currentApiPage;
+  for (let i = start; i <= end; i++) {
+    if (i === currentApiPage) {
+      mkBtn(String(i), null, { active: true, disabled: true });
+    } else {
+      mkBtn(String(i), () => loadPage(i));
+    }
+  }
+
+  mkBtn("›", () => loadPage(currentApiPage + 1), { disabled: !nextPage });
 }
 
 function renderTimelineScrubber(groups) {
