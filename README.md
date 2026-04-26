@@ -4,7 +4,7 @@
 
 <p align="center">
   <strong>A browser companion for your self-hosted <a href="https://immich.app">Immich</a> server.</strong><br/>
-  <em>Coming soon to the Chrome Web Store.</em>
+  <em>Coming soon to the Chrome Web Store and Firefox AddOn Store.</em>
 </p>
 
 ---
