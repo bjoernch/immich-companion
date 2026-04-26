@@ -106,6 +106,30 @@ button.danger:hover {
 }
 .about-links a:hover { text-decoration: underline; }
 
+.github-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  background: var(--text);
+  color: var(--bg);
+  font-weight: 500;
+  font-size: 14px;
+  text-decoration: none;
+  border: 1px solid var(--text);
+  transition: filter 120ms, transform 80ms;
+}
+.github-btn:hover { filter: brightness(1.1); }
+.github-btn:active { transform: scale(0.98); }
+.github-btn svg { flex: 0 0 auto; }
+.link-text {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 13px;
+}
+.link-text:hover { color: var(--accent); text-decoration: underline; }
+
 input[type="text"],
 input[type="url"],
 input[type="password"],
@@ -550,7 +574,8 @@ kbd {
 }
 .popup-panel > .search-row,
 .popup-panel > .recent-footer,
-.popup-panel > #dropZone {
+.popup-panel > #dropZone,
+.popup-panel > .pagination {
   flex: 0 0 auto;
 }
 .popup-panel > #empty,
@@ -920,6 +945,46 @@ kbd {
 .popup .tl-tick:hover {
   color: var(--accent);
   background: var(--panel-2);
+}
+
+/* Numbered pagination row at the bottom of the gallery panel */
+.popup .pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.popup .pagination[hidden] { display: none !important; }
+.popup .pagination button {
+  all: unset;
+  cursor: pointer;
+  min-width: 28px;
+  padding: 5px 9px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  text-align: center;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  transition: background 120ms, border-color 120ms;
+  box-sizing: border-box;
+}
+.popup .pagination button:hover:not(:disabled):not(.active) {
+  border-color: var(--accent);
+  background: var(--panel-3);
+}
+.popup .pagination button.active {
+  background: linear-gradient(180deg, var(--accent), var(--accent-strong));
+  border-color: var(--accent-strong);
+  color: white;
+  font-weight: 500;
+  cursor: default;
+}
+.popup .pagination button:disabled:not(.active) {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .popup .skeleton {
