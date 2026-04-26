@@ -14,7 +14,10 @@ import {
 
 // Inline SVG icons used in the result quick-actions overlay.
 const ICON = {
-  copy: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+  // image (copy the picture itself to clipboard)
+  image: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>',
+  // share (create + copy public link)
+  share: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>',
   download: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
   check: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
   x: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
@@ -176,8 +179,10 @@ function buildResultCard(asset) {
   // Hover quick actions
   const actions = document.createElement("div");
   actions.className = "actions-overlay";
-  actions.appendChild(makeActionButton("Copy share link", ICON.copy,
-    (btn) => copyShareLinkAction(asset, btn)));
+  actions.appendChild(makeActionButton("Copy image to clipboard", ICON.image,
+    (btn) => copyImageAction(asset, btn)));
+  actions.appendChild(makeActionButton("Share link (copy)", ICON.share,
+    (btn) => shareLinkAction(asset, btn)));
   actions.appendChild(makeActionButton("Download original", ICON.download,
     (btn) => downloadOriginalAction(asset, btn)));
   link.appendChild(actions);
@@ -226,10 +231,58 @@ function makeActionButton(title, iconSvg, handler) {
   return btn;
 }
 
-async function copyShareLinkAction(asset, _btn) {
+async function shareLinkAction(asset, _btn) {
   const link = await createShareLink([asset.id]);
   const url = shareUrl(currentCfg.serverUrl, link.key);
   await navigator.clipboard.writeText(url);
+}
+
+async function copyImageAction(asset, _btn) {
+  // Fetch a high-quality preview thumbnail (medium-large JPEG) — full
+  // originals can be 10s of MB which is too heavy for clipboard.
+  const res = await fetch(
+    `${currentCfg.serverUrl}/api/assets/${asset.id}/thumbnail?size=preview`,
+    { headers: { "x-api-key": currentCfg.apiKey } },
+  );
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  let blob = await res.blob();
+
+  // Most browsers only accept image/png in the clipboard. Try the native
+  // MIME first; if that fails, transcode to PNG via canvas.
+  try {
+    await navigator.clipboard.write([
+      new ClipboardItem({ [blob.type || "image/png"]: blob }),
+    ]);
+  } catch {
+    blob = await blobToPng(blob);
+    await navigator.clipboard.write([
+      new ClipboardItem({ "image/png": blob }),
+    ]);
+  }
+}
+
+async function blobToPng(blob) {
+  const url = URL.createObjectURL(blob);
+  try {
+    const img = new Image();
+    await new Promise((resolve, reject) => {
+      img.onload = resolve;
+      img.onerror = () => reject(new Error("Failed to decode image"));
+      img.src = url;
+    });
+    const canvas = document.createElement("canvas");
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    canvas.getContext("2d").drawImage(img, 0, 0);
+    return await new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (b) => (b ? resolve(b) : reject(new Error("PNG encode failed"))),
+        "image/png",
+      );
+    });
+  } finally {
+    URL.revokeObjectURL(url);
+  }
 }
 
 async function downloadOriginalAction(asset, _btn) {
