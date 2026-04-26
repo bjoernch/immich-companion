@@ -153,6 +153,15 @@
               <small class="muted">Photos taken on this date in past years, shown along the bottom.</small>
             </span>
           </label>
+
+          <label class="toggle">
+            <input id="newtabShowMetadata" type="checkbox" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">
+              <strong>Show photo details</strong>
+              <small class="muted">Under the date in the corner: camera, lens, ISO, aperture, shutter, focal length, dimensions, file size — whatever EXIF data Immich has for the current photo.</small>
+            </span>
+          </label>
         </section>
 
         <!-- Search & Share -->
@@ -243,6 +252,23 @@
             <li><strong>New tab</strong> — random photo + "On this day".</li>
             <li><strong>Share toolbar</strong> — Slideshow + Download-all on share pages.</li>
           </ul>
+          <p class="about-links">
+            <a href="https://github.com/bjoernch/immich-companion" target="_blank" rel="noopener">View source on GitHub →</a>
+            ·
+            <a href="https://github.com/bjoernch/immich-companion/blob/main/PRIVACY.md" target="_blank" rel="noopener">Privacy policy</a>
+          </p>
+
+          <hr />
+
+          <h2>Reset</h2>
+          <p class="muted">
+            Wipe every saved setting (server URL, API key, recent uploads, feature toggles)
+            and start over from the welcome page. Your Immich server is not touched.
+          </p>
+          <div class="row">
+            <button id="resetAll" class="danger" type="button">Reset all data and reopen onboarding</button>
+            <span id="resetStatus" class="status"></span>
+          </div>
         </section>
 
         <footer class="content-footer">

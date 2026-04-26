@@ -6,6 +6,7 @@ const TOGGLE_KEYS = [
   "featureNewtab",
   "newtabBackground",
   "newtabOnThisDay",
+  "newtabShowMetadata",
   "featureContextMenus",
   "featureShareToolbar",
   "featureNotifications",
@@ -189,6 +190,28 @@ $("refreshAlbums2").addEventListener("click", async () => {
     if (k === "theme") applyTheme(el.value);
     await saveAll(false);
   });
+});
+
+// Reset all data
+$("resetAll").addEventListener("click", async () => {
+  const ok = confirm(
+    "Wipe every saved setting and reopen the welcome page?\n\n" +
+    "This clears the stored server URL, API key, feature toggles, theme, " +
+    "default album, and recent uploads from chrome.storage.local on this " +
+    "device. Your Immich server is not touched. The API key remains valid " +
+    "until you revoke it in Immich → Account Settings → API Keys."
+  );
+  if (!ok) return;
+  setStatus("resetStatus", "Resetting…");
+  try {
+    await chrome.storage.local.clear();
+    try { await chrome.storage.sync.clear(); } catch {}
+    chrome.runtime.sendMessage({ type: "config-updated" }).catch(() => {});
+    chrome.tabs.create({ url: chrome.runtime.getURL("pages/welcome.html") });
+    window.close();
+  } catch (e) {
+    setStatus("resetStatus", e.message, "err");
+  }
 });
 
 load();
