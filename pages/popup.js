@@ -52,6 +52,9 @@ let inflight = 0;
 let currentResults = [];
 let currentCfg = null;
 let currentMode = "recent"; // "recent" | "search"
+let currentQuery = "";
+let nextPage = null;        // string from Immich API ("2", "3"...) or null
+let loadingMore = false;
 
 function setEmptyState(html) {
   empty.innerHTML = html;
@@ -100,6 +103,8 @@ function escapeHtml(s) {
 async function runSearch(q) {
   const myReq = ++inflight;
   currentMode = "search";
+  currentQuery = q;
+  nextPage = null;
   status.textContent = "Searching…";
   renderSkeletons();
   try {
@@ -111,12 +116,10 @@ async function runSearch(q) {
       return;
     }
     currentCfg = cfg;
-    // Match what the Immich web app shows for a smart-search result page.
-    // Immich validates size up to 1000; 250 is a comfortable upper bound for
-    // browsing in a popup without making the JSON payload heavy.
-    const r = await smartSearch(q, 250);
+    const r = await smartSearch(q, 250, 1);
     if (myReq !== inflight) return;
     currentResults = r?.assets?.items || [];
+    nextPage = r?.assets?.nextPage || null;
     if (!currentResults.length) {
       status.textContent = "";
       setEmptyState(`<div>No matches for <strong>${escapeHtml(q)}</strong>.</div>`);
@@ -133,6 +136,8 @@ async function runSearch(q) {
 async function showRecentLibrary() {
   const myReq = ++inflight;
   currentMode = "recent";
+  currentQuery = "";
+  nextPage = null;
   status.textContent = "Loading recent…";
   renderSkeletons();
   try {
@@ -144,11 +149,10 @@ async function showRecentLibrary() {
       return;
     }
     currentCfg = cfg;
-    // Empty metadata search defaults to ordering by date desc, so we get the
-    // newest items first. Same pagination + quick actions as search results.
-    const r = await metadataSearch({ order: "desc" }, 250);
+    const r = await metadataSearch({ order: "desc", page: 1 }, 250);
     if (myReq !== inflight) return;
     currentResults = r?.assets?.items || [];
+    nextPage = r?.assets?.nextPage || null;
     if (!currentResults.length) {
       status.textContent = "";
       setEmptyState("<div>No items in your library yet.</div>");
@@ -161,6 +165,50 @@ async function showRecentLibrary() {
     setEmptyState(`<div style="color: var(--danger)">${escapeHtml(e.message)}</div>`);
   }
 }
+
+// Triggered when the user scrolls near the bottom of the gallery. Fetches
+// the next page from Immich and appends to the existing results.
+async function loadMoreItems() {
+  if (loadingMore || !nextPage) return;
+  loadingMore = true;
+  const prevStatus = status.textContent;
+  status.textContent = `${prevStatus} · loading more…`;
+  try {
+    const page = parseInt(nextPage, 10);
+    if (!page) return;
+    let r;
+    if (currentMode === "search") {
+      r = await smartSearch(currentQuery, 250, page);
+    } else {
+      r = await metadataSearch({ order: "desc", page }, 250);
+    }
+    const newItems = r?.assets?.items || [];
+    nextPage = r?.assets?.nextPage || null;
+    if (newItems.length) {
+      // Dedup defensively in case the server replays an asset id.
+      const seen = new Set(currentResults.map((a) => a.id));
+      const additions = newItems.filter((a) => !seen.has(a.id));
+      if (additions.length) {
+        const oldScroll = results.scrollTop;
+        currentResults = currentResults.concat(additions);
+        renderResultsPage();
+        results.scrollTop = oldScroll;
+      }
+    }
+  } catch (e) {
+    console.warn("[immich-companion] loadMore failed:", e);
+  } finally {
+    loadingMore = false;
+  }
+}
+
+// Attach scroll listener once. Loads more when within 300 px of the bottom.
+results.addEventListener("scroll", () => {
+  if (!nextPage || loadingMore) return;
+  if (results.scrollTop + results.clientHeight >= results.scrollHeight - 300) {
+    loadMoreItems();
+  }
+});
 
 // Group items by year+month using their best-available date (EXIF
 // dateTimeOriginal first, then fileCreatedAt). Returns an array of

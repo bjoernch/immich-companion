@@ -296,7 +296,7 @@ hr {
 .content-footer {
   position: sticky;
   bottom: 0;
-  background: linear-gradient(180deg, transparent, rgba(11, 13, 18, 0.95) 30%);
+  background: linear-gradient(180deg, transparent, var(--bg) 30%);
   padding: 24px 0 0;
   margin-top: 36px;
   display: flex;

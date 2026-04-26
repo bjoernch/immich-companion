@@ -63,6 +63,22 @@ async function pickAndRender(cfg) {
     }
     return;
   }
+
+  // /search/random is lightweight — Immich often returns a thin asset
+  // record without exifInfo. Fetch the full asset detail so the photo
+  // metadata block in the corner has something to show.
+  if (cfg.newtabShowMetadata !== false) {
+    const exif = asset.exifInfo;
+    const sparse = !exif || Object.keys(exif).length === 0 ||
+      (!exif.make && !exif.model && !exif.iso && !exif.fNumber);
+    if (sparse) {
+      try {
+        const detail = await fetchAssetDetail(cfg, asset.id);
+        if (detail) Object.assign(asset, detail);
+      } catch {}
+    }
+  }
+
   const url = await loadThumbViaBg(asset.id, "preview");
   const bg = $("bg");
   bg.style.opacity = "0";
@@ -108,6 +124,14 @@ async function pickAndRender(cfg) {
   link.target = "_blank";
   link.rel = "noopener";
   meta.appendChild(link);
+}
+
+async function fetchAssetDetail(cfg, assetId) {
+  const res = await fetch(`${cfg.serverUrl}/api/assets/${assetId}`, {
+    headers: { "x-api-key": cfg.apiKey },
+  });
+  if (!res.ok) return null;
+  return res.json();
 }
 
 function buildExifLines(exif) {
