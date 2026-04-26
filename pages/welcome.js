@@ -1,4 +1,7 @@
 import { ping, setConfig, getConfig } from "../lib/immich.js";
+import { applyBrowserPlaceholders } from "../lib/browser-name.js";
+
+applyBrowserPlaceholders();
 
 const $ = (id) => document.getElementById(id);
 

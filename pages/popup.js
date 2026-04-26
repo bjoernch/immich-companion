@@ -60,6 +60,16 @@ let currentApiPage = 1;
 let nextPage = null;        // string from Immich API ("2", "3"...) or null
 let loadingPage = false;
 
+// In-memory cache of fetched pages. Key = `${mode}:${query}:${page}`.
+// Cleared when mode or query changes. Going back to a previously visited
+// page is instant; going forward to a prefetched page is also instant.
+const pageCache = new Map();
+function pageKey(p) { return `${currentMode}:${currentQuery}:${p}`; }
+
+// Cache of thumbnail object URLs by `${assetId}:${size}`. Lets us re-render
+// without re-fetching the same image bytes when paging back and forth.
+const thumbCache = new Map();
+
 function setEmptyState(html) {
   empty.innerHTML = html;
   empty.classList.add("show");
@@ -71,15 +81,24 @@ function setResultsState() {
   gallery.hidden = false;
 }
 
-async function loadThumb(assetId, size = "preview") {
-  return new Promise((resolve, reject) => {
+async function loadThumb(assetId, size = "thumbnail") {
+  const cacheKey = `${assetId}:${size}`;
+  const hit = thumbCache.get(cacheKey);
+  if (hit) return hit;
+  const promise = new Promise((resolve, reject) => {
     chrome.runtime.sendMessage({ type: "thumb", assetId, size }, (res) => {
       if (chrome.runtime.lastError) return reject(new Error(chrome.runtime.lastError.message));
       if (!res?.ok) return reject(new Error(res?.error || `status ${res?.status}`));
       const blob = new Blob([new Uint8Array(res.data)], { type: res.contentType || "image/jpeg" });
       resolve(URL.createObjectURL(blob));
     });
+  }).catch((e) => {
+    // On failure, drop the broken promise from cache so the next try refetches.
+    thumbCache.delete(cacheKey);
+    throw e;
   });
+  thumbCache.set(cacheKey, promise);
+  return promise;
 }
 
 function renderSkeletons(n = 8) {
@@ -106,23 +125,49 @@ function escapeHtml(s) {
 }
 
 async function runSearch(q) {
+  if (currentMode !== "search" || currentQuery !== q) {
+    pageCache.clear();
+  }
   currentMode = "search";
   currentQuery = q;
   await loadPage(1);
 }
 
 async function showRecentLibrary() {
+  if (currentMode !== "recent") {
+    pageCache.clear();
+  }
   currentMode = "recent";
   currentQuery = "";
   await loadPage(1);
 }
 
-// Single source of truth for fetching one page from the server. Used by
-// both the search and recent flows, plus the numbered pagination buttons.
+// Fetch (or read from cache) one page and render. Used by both the search
+// and recent flows, plus the numbered pagination buttons. Subsequent
+// navigation to an already-visited page is instant because pages stay in
+// pageCache for the lifetime of the popup.
 async function loadPage(page) {
   if (page < 1 || loadingPage) return;
-  loadingPage = true;
   const myReq = ++inflight;
+
+  // 1) Cache hit → render immediately, no spinner.
+  const cached = pageCache.get(pageKey(page));
+  if (cached) {
+    if (!currentCfg) {
+      try { currentCfg = await getConfig(); } catch {}
+    }
+    currentResults = cached.items;
+    nextPage = cached.nextPage;
+    currentApiPage = page;
+    renderResultsPage();
+    results.scrollTop = 0;
+    // Still prefetch the page after this one in the background.
+    if (nextPage) prefetchPage(parseInt(nextPage, 10));
+    return;
+  }
+
+  // 2) Cache miss → fetch from server.
+  loadingPage = true;
   status.textContent = page === 1 ? "Loading…" : `Loading page ${page}…`;
   renderSkeletons();
   try {
@@ -141,11 +186,13 @@ async function loadPage(page) {
       r = await metadataSearch({ order: "desc", page }, PAGE_SIZE);
     }
     if (myReq !== inflight) return;
-    currentResults = r?.assets?.items || [];
-    nextPage = r?.assets?.nextPage || null;
+    const items = r?.assets?.items || [];
+    const np = r?.assets?.nextPage || null;
+    pageCache.set(pageKey(page), { items, nextPage: np });
+    currentResults = items;
+    nextPage = np;
     currentApiPage = page;
     if (!currentResults.length) {
-      // Out of bounds — drop back to the previous page if we paged off the end.
       if (page > 1) {
         loadingPage = false;
         return loadPage(page - 1);
@@ -157,12 +204,37 @@ async function loadPage(page) {
     }
     renderResultsPage();
     results.scrollTop = 0;
+    if (nextPage) prefetchPage(parseInt(nextPage, 10));
   } catch (e) {
     if (myReq !== inflight) return;
     setEmptyState(`<div style="color: var(--danger)">${escapeHtml(e.message)}</div>`);
   } finally {
     loadingPage = false;
   }
+}
+
+// Silently fetches and caches a future page so a "next" click is instant.
+// Skips if already cached, already loading, or the user has navigated
+// somewhere else by the time it runs.
+async function prefetchPage(page) {
+  if (!page || pageCache.has(pageKey(page))) return;
+  const snapMode = currentMode;
+  const snapQuery = currentQuery;
+  try {
+    let r;
+    if (snapMode === "search") {
+      r = await smartSearch(snapQuery, PAGE_SIZE, page);
+    } else {
+      r = await metadataSearch({ order: "desc", page }, PAGE_SIZE);
+    }
+    // If the user changed mode or query while we were fetching, drop the
+    // result rather than poisoning the new cache key.
+    if (snapMode !== currentMode || snapQuery !== currentQuery) return;
+    pageCache.set(`${snapMode}:${snapQuery}:${page}`, {
+      items: r?.assets?.items || [],
+      nextPage: r?.assets?.nextPage || null,
+    });
+  } catch {}
 }
 
 // Group items by year+month using their best-available date (EXIF
@@ -344,7 +416,7 @@ function buildResultCard(asset) {
     (btn) => downloadOriginalAction(asset, btn)));
   link.appendChild(actions);
 
-  loadThumb(asset.id, "preview").then((u) => (img.src = u)).catch(() => {
+  loadThumb(asset.id, "thumbnail").then((u) => (img.src = u)).catch(() => {
     link.classList.add("loaded", "failed");
   });
 
