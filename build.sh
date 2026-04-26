@@ -47,8 +47,12 @@ python3 - "$FIREFOX_STAGE/manifest.json" <<'PY'
 import json, sys, pathlib
 src = json.load(open("manifest.json"))
 src.pop("minimum_chrome_version", None)
-# AMO doesn't allow "key" or anything that's chrome-specific. Our manifest
-# is otherwise portable.
+# Firefox MV3 disallows background.service_worker; rewrite to the Firefox-
+# supported background.scripts form. type: "module" keeps the import
+# statements in background.js working.
+sw = src.get("background", {}).get("service_worker")
+if sw:
+    src["background"] = {"scripts": [sw], "type": "module"}
 pathlib.Path(sys.argv[1]).write_text(json.dumps(src, indent=2) + "\n")
 PY
 rm -f "$FIREFOX_ZIP"
