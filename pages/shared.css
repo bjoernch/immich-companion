@@ -743,22 +743,6 @@ kbd {
   opacity: 0.7;
 }
 
-/* Masonry — uses CSS columns so portraits and landscapes both look natural */
-.popup .results {
-  margin-top: 12px;
-  column-count: 2;
-  column-gap: 6px;
-  overflow-x: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: var(--panel-3) transparent;
-}
-.popup .results::-webkit-scrollbar { width: 6px; }
-.popup .results::-webkit-scrollbar-track { background: transparent; }
-.popup .results::-webkit-scrollbar-thumb {
-  background: var(--panel-3);
-  border-radius: 3px;
-}
-
 .popup .results a {
   display: block;
   margin: 0;
