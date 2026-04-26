@@ -257,7 +257,7 @@ chrome.omnibox.onInputEntered.addListener(async (text, disposition) => {
   if (text.startsWith("asset:")) {
     target = viewUrl(cfg.serverUrl, text.slice("asset:".length));
   } else {
-    target = `${cfg.serverUrl}/search?query=${encodeURIComponent(text.trim())}`;
+    target = `${cfg.serverUrl}/search?query=${encodeURIComponent(JSON.stringify({ query: text.trim() }))}`;
   }
   if (disposition === "currentTab") chrome.tabs.update({ url: target });
   else chrome.tabs.create({ url: target, active: disposition !== "newBackgroundTab" });

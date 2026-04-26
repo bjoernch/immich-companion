@@ -280,7 +280,7 @@
 
     const viewAll = document.createElement("a");
     viewAll.className = "icc-view-all";
-    viewAll.href = `${serverUrl}/search?query=${encodeURIComponent(query)}`;
+    viewAll.href = `${serverUrl}/search?query=${encodeURIComponent(JSON.stringify({ query }))}`;
     viewAll.target = "_blank";
     viewAll.rel = "noopener";
     viewAll.textContent = "View all in Immich →";

@@ -30,14 +30,22 @@ document.querySelectorAll(".popup-tab").forEach((btn) => {
 const results = $("results");
 const empty = $("empty");
 const status = $("status");
+const pagination = $("pagination");
 let debounce;
 let lastQuery = "";
 let inflight = 0;
+
+// Pagination state
+const PAGE_SIZE = 8;
+let currentResults = [];
+let currentPage = 0;
+let currentCfg = null;
 
 function setEmptyState(html) {
   empty.innerHTML = html;
   empty.classList.add("show");
   results.hidden = true;
+  pagination.hidden = true;
 }
 function setResultsState() {
   empty.classList.remove("show");
@@ -90,41 +98,96 @@ async function runSearch(q) {
       status.textContent = "";
       return;
     }
-    const r = await smartSearch(q, 30);
+    currentCfg = cfg;
+    // Match what the Immich web app shows for a smart-search result page.
+    // Immich validates size up to 1000; 250 is a comfortable upper bound for
+    // browsing in a popup without making the JSON payload heavy.
+    const r = await smartSearch(q, 250);
     if (myReq !== inflight) return;
-    const items = r?.assets?.items || [];
-    status.textContent = items.length ? `${items.length} result${items.length === 1 ? "" : "s"}` : "";
-    if (!items.length) {
+    currentResults = r?.assets?.items || [];
+    currentPage = 0;
+    if (!currentResults.length) {
+      status.textContent = "";
       setEmptyState(`<div>No matches for <strong>${escapeHtml(q)}</strong>.</div>`);
       return;
     }
-    setResultsState();
-    results.innerHTML = "";
-    for (const a of items) {
-      const link = document.createElement("a");
-      link.href = viewUrl(cfg.serverUrl, a.id);
-      link.target = "_blank";
-      link.rel = "noopener";
-      link.title = a.originalFileName || a.id;
-      const img = document.createElement("img");
-      img.alt = "";
-      img.loading = "lazy";
-      const date = fmtDate(a.exifInfo?.dateTimeOriginal || a.fileCreatedAt);
-      link.appendChild(img);
-      if (date) {
-        const meta = document.createElement("div");
-        meta.className = "meta-overlay";
-        meta.textContent = date;
-        link.appendChild(meta);
-      }
-      results.appendChild(link);
-      loadThumb(a.id, "preview").then((u) => (img.src = u)).catch(() => {});
-    }
+    renderResultsPage();
   } catch (e) {
     if (myReq !== inflight) return;
     status.textContent = "";
     setEmptyState(`<div style="color: var(--danger)">${escapeHtml(e.message)}</div>`);
   }
+}
+
+function renderResultsPage() {
+  const total = currentResults.length;
+  const pages = Math.ceil(total / PAGE_SIZE);
+  const start = currentPage * PAGE_SIZE;
+  const items = currentResults.slice(start, start + PAGE_SIZE);
+
+  status.textContent = `${total} result${total === 1 ? "" : "s"} · page ${currentPage + 1} of ${pages}`;
+
+  setResultsState();
+  results.innerHTML = "";
+  for (const a of items) {
+    const link = document.createElement("a");
+    link.href = viewUrl(currentCfg.serverUrl, a.id);
+    link.target = "_blank";
+    link.rel = "noopener";
+    link.title = a.originalFileName || a.id;
+    const img = document.createElement("img");
+    img.alt = "";
+    img.loading = "lazy";
+    const date = fmtDate(a.exifInfo?.dateTimeOriginal || a.fileCreatedAt);
+    link.appendChild(img);
+    if (date) {
+      const meta = document.createElement("div");
+      meta.className = "meta-overlay";
+      meta.textContent = date;
+      link.appendChild(meta);
+    }
+    results.appendChild(link);
+    loadThumb(a.id, "preview").then((u) => (img.src = u)).catch(() => {});
+  }
+  results.scrollTop = 0;
+
+  renderPagination(total, pages);
+}
+
+function renderPagination(total, pages) {
+  pagination.innerHTML = "";
+  if (pages <= 1) {
+    pagination.hidden = true;
+    return;
+  }
+  pagination.hidden = false;
+
+  const mkBtn = (label, onClick, opts = {}) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = label;
+    if (opts.active) b.classList.add("active");
+    if (opts.disabled) b.disabled = true;
+    if (onClick) b.addEventListener("click", onClick);
+    pagination.appendChild(b);
+    return b;
+  };
+
+  mkBtn("‹", () => { if (currentPage > 0) { currentPage--; renderResultsPage(); } },
+        { disabled: currentPage === 0 });
+
+  // Show up to 5 page numbers, sliding window around current page.
+  const window_ = 5;
+  let start = Math.max(0, currentPage - Math.floor(window_ / 2));
+  let end = Math.min(pages, start + window_);
+  start = Math.max(0, end - window_);
+  for (let i = start; i < end; i++) {
+    mkBtn(String(i + 1), () => { currentPage = i; renderResultsPage(); },
+          { active: i === currentPage });
+  }
+
+  mkBtn("›", () => { if (currentPage < pages - 1) { currentPage++; renderResultsPage(); } },
+        { disabled: currentPage >= pages - 1 });
 }
 
 $("q").addEventListener("input", (e) => {
@@ -153,7 +216,16 @@ async function openSearchInImmich() {
   const q = $("q").value.trim();
   const cfg = await getConfig();
   if (!isConfigured(cfg)) return openOptions();
-  const url = q ? `${cfg.serverUrl}/search?query=${encodeURIComponent(q)}` : cfg.serverUrl;
+  let base = cfg.serverUrl.trim().replace(/\/+$/, "");
+  // Make sure the URL has a protocol — chrome.tabs.create() with a bare host
+  // would otherwise be parsed as a search query.
+  if (!/^https?:\/\//i.test(base)) base = `https://${base}`;
+  // Immich's web app expects ?query= to be a URL-encoded JSON object, not
+  // raw text — e.g. /search?query=%7B%22query%22%3A%22cat%22%7D
+  // Without the JSON wrapper the page just spins forever.
+  const url = q
+    ? `${base}/search?query=${encodeURIComponent(JSON.stringify({ query: q }))}`
+    : `${base}/photos`;
   chrome.tabs.create({ url });
 }
 
