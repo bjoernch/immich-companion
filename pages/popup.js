@@ -196,9 +196,13 @@ function groupByMonth(items) {
 
 function renderResultsPage() {
   const total = currentResults.length;
+  // We request size=250 from Immich. If we got exactly that many back the
+  // server probably has more — say so explicitly so the count isn't
+  // mistaken for the total library size.
+  const capped = total >= 250 ? "+" : "";
   const label = currentMode === "recent"
-    ? `Most recent · ${total} item${total === 1 ? "" : "s"}`
-    : `${total} result${total === 1 ? "" : "s"}`;
+    ? `Most recent · showing ${total}${capped}`
+    : `${total}${capped} match${total === 1 ? "" : "es"}`;
   status.textContent = label;
 
   setResultsState();
