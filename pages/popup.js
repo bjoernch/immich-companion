@@ -2,6 +2,7 @@ import {
   getConfig,
   isConfigured,
   smartSearch,
+  metadataSearch,
   viewUrl,
   shareUrl,
   uploadAsset,
@@ -52,6 +53,7 @@ const PAGE_SIZE = 8;
 let currentResults = [];
 let currentPage = 0;
 let currentCfg = null;
+let currentMode = "recent"; // "recent" | "search"
 
 function setEmptyState(html) {
   empty.innerHTML = html;
@@ -100,6 +102,7 @@ function escapeHtml(s) {
 
 async function runSearch(q) {
   const myReq = ++inflight;
+  currentMode = "search";
   status.textContent = "Searching…";
   renderSkeletons();
   try {
@@ -131,13 +134,50 @@ async function runSearch(q) {
   }
 }
 
+async function showRecentLibrary() {
+  const myReq = ++inflight;
+  currentMode = "recent";
+  status.textContent = "Loading recent…";
+  renderSkeletons();
+  try {
+    const cfg = await getConfig();
+    if (!isConfigured(cfg)) {
+      setEmptyState('<div>Server not configured.</div><a href="#" id="goSettings">Open settings</a>');
+      $("goSettings").addEventListener("click", openOptions);
+      status.textContent = "";
+      return;
+    }
+    currentCfg = cfg;
+    // Empty metadata search defaults to ordering by date desc, so we get the
+    // newest items first. Same pagination + quick actions as search results.
+    const r = await metadataSearch({ order: "desc" }, 250);
+    if (myReq !== inflight) return;
+    currentResults = r?.assets?.items || [];
+    currentPage = 0;
+    if (!currentResults.length) {
+      status.textContent = "";
+      setEmptyState("<div>No items in your library yet.</div>");
+      return;
+    }
+    renderResultsPage();
+  } catch (e) {
+    if (myReq !== inflight) return;
+    status.textContent = "";
+    setEmptyState(`<div style="color: var(--danger)">${escapeHtml(e.message)}</div>`);
+  }
+}
+
 function renderResultsPage() {
   const total = currentResults.length;
   const pages = Math.ceil(total / PAGE_SIZE);
   const start = currentPage * PAGE_SIZE;
   const items = currentResults.slice(start, start + PAGE_SIZE);
 
-  status.textContent = `${total} result${total === 1 ? "" : "s"} · page ${currentPage + 1} of ${pages}`;
+  const label = currentMode === "recent"
+    ? `Most recent · ${total} item${total === 1 ? "" : "s"}`
+    : `${total} result${total === 1 ? "" : "s"}`;
+  const pageInfo = pages > 1 ? ` · page ${currentPage + 1} of ${pages}` : "";
+  status.textContent = `${label}${pageInfo}`;
 
   setResultsState();
   results.innerHTML = "";
@@ -354,12 +394,8 @@ $("q").addEventListener("input", (e) => {
   const q = e.target.value.trim();
   clearTimeout(debounce);
   if (!q) {
-    inflight++;
-    setEmptyState(`
-      <div>Type to search your library.</div>
-      <div class="hint">Smart search uses CLIP — try "dog at the beach" or "red sunset".</div>
-    `);
-    status.textContent = "";
+    lastQuery = "";
+    showRecentLibrary();
     return;
   }
   debounce = setTimeout(() => {
@@ -585,3 +621,7 @@ function renderUploadItem(name) {
     document.documentElement.setAttribute("data-theme", cfg.theme);
   }
 })();
+
+// On popup open: when no query is typed yet, show the most recent items
+// from the library so the search panel isn't a blank slate.
+showRecentLibrary().catch(() => {});
