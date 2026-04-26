@@ -761,8 +761,7 @@ kbd {
 
 .popup .results a {
   display: block;
-  break-inside: avoid;
-  margin: 0 0 6px;
+  margin: 0;
   background: linear-gradient(90deg, var(--panel-2) 0%, var(--panel-3) 50%, var(--panel-2) 100%);
   background-size: 200% 100%;
   animation: shimmer 1.4s linear infinite;
@@ -771,6 +770,9 @@ kbd {
   position: relative;
   text-decoration: none;
   transition: transform 120ms ease, box-shadow 120ms ease;
+  /* Phone-gallery look: every cell is square; image cover-crops to fit.
+     Overrides the per-photo aspect-ratio that JS sets inline. */
+  aspect-ratio: 1 / 1 !important;
 }
 .popup .results a.loaded {
   background: var(--panel-2);
@@ -805,13 +807,14 @@ kbd {
 /* Quick-action buttons revealed on hover */
 .popup .results .actions-overlay {
   position: absolute;
-  top: 6px;
-  right: 6px;
+  top: 5px;
+  right: 5px;
   display: flex;
-  gap: 4px;
+  gap: 3px;
   opacity: 0;
   transform: translateY(-2px);
   transition: opacity 130ms ease, transform 130ms ease;
+  z-index: 3;
 }
 .popup .results a:hover .actions-overlay,
 .popup .results a:focus-within .actions-overlay {
@@ -821,13 +824,13 @@ kbd {
 .popup .results .action-btn {
   all: unset;
   cursor: pointer;
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
   display: grid;
   place-items: center;
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
+  border-radius: 5px;
   color: white;
   backdrop-filter: blur(4px);
   transition: background 120ms ease, transform 80ms ease;
@@ -848,21 +851,31 @@ kbd {
   flex: 1 1 auto;
   min-height: 0;
   display: grid;
-  grid-template-columns: 1fr 28px;
+  grid-template-columns: 1fr 24px;
+  /* Lock the single grid row to the available height so .results can
+     actually scroll instead of growing unbounded. */
+  grid-template-rows: minmax(0, 1fr);
   gap: 4px;
   margin-top: 12px;
+  overflow: hidden;
 }
 .popup .gallery[hidden] { display: none !important; }
 
 .popup .results {
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   padding-right: 2px;
   scrollbar-width: thin;
   scrollbar-color: var(--panel-3) transparent;
 }
+.popup .results::-webkit-scrollbar { width: 6px; }
+.popup .results::-webkit-scrollbar-thumb {
+  background: var(--panel-3);
+  border-radius: 3px;
+}
 
-.popup .tl-group { margin-bottom: 12px; }
+.popup .tl-group { margin-bottom: 14px; }
 .popup .tl-group-header {
   position: sticky;
   top: 0;
@@ -875,11 +888,15 @@ kbd {
   text-transform: uppercase;
   letter-spacing: 0.6px;
   border-bottom: 1px solid var(--border);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
+/* Phone-gallery-style grid: two equal columns, square thumbnails. Predictable
+   layout (no masonry guesswork), big enough thumbs in a 420px popup, plenty
+   of room for the hover action overlay. */
 .popup .tl-group-grid {
-  column-count: 2;
-  column-gap: 6px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
 }
 
 /* Right-side year scrubber */
