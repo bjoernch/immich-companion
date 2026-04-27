@@ -5,6 +5,7 @@ import {
   metadataSearch,
   viewUrl,
   shareUrl,
+  videoPlaybackUrl,
   uploadAsset,
   addAssetsToAlbum,
   createShareLink,
@@ -38,7 +39,31 @@ const ICON = {
   check: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
   x: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
   spinner: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="spin"><path d="M12 2a10 10 0 0 1 10 10" /></svg>',
+  // Big play triangle for the video card overlay
+  play: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="white"><polygon points="7,4 21,12 7,20"/></svg>',
+  // Bigger spinner used while loading the video bytes
+  spinnerLg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" class="spin"><path d="M12 2a10 10 0 0 1 10 10" /></svg>',
+  // Diagonal arrows pointing outward — opens the dedicated player window
+  expand: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>',
 };
+
+// Inline preview cap. Above this we refuse and tell the user to open in Immich
+// instead — fetching multi-GB clips into a Blob would freeze the popup.
+const VIDEO_PREVIEW_MAX_BYTES = 150 * 1024 * 1024;
+
+// "0:00:32.123000" / "00:01:23" → "0:32" / "1:23". Returns "" when unparseable.
+function fmtDuration(s) {
+  if (!s || typeof s !== "string") return "";
+  const parts = s.split(":");
+  if (parts.length !== 3) return "";
+  const hours = parseInt(parts[0], 10) || 0;
+  const mins = parseInt(parts[1], 10) || 0;
+  const secs = Math.floor(parseFloat(parts[2]) || 0);
+  if (hours > 0) {
+    return `${hours}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+  }
+  return `${mins}:${String(secs).padStart(2, "0")}`;
+}
 
 const $ = (id) => document.getElementById(id);
 
@@ -426,12 +451,14 @@ function renderTimelineScrubber(groups) {
 }
 
 function buildResultCard(asset) {
+  const isVideo = asset.type === "VIDEO" && currentCfg.featureVideoPreview !== false;
+
   const link = document.createElement("a");
   link.href = viewUrl(currentCfg.serverUrl, asset.id);
   link.target = "_blank";
   link.rel = "noopener";
   link.title = asset.originalFileName || asset.id;
-  link.className = "result-card";
+  link.className = isVideo ? "result-card video" : "result-card";
 
   // Reserve the card's final dimensions via aspect-ratio so masonry doesn't
   // reflow when the thumbnail fetches arrive at varying times.
@@ -442,9 +469,38 @@ function buildResultCard(asset) {
   const img = document.createElement("img");
   img.alt = "";
   img.loading = "lazy";
+  img.className = "poster";
   img.addEventListener("load", () => link.classList.add("loaded"));
   img.addEventListener("error", () => link.classList.add("loaded", "failed"));
   link.appendChild(img);
+
+  if (isVideo) {
+    const playBtn = document.createElement("button");
+    playBtn.type = "button";
+    playBtn.className = "play-overlay";
+    playBtn.title = "Play preview";
+    playBtn.setAttribute("aria-label", "Play preview");
+    setOnly(playBtn, svgNode(ICON.play));
+    playBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      playVideoInCard(link, asset).catch(() => {});
+    });
+    link.appendChild(playBtn);
+
+    const dur = fmtDuration(asset.duration || asset.exifInfo?.duration);
+    if (dur) {
+      const badge = document.createElement("div");
+      badge.className = "duration-badge";
+      badge.textContent = dur;
+      link.appendChild(badge);
+    }
+
+    // While playing inline, the wrapping <a> must not navigate away.
+    link.addEventListener("click", (e) => {
+      if (link.classList.contains("playing")) e.preventDefault();
+    });
+  }
 
   const date = fmtDate(asset.exifInfo?.dateTimeOriginal || asset.fileCreatedAt);
   if (date) {
@@ -454,14 +510,17 @@ function buildResultCard(asset) {
     link.appendChild(meta);
   }
 
-  // Hover quick actions
+  // Hover quick actions. Videos drop the "Copy" action: clipboard images
+  // can't represent a video file, and copying a still poster would surprise.
   const actions = document.createElement("div");
   actions.className = "actions-overlay";
-  const copyTitle = currentCfg.clipboardCopyOriginal
-    ? "Copy original to clipboard"
-    : "Copy preview to clipboard";
-  actions.appendChild(makeActionButton(copyTitle, ICON.clipboard,
-    (btn) => copyImageAction(asset, btn)));
+  if (!isVideo) {
+    const copyTitle = currentCfg.clipboardCopyOriginal
+      ? "Copy original to clipboard"
+      : "Copy preview to clipboard";
+    actions.appendChild(makeActionButton(copyTitle, ICON.clipboard,
+      (btn) => copyImageAction(asset, btn)));
+  }
   actions.appendChild(makeActionButton("Share link (copy)", ICON.share,
     (btn) => shareLinkAction(asset, btn)));
   actions.appendChild(makeActionButton("Download original", ICON.download,
@@ -473,6 +532,111 @@ function buildResultCard(asset) {
   });
 
   return link;
+}
+
+// Inline mini-player. Fetches Immich's transcoded playback stream into a Blob
+// and swaps it in for the poster. Cap at VIDEO_PREVIEW_MAX_BYTES so the popup
+// doesn't OOM on huge source files.
+async function playVideoInCard(link, asset) {
+  if (link.classList.contains("playing") || link.classList.contains("video-loading")) return;
+  link.classList.add("video-loading");
+
+  const loader = document.createElement("div");
+  loader.className = "video-loader";
+  loader.appendChild(svgNode(ICON.spinnerLg));
+  link.appendChild(loader);
+
+  const cleanupLoader = () => {
+    link.classList.remove("video-loading");
+    loader.remove();
+  };
+
+  const showCardError = (text) => {
+    cleanupLoader();
+    const errEl = document.createElement("div");
+    errEl.className = "video-error";
+    errEl.textContent = text;
+    link.appendChild(errEl);
+    setTimeout(() => errEl.remove(), 2600);
+  };
+
+  let blobUrl;
+  try {
+    const url = videoPlaybackUrl(currentCfg.serverUrl, asset.id);
+    const res = await fetch(url, { headers: { "x-api-key": currentCfg.apiKey } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const len = parseInt(res.headers.get("Content-Length") || "0", 10);
+    if (len && len > VIDEO_PREVIEW_MAX_BYTES) {
+      showCardError("Too large to preview");
+      return;
+    }
+    const blob = await res.blob();
+    if (blob.size > VIDEO_PREVIEW_MAX_BYTES) {
+      showCardError("Too large to preview");
+      return;
+    }
+    blobUrl = URL.createObjectURL(blob);
+  } catch (e) {
+    showCardError(e.message?.startsWith("HTTP") ? e.message : "Couldn't load");
+    return;
+  }
+
+  cleanupLoader();
+  link.classList.add("playing");
+
+  const video = document.createElement("video");
+  video.className = "video-player";
+  video.src = blobUrl;
+  video.controls = true;
+  video.autoplay = true;
+  video.muted = true;
+  video.playsInline = true;
+  // Stop the wrapping <a>'s click from interfering with the controls.
+  video.addEventListener("click", (e) => e.stopPropagation());
+  link.appendChild(video);
+
+  const closeBtn = document.createElement("button");
+  closeBtn.type = "button";
+  closeBtn.className = "video-close";
+  closeBtn.title = "Close preview";
+  closeBtn.setAttribute("aria-label", "Close preview");
+  setOnly(closeBtn, svgNode(ICON.x));
+  closeBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try { video.pause(); } catch {}
+    video.remove();
+    closeBtn.remove();
+    expandBtn.remove();
+    URL.revokeObjectURL(blobUrl);
+    link.classList.remove("playing");
+  });
+  link.appendChild(closeBtn);
+
+  // "Expand" → open the dedicated player window. The popup will lose focus
+  // and close once the new window is focused; the inline blob URL gets
+  // reclaimed when the popup document is destroyed, no manual cleanup needed.
+  const expandBtn = document.createElement("button");
+  expandBtn.type = "button";
+  expandBtn.className = "video-expand";
+  expandBtn.title = "Open in larger window";
+  expandBtn.setAttribute("aria-label", "Open in larger window");
+  setOnly(expandBtn, svgNode(ICON.expand));
+  expandBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try { video.pause(); } catch {}
+    chrome.windows.create({
+      url: chrome.runtime.getURL(
+        `pages/player.html?id=${encodeURIComponent(asset.id)}`,
+      ),
+      type: "popup",
+      width: 960,
+      height: 600,
+      focused: true,
+    });
+  });
+  link.appendChild(expandBtn);
 }
 
 function makeActionButton(title, iconSvg, handler) {

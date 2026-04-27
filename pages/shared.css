@@ -306,6 +306,62 @@ hr {
 .features-list { padding-left: 18px; }
 .features-list li { margin: 6px 0; }
 
+/* About-section "report an issue" card */
+.issue-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  margin-top: 18px;
+  background:
+    linear-gradient(135deg, rgba(124, 140, 255, 0.10), rgba(166, 114, 255, 0.05));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: var(--text);
+  transition: border-color 140ms, transform 100ms, box-shadow 140ms;
+}
+.issue-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(124, 140, 255, 0.18);
+}
+.issue-card-icon {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-violet));
+  color: white;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 12px rgba(124, 140, 255, 0.30);
+}
+.issue-card-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.issue-card-title {
+  font-weight: 600;
+  font-size: 14.5px;
+  margin-bottom: 2px;
+  letter-spacing: -0.1px;
+}
+.issue-card-sub {
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+.issue-card-arrow {
+  flex: 0 0 auto;
+  color: var(--muted);
+  transition: color 140ms, transform 140ms;
+}
+.issue-card:hover .issue-card-arrow {
+  color: var(--accent);
+  transform: translate(2px, -2px);
+}
+
 .row {
   display: flex;
   align-items: center;
@@ -528,39 +584,59 @@ kbd {
 
 .popup-tabs {
   flex: 0 0 auto;
-  display: flex;
-  gap: 2px;
-  padding: 10px 10px 0;
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+  padding: 4px;
+  margin: 10px 12px 4px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
 }
 .popup-tab {
   all: unset;
   cursor: pointer;
-  padding: 8px 12px;
-  font-size: 13px;
+  padding: 7px 8px;
+  font-size: 12.5px;
+  font-weight: 500;
   color: var(--muted);
-  border-bottom: 2px solid transparent;
-  transition: color 120ms, border-color 120ms;
+  border-radius: 7px;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
+  text-align: center;
+  transition: background 140ms, color 140ms, box-shadow 140ms;
+}
+.popup-tab svg {
+  flex: 0 0 auto;
+  opacity: 0.8;
+  transition: opacity 140ms, color 140ms;
 }
 .popup-tab:hover { color: var(--text); }
+.popup-tab:hover svg { opacity: 1; }
 .popup-tab.active {
+  background: linear-gradient(180deg, rgba(124, 140, 255, 0.20), rgba(91, 108, 255, 0.10));
   color: var(--text);
-  border-bottom-color: var(--accent);
+  box-shadow: inset 0 0 0 1px rgba(124, 140, 255, 0.25);
+}
+.popup-tab.active svg {
+  color: var(--accent);
+  opacity: 1;
 }
 .popup-tab .badge {
   background: var(--panel-3);
   color: var(--muted);
-  font-size: 11px;
+  font-size: 10.5px;
+  font-weight: 500;
   padding: 1px 6px;
   border-radius: 999px;
   min-width: 16px;
   text-align: center;
+  line-height: 1.4;
 }
 .popup-tab.active .badge { background: var(--accent); color: white; }
+.popup-tab .badge:empty { display: none; }
 
 .popup-panel {
   display: none;
@@ -854,6 +930,174 @@ kbd {
 .popup .results .action-btn.busy { cursor: wait; }
 .popup .results .action-btn .spin { animation: spin 0.9s linear infinite; transform-origin: 50% 50%; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ----- Video card ----- */
+.popup .results .play-overlay {
+  all: unset;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 2;
+  backdrop-filter: blur(2px);
+  transition: background 120ms, transform 120ms;
+}
+.popup .results .play-overlay svg { transform: translateX(1px); /* optical */ }
+.popup .results a:hover .play-overlay,
+.popup .results a:focus-within .play-overlay {
+  background: var(--accent-strong);
+  border-color: var(--accent);
+  transform: translate(-50%, -50%) scale(1.06);
+}
+.popup .results .duration-badge {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  padding: 2px 6px;
+  background: rgba(0, 0, 0, 0.72);
+  color: white;
+  font-size: 10.5px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  border-radius: 4px;
+  z-index: 2;
+  pointer-events: none;
+  letter-spacing: 0.2px;
+}
+.popup .results .video-loader {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 4;
+}
+.popup .results .video-loader .spin {
+  animation: spin 0.9s linear infinite;
+  transform-origin: 50% 50%;
+}
+.popup .results .video-error {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  background: rgba(255, 107, 107, 0.92);
+  color: white;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  z-index: 4;
+}
+/* When a video is playing, hide the poster + overlays so the player owns the card. */
+.popup .results a.playing .poster,
+.popup .results a.playing .play-overlay,
+.popup .results a.playing .duration-badge,
+.popup .results a.playing .meta-overlay,
+.popup .results a.playing .actions-overlay {
+  display: none;
+}
+.popup .results .video-player {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  object-fit: contain;
+  z-index: 3;
+  display: block;
+}
+.popup .results .video-close {
+  all: unset;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  z-index: 5;
+  backdrop-filter: blur(4px);
+  transition: background 120ms;
+}
+.popup .results .video-close:hover {
+  background: var(--danger);
+  border-color: var(--danger);
+}
+.popup .results .video-expand {
+  all: unset;
+  position: absolute;
+  top: 5px;
+  right: 31px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  z-index: 5;
+  backdrop-filter: blur(4px);
+  transition: background 120ms;
+}
+.popup .results .video-expand:hover {
+  background: var(--accent-strong);
+  border-color: var(--accent);
+}
+
+/* ============== Standalone video player window ============== */
+
+body.player {
+  margin: 0;
+  background: #000;
+  color: var(--text);
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+body.player video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+  display: block;
+}
+body.player video[hidden] { display: none; }
+body.player .player-status {
+  padding: 24px;
+  text-align: center;
+  color: var(--text);
+  font-size: 14px;
+}
+body.player .player-status[hidden] { display: none; }
+body.player .player-status a {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: var(--accent-strong);
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+}
+body.player .player-status a:hover { filter: brightness(1.1); }
 
 /* Gallery (date-grouped timeline) */
 .popup .gallery {

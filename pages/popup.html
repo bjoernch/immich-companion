@@ -6,9 +6,28 @@
   </head>
   <body class="popup">
     <div class="popup-tabs">
-      <button class="popup-tab active" data-tab="search">Search</button>
-      <button class="popup-tab" data-tab="recent">Recent <span id="recentCount" class="badge"></span></button>
-      <button class="popup-tab" data-tab="upload">Upload</button>
+      <button class="popup-tab active" data-tab="search">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"/>
+          <path d="m21 21-4.3-4.3"/>
+        </svg>
+        <span>Search</span>
+      </button>
+      <button class="popup-tab" data-tab="recent">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span>Saved</span>
+        <span id="recentCount" class="badge"></span>
+      </button>
+      <button class="popup-tab" data-tab="upload">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <span>Upload</span>
+      </button>
     </div>
 
     <!-- Search panel -->
@@ -37,7 +56,7 @@
     <!-- Recent uploads panel -->
     <div class="popup-panel" data-panel="recent">
       <div id="recentEmpty" class="results-state show">
-        <div>No uploads yet.</div>
+        <div>Nothing saved yet.</div>
         <div class="hint">Right-click any image on the web → "Save to Immich".</div>
       </div>
       <ul id="recentList" class="recent-list" hidden></ul>
