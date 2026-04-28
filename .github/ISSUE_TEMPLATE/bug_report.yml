@@ -21,17 +21,12 @@ body:
     validations:
       required: true
 
-  - type: dropdown
+  - type: input
     id: browser
     attributes:
       label: Browser
-      options:
-        - Google Chrome
-        - Microsoft Edge
-        - Brave
-        - Vivaldi / Opera / other Chromium
-        - Mozilla Firefox
-        - Other
+      description: "e.g. Google Chrome, Brave, Microsoft Edge, Mozilla Firefox, Vivaldi / Opera / other Chromium."
+      placeholder: "e.g. Brave"
     validations:
       required: true
 
@@ -66,6 +61,7 @@ body:
     attributes:
       label: Which feature is affected?
       options:
+        - "— Choose a feature —"
         - Save to Immich (right-click on image / video)
         - Save & share (right-click → copy share link)
         - Toolbar popup — search
