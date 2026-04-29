@@ -3,32 +3,32 @@
 </p>
 
 <p align="center">
-  <!-- Store-button images. All bundled locally in webstore-assets/ so the
-       README never depends on an external CDN. Once a listing goes live,
-       swap the href on the matching <a> to the actual store URL. -->
-  <a href="#install" title="Chrome Web Store — pending review">
-    <img height="58" alt="Available in the Chrome Web Store"
-         src="webstore-assets/chrome-webstore-badge.svg">
-  </a>
-  &nbsp;
-  <a href="#install" title="Firefox Add-ons — pending review">
-    <img height="58" alt="Get the Firefox Add-on"
-         src="webstore-assets/firefox-addons-badge.svg">
-  </a>
-  &nbsp;
-  <a href="#install" title="Microsoft Edge Add-ons — pending review">
-    <img height="58" alt="Available in the Microsoft Edge Add-ons store"
-         src="webstore-assets/edge-addons-badge.svg">
-  </a>
-</p>
-
-<p align="center">
   <strong>A community browser extension for self-hosted <a href="https://immich.app">Immich</a>.</strong><br/>
   Save anything you see on the web, smart-search your library from the toolbar popup, and turn every new tab into a memory.
 </p>
 
 <p align="center">
-  <em>The store listings are pending review at the Chrome Web Store, Firefox Add-ons, and Microsoft Edge Add-ons. While you're waiting, you can install the extension from the latest <a href="https://github.com/bjoernch/immich-companion/releases">release</a> — see <a href="#install">install instructions</a> below.</em>
+  <strong>Coming soon to the stores below.</strong> The Chrome Web Store, Firefox Add-ons, and Microsoft Edge Add-ons listings are still in review — the buttons below will become live links as each store approves the extension. Until then, install from the <a href="https://github.com/bjoernch/immich-companion/releases">latest release</a> (<a href="#install">instructions</a>).
+</p>
+
+<p align="center">
+  <!-- Store-button images. All bundled locally in webstore-assets/ so the
+       README never depends on an external CDN. Once a listing goes live,
+       swap the href on the matching <a> to the actual store URL. -->
+  <a href="#install" title="Chrome Web Store — pending review">
+    <img height="58" alt="Available in the Chrome Web Store (pending review)"
+         src="webstore-assets/chrome-webstore-badge.svg">
+  </a>
+  &nbsp;
+  <a href="#install" title="Firefox Add-ons — pending review">
+    <img height="58" alt="Get the Firefox Add-on (pending review)"
+         src="webstore-assets/firefox-addons-badge.svg">
+  </a>
+  &nbsp;
+  <a href="#install" title="Microsoft Edge Add-ons — pending review">
+    <img height="58" alt="Available in the Microsoft Edge Add-ons store (pending review)"
+         src="webstore-assets/edge-addons-badge.svg">
+  </a>
 </p>
 
 ---
