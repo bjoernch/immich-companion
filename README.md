@@ -3,15 +3,17 @@
 </p>
 
 <p align="center">
-  <!-- Real store-button images. Once a listing goes live, swap the href to its actual store URL. -->
+  <!-- Store-button images. All bundled locally in webstore-assets/ so the
+       README never depends on an external CDN. Once a listing goes live,
+       swap the href on the matching <a> to the actual store URL. -->
   <a href="#install" title="Chrome Web Store — pending review">
     <img height="58" alt="Available in the Chrome Web Store"
-         src="https://storage.googleapis.com/web-dev-uploads/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/UV4C4ybeBTsZt43U4xis.png">
+         src="webstore-assets/chrome-webstore-badge.svg">
   </a>
   &nbsp;
   <a href="#install" title="Firefox Add-ons — pending review">
     <img height="58" alt="Get the Firefox Add-on"
-         src="https://blog.mozilla.org/addons/files/2020/04/get-the-addon-fx-apr-2020.svg">
+         src="webstore-assets/firefox-addons-badge.svg">
   </a>
   &nbsp;
   <a href="#install" title="Microsoft Edge Add-ons — pending review">
