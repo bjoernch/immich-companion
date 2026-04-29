@@ -225,23 +225,9 @@ function renderMinimal(cfg) {
     location.replace(cfg.newtabFallbackUrl);
     return;
   }
+  // Minimal mode is just a clock now — no search bar. Users with
+  // "Replace new tab" turned off and no fallback URL set see this.
   document.body.classList.add("minimal");
-  const form = document.getElementById("minimalSearch");
-  if (form) {
-    form.hidden = false;
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const q = form.q.value.trim();
-      if (!q) return;
-      // Detect "looks like a URL" → open directly, otherwise Google search.
-      const isUrl = /^[a-z][a-z0-9+\-.]*:\/\//i.test(q) ||
-        /^[a-z0-9-]+(\.[a-z0-9-]+)+(\/.*)?$/i.test(q);
-      const target = isUrl
-        ? (q.includes("://") ? q : `https://${q}`)
-        : `https://www.google.com/search?q=${encodeURIComponent(q)}`;
-      location.href = target;
-    });
-  }
 }
 
 function diagRow(parent, label, status, detail) {

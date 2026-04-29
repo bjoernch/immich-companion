@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Immich Companion",
-  "version": "0.6.0",
-  "description": "Save images and videos from any page to your self-hosted Immich, search via the omnibox, and turn the new tab into a memory feed.",
+  "version": "0.6.1",
+  "description": "Save images and videos from any page to your self-hosted Immich and turn the new tab into a memory feed.",
   "minimum_chrome_version": "114",
   "browser_specific_settings": {
     "gecko": {
@@ -18,7 +18,6 @@
     "storage",
     "notifications",
     "activeTab",
-    "scripting",
     "alarms",
     "clipboardWrite"
   ],
@@ -45,7 +44,6 @@
     "page": "pages/options.html",
     "open_in_tab": true
   },
-  "omnibox": { "keyword": "im" },
   "chrome_url_overrides": { "newtab": "pages/newtab.html" },
   "commands": {
     "_execute_action": {

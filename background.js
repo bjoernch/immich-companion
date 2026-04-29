@@ -5,7 +5,6 @@ import {
   addAssetsToAlbum,
   smartSearch,
   thumbnailUrl,
-  viewUrl,
   shareUrl,
   ping,
   createShareLink,
@@ -35,6 +34,19 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     if (!isConfigured(cfg)) {
       chrome.tabs.create({ url: chrome.runtime.getURL("pages/welcome.html") });
     }
+    // Stash an update notice for the popup to surface on its next open.
+    // Skipped if the version didn't actually change (defensive — Chrome
+    // sometimes fires "update" for trivial reloads of unpacked extensions).
+    try {
+      const m = chrome.runtime.getManifest();
+      const from = details.previousVersion || "";
+      const to = m.version || "";
+      if (from && to && from !== to) {
+        await chrome.storage.local.set({
+          updateNotice: { from, to, at: Date.now() },
+        });
+      }
+    } catch {}
   }
 });
 chrome.runtime.onStartup.addListener(async () => {
@@ -224,49 +236,6 @@ async function copyToClipboardViaTab(tabId, text) {
     // Failsafe: don't hang forever if no listener.
     setTimeout(() => resolve(false), 2000);
   });
-}
-
-// --- Omnibox quick search --------------------------------------------------
-
-chrome.omnibox.setDefaultSuggestion({
-  description: "Search Immich: <match>%s</match>",
-});
-
-chrome.omnibox.onInputChanged.addListener(async (text, suggest) => {
-  if (!text || text.trim().length < 2) return;
-  try {
-    const cfg = await getConfig();
-    if (!isConfigured(cfg)) return;
-    const r = await smartSearch(text.trim(), 6);
-    const items = r?.assets?.items || [];
-    const suggestions = items.slice(0, 6).map((a) => ({
-      content: `asset:${a.id}`,
-      description: `📷 ${escapeXml(a.originalFileName || a.id)} <dim>${escapeXml(a.exifInfo?.dateTimeOriginal || "")}</dim>`,
-    }));
-    suggest(suggestions);
-  } catch {}
-});
-
-chrome.omnibox.onInputEntered.addListener(async (text, disposition) => {
-  const cfg = await getConfig();
-  if (!isConfigured(cfg)) {
-    chrome.runtime.openOptionsPage();
-    return;
-  }
-  let target;
-  if (text.startsWith("asset:")) {
-    target = viewUrl(cfg.serverUrl, text.slice("asset:".length));
-  } else {
-    target = `${cfg.serverUrl}/search?query=${encodeURIComponent(JSON.stringify({ query: text.trim() }))}`;
-  }
-  if (disposition === "currentTab") chrome.tabs.update({ url: target });
-  else chrome.tabs.create({ url: target, active: disposition !== "newBackgroundTab" });
-});
-
-function escapeXml(s) {
-  return String(s).replace(/[&<>"]/g, (c) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;",
-  }[c]));
 }
 
 // --- Notifications ---------------------------------------------------------

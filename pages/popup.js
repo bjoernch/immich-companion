@@ -45,6 +45,8 @@ const ICON = {
   spinnerLg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" class="spin"><path d="M12 2a10 10 0 0 1 10 10" /></svg>',
   // Diagonal arrows pointing outward — opens the dedicated player window
   expand: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>',
+  // Map-pin (Lucide MapPin) — opens the asset's GPS location in Google Maps
+  maps: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
 };
 
 // Inline preview cap. Above this we refuse and tell the user to open in Immich
@@ -99,12 +101,20 @@ let currentQuery = "";
 let currentApiPage = 1;
 let nextPage = null;        // string from Immich API ("2", "3"...) or null
 let loadingPage = false;
+let currentTypeFilter = "all"; // "all" | "image" | "video" — applied to both modes
+
+// Translate the UI filter into the API's type parameter. "all" → no filter.
+function typeFilterParam() {
+  if (currentTypeFilter === "image") return "IMAGE";
+  if (currentTypeFilter === "video") return "VIDEO";
+  return null;
+}
 
 // In-memory cache of fetched pages. Key = `${mode}:${query}:${page}`.
 // Cleared when mode or query changes. Going back to a previously visited
 // page is instant; going forward to a prefetched page is also instant.
 const pageCache = new Map();
-function pageKey(p) { return `${currentMode}:${currentQuery}:${p}`; }
+function pageKey(p) { return `${currentMode}:${currentQuery}:${currentTypeFilter}:${p}`; }
 
 // Cache of thumbnail object URLs by `${assetId}:${size}`. Lets us re-render
 // without re-fetching the same image bytes when paging back and forth.
@@ -249,10 +259,13 @@ async function loadPage(page) {
     }
     currentCfg = cfg;
     let r;
+    const t = typeFilterParam();
     if (currentMode === "search") {
-      r = await smartSearch(currentQuery, PAGE_SIZE, page);
+      r = await smartSearch(currentQuery, PAGE_SIZE, page, t);
     } else {
-      r = await metadataSearch({ order: "desc", page }, PAGE_SIZE);
+      const params = { order: "desc", page };
+      if (t) params.type = t;
+      r = await metadataSearch(params, PAGE_SIZE);
     }
     if (myReq !== inflight) return;
     const items = r?.assets?.items || [];
@@ -297,17 +310,21 @@ async function prefetchPage(page) {
   if (!page || pageCache.has(pageKey(page))) return;
   const snapMode = currentMode;
   const snapQuery = currentQuery;
+  const snapFilter = currentTypeFilter;
+  const t = typeFilterParam();
   try {
     let r;
     if (snapMode === "search") {
-      r = await smartSearch(snapQuery, PAGE_SIZE, page);
+      r = await smartSearch(snapQuery, PAGE_SIZE, page, t);
     } else {
-      r = await metadataSearch({ order: "desc", page }, PAGE_SIZE);
+      const params = { order: "desc", page };
+      if (t) params.type = t;
+      r = await metadataSearch(params, PAGE_SIZE);
     }
-    // If the user changed mode or query while we were fetching, drop the
-    // result rather than poisoning the new cache key.
-    if (snapMode !== currentMode || snapQuery !== currentQuery) return;
-    pageCache.set(`${snapMode}:${snapQuery}:${page}`, {
+    // If the user changed mode/query/filter while we were fetching, drop
+    // the result rather than poisoning the new cache key.
+    if (snapMode !== currentMode || snapQuery !== currentQuery || snapFilter !== currentTypeFilter) return;
+    pageCache.set(`${snapMode}:${snapQuery}:${snapFilter}:${page}`, {
       items: r?.assets?.items || [],
       nextPage: r?.assets?.nextPage || null,
     });
@@ -525,6 +542,14 @@ function buildResultCard(asset) {
     (btn) => shareLinkAction(asset, btn)));
   actions.appendChild(makeActionButton("Download original", ICON.download,
     (btn) => downloadOriginalAction(asset, btn)));
+  const mapsProvider = currentCfg.mapsProvider || "off";
+  if (mapsProvider !== "off") {
+    const mapsTitle = mapsProvider === "apple"
+      ? "Open in Apple Maps"
+      : "Open in Google Maps";
+    actions.appendChild(makeActionButton(mapsTitle, ICON.maps,
+      (btn) => openMapsAction(asset, btn)));
+  }
   link.appendChild(actions);
 
   loadThumb(asset.id, "thumbnail").then((u) => (img.src = u)).catch(() => {
@@ -734,6 +759,45 @@ async function blobToPng(blob) {
   } finally {
     URL.revokeObjectURL(url);
   }
+}
+
+// Opens the asset's GPS coordinates in the configured maps app. Tries the
+// asset's local exifInfo first; if missing (search/random endpoints often
+// return sparse records), fetches the full asset detail to pull the coords.
+// Throws "No GPS info" if the photo has no location — makeActionButton
+// surfaces that as the red ✕ state with the message in the tooltip.
+async function openMapsAction(asset, _btn) {
+  let lat = asset.exifInfo?.latitude;
+  let lng = asset.exifInfo?.longitude;
+
+  if (lat == null || lng == null) {
+    try {
+      const res = await fetch(`${currentCfg.serverUrl}/api/assets/${asset.id}`, {
+        headers: { "x-api-key": currentCfg.apiKey },
+      });
+      if (res.ok) {
+        const detail = await res.json();
+        lat = detail.exifInfo?.latitude;
+        lng = detail.exifInfo?.longitude;
+        // Cache back onto the local asset so a second click is instant.
+        if (lat != null && lng != null) {
+          asset.exifInfo = { ...(asset.exifInfo || {}), latitude: lat, longitude: lng };
+        }
+      }
+    } catch {}
+  }
+
+  if (lat == null || lng == null) {
+    throw new Error("No GPS info");
+  }
+
+  // "apple" → maps://?q=lat,lng — opens Maps.app on macOS via the OS URL
+  // handler. Chrome shows a one-time confirmation prompt on first use.
+  // Anything else falls back to Google Maps in a new tab.
+  const url = currentCfg.mapsProvider === "apple"
+    ? `maps://?q=${lat},${lng}`
+    : `https://www.google.com/maps?q=${lat},${lng}`;
+  chrome.tabs.create({ url });
 }
 
 async function downloadOriginalAction(asset, _btn) {
@@ -991,6 +1055,53 @@ function renderUploadItem(name) {
     document.documentElement.setAttribute("data-theme", cfg.theme);
   }
 })();
+
+// Type-filter pills (All / Photos / Videos). Active filter is shared across
+// search and metadata-recent modes; flipping it clears the page cache and
+// refetches page 1.
+document.querySelectorAll(".type-pill").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const t = btn.dataset.type;
+    if (!t || t === currentTypeFilter) return;
+    currentTypeFilter = t;
+    document.querySelectorAll(".type-pill").forEach((b) => {
+      const isActive = b === btn;
+      b.classList.toggle("active", isActive);
+      b.setAttribute("aria-selected", isActive ? "true" : "false");
+    });
+    pageCache.clear();
+    loadPage(1);
+  });
+});
+
+// "Updated to vX.Y.Z" banner. background.js writes the notice on the
+// onInstalled(reason="update") event; we render it on the next popup open
+// and clear it after the user views the release notes or clicks dismiss.
+async function showUpdateBannerIfPending() {
+  try {
+    const { updateNotice } = await chrome.storage.local.get("updateNotice");
+    if (!updateNotice?.to) return;
+    const banner = $("updateBanner");
+    if (!banner) return;
+    $("updateBannerText").textContent = `Updated to v${updateNotice.to}`;
+    const link = $("updateBannerLink");
+    link.href = `https://github.com/bjoernch/immich-companion/releases/tag/v${encodeURIComponent(updateNotice.to)}`;
+    banner.hidden = false;
+  } catch {}
+}
+
+async function dismissUpdateBanner() {
+  const banner = $("updateBanner");
+  if (banner) banner.hidden = true;
+  try { await chrome.storage.local.remove("updateNotice"); } catch {}
+}
+
+$("updateBannerDismiss")?.addEventListener("click", dismissUpdateBanner);
+$("updateBannerLink")?.addEventListener("click", () => {
+  // Let the link open in a new tab, then clear the notice on the next tick.
+  setTimeout(dismissUpdateBanner, 50);
+});
+showUpdateBannerIfPending();
 
 // On popup open: when no query is typed yet, show the most recent items
 // from the library so the search panel isn't a blank slate.

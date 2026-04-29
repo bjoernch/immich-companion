@@ -59,6 +59,57 @@
               <small class="muted">Immich → Account Settings → API Keys.</small>
             </label>
           </div>
+
+          <div class="perm-card">
+            <div class="perm-card-header">
+              <strong>Required API key permissions</strong>
+              <span class="muted">click a row to copy the scope name</span>
+            </div>
+
+            <div class="perm-tabs">
+              <button class="perm-tab active" data-tab="minimal" type="button">Minimal (recommended)</button>
+              <button class="perm-tab" data-tab="all" type="button">Easiest (All)</button>
+            </div>
+
+            <div id="perm-minimal" class="perm-list active">
+              <div class="perm-row" data-copy="asset.upload">
+                <code>asset.upload</code>
+                <span class="muted">save images and videos to your library</span>
+              </div>
+              <div class="perm-row" data-copy="asset.read">
+                <code>asset.read</code>
+                <span class="muted">search results, thumbnails, downloads, and video playback</span>
+              </div>
+              <div class="perm-row" data-copy="asset.view">
+                <code>asset.view</code>
+                <span class="muted">open assets when clicked (older Immich builds)</span>
+              </div>
+              <div class="perm-row" data-copy="album.read">
+                <code>album.read</code>
+                <span class="muted">list albums in the settings dropdowns</span>
+              </div>
+              <div class="perm-row" data-copy="albumAsset.create">
+                <code>albumAsset.create</code>
+                <span class="muted">add saved items to your default album (optional)</span>
+              </div>
+              <div class="perm-row" data-copy="sharedLink.create">
+                <code>sharedLink.create</code>
+                <span class="muted">"Save &amp; share" — create a public link on the spot</span>
+              </div>
+            </div>
+
+            <div id="perm-all" class="perm-list">
+              <div class="perm-row" data-copy="all">
+                <code>Select all</code>
+                <span class="muted">simplest — full read/write to your account. The extension still only uses the scopes listed under "Minimal".</span>
+              </div>
+            </div>
+
+            <small class="muted perm-footnote">
+              In Immich → Account Settings → API Keys → <strong>+ New API Key</strong>. Older Immich builds (≤ 1.106) had a single all-or-nothing key — if you don't see scopes, the key has full access by default.
+            </small>
+          </div>
+
           <div class="row">
             <button id="save" class="primary">Save</button>
             <button id="test" type="button">Test connection</button>
@@ -98,7 +149,7 @@
               <strong>Replace <span data-browser>Chrome</span>'s new tab page</strong>
               <small class="muted">
                 <span data-browser>Chrome</span> doesn't allow extensions to give back the original new tab without uninstalling.
-                When off, the new tab shows a minimal page with just a clock and a Google search bar — or
+                When off, the new tab shows a minimal clock-only page — or
                 redirects to the URL below if you set one. To fully restore <span data-browser>Chrome</span>'s default new tab,
                 disable the extension at <code data-extensions-url>chrome://extensions</code>.
               </small>
@@ -177,10 +228,6 @@
               <code>/share/...</code> URLs at these hosts. The host of your Server URL is included automatically.
             </small>
           </label>
-          <p class="muted callout">
-            <strong>Omnibox search:</strong> in the address bar, type <code>im</code> + Space + a query
-            (e.g. <code>im dog at the beach</code>) for live smart-search results.
-          </p>
         </section>
 
         <!-- Features -->
@@ -237,6 +284,15 @@
               <small class="muted">When using "Copy image to clipboard" in the popup, copy the full-resolution original instead of the medium-size preview. Off (preview) is recommended — originals can be very large and may fail to write to the clipboard if they're HEIC, RAW, or other unsupported formats.</small>
             </span>
           </label>
+          <label>
+            <span>Open in Maps</span>
+            <select id="mapsProvider">
+              <option value="off">Off (no button)</option>
+              <option value="google">Google Maps</option>
+              <option value="apple" data-macos-only>Apple Maps (macOS only)</option>
+            </select>
+            <small class="muted">Adds a map-pin button next to Share / Download on each photo. Click it to open the photo's GPS coordinates in the chosen maps app. Only the latitude and longitude are sent (in the URL); no other data leaves your device. Apple Maps opens the macOS Maps.app via the <code>maps://</code> URL scheme — the option is disabled on other operating systems. Photos without GPS info show a brief error.</small>
+          </label>
         </section>
 
         <!-- About -->
@@ -247,14 +303,12 @@
           <p>Companion extension for self-hosted Immich.</p>
           <ul class="features-list">
             <li><strong>Save to Immich</strong> — right-click any image or video.</li>
-            <li><strong>Omnibox</strong> — <code>im</code> + Space + query in the address bar.</li>
             <li><strong>Popup search</strong> — toolbar button → smart search of your library.</li>
             <li><strong>New tab</strong> — random photo + "On this day".</li>
             <li><strong>Share toolbar</strong> — Slideshow + Download-all on share pages.</li>
           </ul>
 
-          <a href="https://github.com/bjoernch/immich-companion/issues/new/choose"
-             target="_blank" rel="noopener" class="issue-card">
+          <button id="issueCard" type="button" class="issue-card">
             <div class="issue-card-icon">
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -270,7 +324,7 @@
               <line x1="7" y1="17" x2="17" y2="7"/>
               <polyline points="7 7 17 7 17 17"/>
             </svg>
-          </a>
+          </button>
 
           <div class="row">
             <a href="https://github.com/bjoernch/immich-companion" target="_blank" rel="noopener" class="github-btn">
@@ -299,6 +353,33 @@
         </footer>
       </main>
     </div>
+
+    <!-- Bug-report consent modal: previews the system info that will be added
+         to the prefilled GitHub issue. The user can confirm, skip the prefill,
+         or cancel. The modal lives at the body level so its z-index can sit
+         above the sticky sidebar/footer. -->
+    <div id="bugReportModal" class="modal" hidden>
+      <div class="modal-backdrop" data-close></div>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="bugReportTitle">
+        <h2 id="bugReportTitle">Report a bug</h2>
+        <p class="muted">The following information will be added to the GitHub issue form. You can edit any of it on the form before submitting.</p>
+        <ul class="bug-report-list">
+          <li><span>Extension version</span><code id="brExt">…</code></li>
+          <li><span>Browser</span><code id="brBrowser">…</code></li>
+          <li><span>Operating system</span><code id="brOs">…</code></li>
+          <li><span>Immich server</span><code id="brImmich">…</code></li>
+        </ul>
+        <p class="muted small">
+          By clicking <strong>Continue</strong>, you agree this information will be sent to GitHub. Your <strong>API key and Immich server URL are never included</strong>.
+        </p>
+        <div class="modal-actions">
+          <button type="button" id="brCancel" data-close>Cancel</button>
+          <button type="button" id="brSkip" class="link-text">Continue without info</button>
+          <button type="button" id="brContinue" class="primary">Continue</button>
+        </div>
+      </div>
+    </div>
+
     <script type="module" src="options.js"></script>
   </body>
 </html>

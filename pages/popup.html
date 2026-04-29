@@ -5,6 +5,14 @@
     <link rel="stylesheet" href="shared.css" />
   </head>
   <body class="popup">
+    <div id="updateBanner" class="update-banner" hidden>
+      <span class="update-banner-icon" aria-hidden="true">✨</span>
+      <div class="update-banner-body">
+        <span id="updateBannerText" class="update-banner-text">Updated</span>
+        <a id="updateBannerLink" target="_blank" rel="noopener" class="update-banner-link">Release notes →</a>
+      </div>
+      <button id="updateBannerDismiss" type="button" class="update-banner-dismiss" aria-label="Dismiss">×</button>
+    </div>
     <div class="popup-tabs">
       <button class="popup-tab active" data-tab="search">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -41,6 +49,11 @@
             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
           </svg>
         </button>
+      </div>
+      <div id="typeFilter" class="type-filter" role="tablist" aria-label="Filter by type">
+        <button class="type-pill active" data-type="all" type="button" role="tab" aria-selected="true">All</button>
+        <button class="type-pill" data-type="image" type="button" role="tab" aria-selected="false">Photos</button>
+        <button class="type-pill" data-type="video" type="button" role="tab" aria-selected="false">Videos</button>
       </div>
       <div id="empty" class="results-state show">
         <div>Type to search your library.</div>

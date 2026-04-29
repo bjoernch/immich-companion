@@ -361,6 +361,95 @@ hr {
   color: var(--accent);
   transform: translate(2px, -2px);
 }
+/* The card is a button now (was an <a>). Reset any default button look. */
+button.issue-card {
+  font: inherit;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+}
+
+/* Bug-report consent modal */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+}
+.modal[hidden] { display: none !important; }
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+}
+.modal-card {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 26px 28px 22px;
+  max-width: 480px;
+  width: calc(100% - 40px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+.modal-card h2 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 600;
+}
+.modal-card p { margin: 0 0 12px; }
+.modal-card p.small { font-size: 12.5px; line-height: 1.5; margin-top: 14px; }
+
+.bug-report-list {
+  list-style: none;
+  padding: 12px 14px;
+  margin: 14px 0 0;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.bug-report-list li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+}
+.bug-report-list li > span {
+  color: var(--muted);
+  flex: 0 0 auto;
+}
+.bug-report-list li > code {
+  background: transparent;
+  padding: 0;
+  font-size: 12.5px;
+  color: var(--text);
+  text-align: right;
+  word-break: break-word;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+.modal-actions .link-text {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 8px 4px;
+  margin-right: auto;
+}
+.modal-actions .link-text:hover { color: var(--accent); }
 
 .row {
   display: flex;
@@ -692,6 +781,91 @@ kbd {
   background: var(--panel-3);
 }
 .popup .search-row button svg { display: block; }
+
+/* Type-filter pills (All / Photos / Videos) above the gallery. */
+.popup .type-filter {
+  display: flex;
+  gap: 4px;
+  margin: 8px 0 2px;
+  flex: 0 0 auto;
+}
+.popup .type-pill {
+  all: unset;
+  cursor: pointer;
+  padding: 4px 11px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--muted);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  transition: background 140ms, color 140ms, border-color 140ms;
+}
+.popup .type-pill:hover { color: var(--text); }
+.popup .type-pill.active {
+  background: linear-gradient(180deg, rgba(124, 140, 255, 0.20), rgba(91, 108, 255, 0.10));
+  color: var(--text);
+  border-color: rgba(124, 140, 255, 0.40);
+}
+
+/* "Updated to vX.Y.Z" banner — shown once after the browser auto-updates
+   the extension. Sits above the popup tabs. */
+.popup .update-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 11px;
+  margin: 10px 12px 0;
+  background:
+    linear-gradient(135deg, rgba(124, 140, 255, 0.14), rgba(166, 114, 255, 0.08));
+  border: 1px solid rgba(124, 140, 255, 0.30);
+  border-radius: 9px;
+  font-size: 12.5px;
+  flex: 0 0 auto;
+}
+.popup .update-banner[hidden] { display: none !important; }
+.popup .update-banner-icon {
+  flex: 0 0 auto;
+  font-size: 14px;
+  line-height: 1;
+}
+.popup .update-banner-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  min-width: 0;
+}
+.popup .update-banner-text {
+  font-weight: 600;
+  color: var(--text);
+}
+.popup .update-banner-link {
+  color: var(--accent);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.popup .update-banner-link:hover { text-decoration: underline; }
+.popup .update-banner-dismiss {
+  all: unset;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+  flex: 0 0 auto;
+  transition: background 120ms, color 120ms;
+}
+.popup .update-banner-dismiss:hover {
+  background: var(--panel-3);
+  color: var(--text);
+}
 
 /* Recent uploads list */
 .recent-list {
@@ -1476,27 +1650,6 @@ body.player .player-status a:hover { filter: brightness(1.1); }
   text-shadow: none;
   color: var(--text);
 }
-.newtab .minimal-search {
-  display: none;
-  width: 100%;
-  max-width: 560px;
-}
-.newtab.minimal .minimal-search { display: block; }
-.newtab .minimal-search input {
-  width: 100%;
-  font-size: 16px;
-  padding: 14px 20px;
-  border-radius: 999px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  color: var(--text);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-}
-.newtab .minimal-search input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(124, 140, 255, 0.18);
-}
-
 /* ============== Toolbar (content script) ============== */
 
 .immich-companion-toolbar {

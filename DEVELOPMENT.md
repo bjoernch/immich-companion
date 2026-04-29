@@ -6,7 +6,7 @@ Internal notes for building, releasing, and publishing Immich Companion. Not use
 
 ```
 manifest.json            MV3 manifest
-background.js            service worker — context menus, omnibox, alarms, badge,
+background.js            service worker — context menus, alarms, badge,
                          message proxy for content scripts
 content.js / content.css runs on every page — toast UI, share-album toolbar,
                          Google search-result card injection

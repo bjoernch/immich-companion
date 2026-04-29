@@ -18,9 +18,9 @@ Immich Companion
 ## Short description (132 chars max — appears in search results)
 
 ```
-Save, share and search your self-hosted Immich library from any browser tab. Upload, smart-search, and a memory new tab.
+Save, share and search your self-hosted Immich library from any browser tab. Includes inline video preview and a memory new tab.
 ```
-(120 chars — leaves headroom)
+(128 chars — leaves headroom)
 
 ## Category
 
@@ -69,12 +69,13 @@ SIMPLE AND FAST
 A LIBRARY VIEW THAT FEELS LIKE A PHONE GALLERY
 - The toolbar popup opens straight to the most recent items in your library — masonry layout, grouped by month with sticky date headers and a thin year scrubber on the right edge
 - Click any year on the scrubber to jump straight to that point in your library
+- Filter the view to Photos only or Videos only with a single pill click
 - Smart search runs from the same input — up to 250 CLIP results per query, grouped on the same timeline
-- Three quick actions on every result, revealed on hover: copy the image straight to your clipboard, copy a public share link, or download the original — each with inline progress, success, and error feedback
+- Quick actions on every result, revealed on hover: copy to clipboard, copy a public share link, download the original, and open the photo's GPS location in Google Maps or Apple Maps (macOS-only) — each with inline progress, success, and error feedback
 - Choose whether the clipboard action copies the medium-size preview (default, fast and always works) or the full-resolution original
-- Address-bar search — type "im" plus a space plus a query for live suggestions
-- Inline matches on Google search pages — matching photos appear in a card above Google's results, without any data ever traveling through Google's servers
-- "Recent uploads" tab tracks the items you saved through the extension, with one-click open and copy-link actions
+- Inline video preview — videos in the gallery get a play overlay and a duration badge; click to play the transcoded stream right inside the popup, or pop it out into a dedicated 960×600 player window with native fullscreen support
+- Optional "Show Immich matches on Google" — when enabled, matching photos from your library appear in a card above Google search results; the search runs entirely between your browser and your own Immich server, with no data ever sent to Google
+- "Saved" tab tracks the items you saved through the extension, with one-click open and copy-link actions
 - Drag and drop files onto the popup to upload them straight from your computer
 
 A NEW TAB WORTH OPENING
@@ -83,7 +84,7 @@ A NEW TAB WORTH OPENING
 - An optional "On this day" memory strip with photos from past years
 - Pick a specific album as the background source
 - Optional auto-rotate every 30 seconds to 15 minutes
-- Or turn the new tab override off entirely — a minimal clock and Google search bar replaces it
+- Or turn the new tab override off entirely — a minimal clock-only page replaces it (or redirects to a URL of your choice)
 
 ORGANIZED
 - Optional default album for every save
@@ -95,6 +96,8 @@ BEAUTIFUL
 - Dark and light themes, plus a "match system" option
 - Connection status indicator on the toolbar icon (red when the server is unreachable)
 - Polished first-run onboarding that walks through creating an API key
+- A small "Updated to vX.Y.Z" banner appears once after the browser auto-updates the extension, with a direct link to the release notes
+- Built-in "Report a bug" flow on the About page — opens a consent modal that previews exactly which non-sensitive system fields (extension version, browser, OS, Immich version) get prefilled into a GitHub issue, and never includes your API key or server URL
 
 PRIVATE AND SECURE
 - All data goes directly to YOUR Immich server
@@ -139,12 +142,13 @@ EINFACH UND SCHNELL
 EINE BIBLIOTHEK-ANSICHT WIE IN EINER MOBILEN GALERIE-APP
 - Das Symbolleisten-Popup öffnet sich direkt mit den neuesten Items deiner Bibliothek — masonry-Layout, gruppiert nach Monat mit fixierten Datums-Headern und einem schmalen Jahres-Scrubber am rechten Rand
 - Klick auf ein Jahr im Scrubber springt direkt zu diesem Punkt in deiner Bibliothek
+- Filter-Pills oberhalb der Treffer schalten die Ansicht mit einem Klick zwischen Alle, nur Fotos und nur Videos um
 - Intelligente Suche läuft aus demselben Eingabefeld — bis zu 250 CLIP-Treffer pro Anfrage, in derselben Timeline gruppiert
-- Drei Schnellaktionen auf jedem Treffer (per Hover): Bild direkt in die Zwischenablage kopieren, öffentlichen Teilungslink kopieren, oder Original herunterladen — mit Fortschritt, Erfolgs- und Fehler-Feedback
+- Schnellaktionen auf jedem Treffer (per Hover): in die Zwischenablage kopieren, öffentlichen Teilungslink kopieren, Original herunterladen, sowie GPS-Standort des Fotos in Google Maps oder Apple Maps (nur macOS) öffnen
 - Wähle, ob die Zwischenablage-Aktion das mittelgroße Vorschaubild (Standard, schnell, funktioniert immer) oder das Original in voller Auflösung kopiert
-- Adresszeilen-Suche — tippe "im" plus Leerzeichen plus Anfrage für Live-Vorschläge
-- Inline-Treffer auf Google-Suchseiten — passende Fotos aus deiner Bibliothek erscheinen in einer Karte über Googles Ergebnissen, ohne dass irgendwelche Daten Googles Server berühren
-- "Letzte Uploads"-Tab zeigt die Dateien, die du über die Erweiterung gespeichert hast, mit Ein-Klick-Öffnen und Link-kopieren
+- Inline-Video-Vorschau — Videos in der Bibliothek bekommen ein Play-Symbol und eine Dauer-Markierung; ein Klick spielt den transcodierten Stream direkt im Popup ab oder öffnet ihn auf Wunsch in einem eigenen 960×600-Player-Fenster mit nativer Vollbild-Unterstützung
+- Optional: „Immich-Treffer auf Google anzeigen" — passende Fotos aus deiner Bibliothek erscheinen in einer Karte über Googles Ergebnissen, ohne dass irgendwelche Daten Googles Server berühren
+- „Gespeichert"-Tab zeigt die Dateien, die du über die Erweiterung gespeichert hast, mit Ein-Klick-Öffnen und Link-kopieren
 - Drag and Drop von Dateien auf das Popup, um sie direkt vom Computer hochzuladen
 
 EIN NEUER TAB, DER SICH LOHNT
@@ -153,7 +157,7 @@ EIN NEUER TAB, DER SICH LOHNT
 - Optionaler "An diesem Tag"-Streifen mit Fotos aus vergangenen Jahren
 - Bestimmtes Album als Quelle wählbar
 - Optionaler Auto-Wechsel alle 30 Sekunden bis 15 Minuten
-- Oder die Tab-Übernahme ganz abschalten — eine minimale Seite mit Uhrzeit und Google-Suchleiste tritt an die Stelle
+- Oder die Tab-Übernahme ganz abschalten — eine minimale Uhr-Seite tritt an die Stelle (oder eine Weiterleitung zu einer URL deiner Wahl)
 
 ORGANISIERT
 - Optionales Standard-Album für jeden Upload
@@ -196,7 +200,7 @@ The Web Store reviewer cares that the extension has *one* purpose. The trick: fr
 ```
 Browser integration for a self-hosted Immich photo server.
 
-Every feature in the extension serves the same single purpose: giving the user read and write access to their own Immich instance from inside their browser. Right-clicking an image saves it to Immich (write). The toolbar popup, the omnibox, and the inline card on Google search results read the Immich library so it can be searched without leaving the current tab. The new tab page surfaces a random photo and "On this day" memories — again, reading from Immich. There is no functionality unrelated to the Immich integration.
+Every feature in the extension serves the same single purpose: giving the user read and write access to their own Immich instance from inside their browser. Right-clicking an image saves it to Immich (write). The toolbar popup and the optional inline card on Google search results read the Immich library so it can be searched without leaving the current tab. The new tab page surfaces a random photo and "On this day" memories — again, reading from Immich. There is no functionality unrelated to the Immich integration.
 ```
 
 ### Deutsch
@@ -204,7 +208,7 @@ Every feature in the extension serves the same single purpose: giving the user r
 ```
 Browser-Integration für einen selbstgehosteten Immich-Foto-Server.
 
-Alle Funktionen der Erweiterung dienen demselben einen Zweck: dem Nutzer Lese- und Schreibzugriff auf seine eigene Immich-Instanz direkt aus dem Browser zu ermöglichen. Ein Rechtsklick auf ein Bild speichert es in Immich (Schreibzugriff). Das Symbolleisten-Popup, die Adresszeilen-Suche und die eingebettete Trefferkarte auf Google-Suchseiten lesen die Immich-Bibliothek, damit man sie suchen kann, ohne den aktuellen Tab zu verlassen. Die Neuer-Tab-Seite zeigt ein zufälliges Foto und „An diesem Tag"-Erinnerungen — ebenfalls aus Immich gelesen. Es gibt keine Funktion, die nichts mit der Immich-Integration zu tun hat.
+Alle Funktionen der Erweiterung dienen demselben einen Zweck: dem Nutzer Lese- und Schreibzugriff auf seine eigene Immich-Instanz direkt aus dem Browser zu ermöglichen. Ein Rechtsklick auf ein Bild speichert es in Immich (Schreibzugriff). Das Symbolleisten-Popup und die optionale eingebettete Trefferkarte auf Google-Suchseiten lesen die Immich-Bibliothek, damit man sie suchen kann, ohne den aktuellen Tab zu verlassen. Die Neuer-Tab-Seite zeigt ein zufälliges Foto und „An diesem Tag"-Erinnerungen — ebenfalls aus Immich gelesen. Es gibt keine Funktion, die nichts mit der Immich-Integration zu tun hat.
 ```
 
 ### Short version (if the field is single-line)
@@ -225,7 +229,7 @@ Field in the Store dashboard that asks for a short purpose statement and an inst
 ### English
 
 ```
-Immich Companion connects your browser to your self-hosted Immich server. Save images and videos from any webpage with one right-click, search your library straight from the address bar or directly inside Google's search results, and turn every new tab into a feed of your own memories.
+Immich Companion connects your browser to your self-hosted Immich server. Save images and videos from any webpage with one right-click, search your library straight from the toolbar popup with photo / video filters and an inline video preview, and turn every new tab into a feed of your own memories.
 
 Install it if you already run Immich and want to stop downloading-then-uploading every time you find something worth keeping. The extension never talks to anything other than the server you configure — no cloud account, no telemetry, no tracking.
 ```
@@ -233,7 +237,7 @@ Install it if you already run Immich and want to stop downloading-then-uploading
 ### Deutsch
 
 ```
-Immich Companion verbindet deinen Browser mit deinem selbstgehosteten Immich-Server. Speichere Bilder und Videos von jeder Webseite per Rechtsklick, durchsuche deine Bibliothek direkt aus der Adresszeile oder mitten in den Google-Suchergebnissen und mach jeden neuen Tab zu einem Feed deiner eigenen Erinnerungen.
+Immich Companion verbindet deinen Browser mit deinem selbstgehosteten Immich-Server. Speichere Bilder und Videos von jeder Webseite per Rechtsklick, durchsuche deine Bibliothek direkt aus dem Symbolleisten-Popup mit Foto-/Video-Filtern und Inline-Video-Vorschau, und mach jeden neuen Tab zu einem Feed deiner eigenen Erinnerungen.
 
 Installiere die Erweiterung, wenn du Immich bereits selbst betreibst und nicht mehr jedes Mal etwas herunter- und wieder hochladen willst, was du im Web findest. Die Erweiterung kommuniziert ausschließlich mit dem Server, den du konfigurierst — kein Cloud-Konto, keine Telemetrie, kein Tracking.
 ```
@@ -278,12 +282,6 @@ Zeigt eine Desktop-Benachrichtigung an, sobald ein Upload zum Immich-Server abge
 
 ```
 Wird verwendet, um die in-page Upload-Toasts (oben rechts) im aktiven Tab anzuzeigen, in dem der Nutzer die Speichern-Aktion ausgelöst hat. Außerdem nötig, damit der nach einer „Speichern & teilen"-Aktion erzeugte öffentliche Immich-Teilungslink in die Zwischenablage geschrieben werden kann (Browser verlangen für Zwischenablage-Zugriff einen Bezug zum aktiven Tab).
-```
-
-### `scripting`
-
-```
-Wird zusammen mit activeTab verwendet, um die Upload-Fortschritts- und Erfolgs-Toasts in den aktiven Tab einzublenden, der die Speichern-Aktion ausgelöst hat. Die Erweiterung führt ausschließlich extension-eigenen Code aus, der mit der Erweiterung mitgeliefert wird — es wird kein Remote-Code geladen oder ausgeführt.
 ```
 
 ### `alarms`
@@ -343,9 +341,6 @@ Shows a desktop notification when an upload to Immich completes (success / dupli
 
 activeTab:
 Renders the in-page upload toasts on the source tab and lets the share link be written to the clipboard after "Save & share" (browsers gate clipboard access on the active tab).
-
-scripting:
-Paired with activeTab to inject the toast UI into the source tab. Only ships extension-bundled code — no remote code execution.
 
 alarms:
 Schedules a periodic (every 5 minutes) connection check to the configured Immich server so the toolbar icon's status badge stays accurate. No other hosts are contacted.

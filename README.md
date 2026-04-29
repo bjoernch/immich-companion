@@ -10,7 +10,7 @@
 
 <p align="center">
   <strong>A community browser extension for self-hosted <a href="https://immich.app">Immich</a>.</strong><br/>
-  Save anything you see on the web, smart-search your library from the address bar, and turn every new tab into a memory.
+  Save anything you see on the web, smart-search your library from the toolbar popup, and turn every new tab into a memory.
 </p>
 
 <p align="center">
@@ -28,8 +28,7 @@ Right-click any image or video on any website to upload it directly to your Immi
 One click uploads the asset, creates a public Immich share link, and copies it to your clipboard — ready to paste anywhere.
 
 ### Smart search, everywhere
-- **Address bar** — type `im` + space + a query for live CLIP-powered results.
-- **Toolbar popup** — phone-gallery-style timeline grouped by month, with sticky date headers and a year scrubber on the right edge. Same view for both your most recent items and search results, with three quick actions on every photo (copy to clipboard, share link, download original).
+- **Toolbar popup** — phone-gallery-style timeline grouped by month, with sticky date headers and a year scrubber on the right edge. Same view for both your most recent items and search results, with quick actions on every photo (copy to clipboard, share link, download original, open in maps).
 - **Google search results** — when you Google something, photos in your library that match the query appear in a card at the top of the results. The search runs entirely between your browser and your Immich; nothing is sent to Google.
 
 ### New tab as a memory feed
