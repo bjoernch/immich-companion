@@ -1,0 +1,55 @@
+name: Sync privacy policy gist
+
+# Mirrors PRIVACY.md from this repo into the public gist that the store
+# listings (Chrome Web Store, Firefox AMO, Microsoft Edge Add-ons) point at
+# as their "privacy policy URL". The gist ID is hardcoded so the public URL
+# never changes — `gh gist edit` updates the existing gist in place; it
+# cannot create a new one.
+#
+# Manual setup (one time):
+#   1. Create a Classic Personal Access Token at
+#      https://github.com/settings/tokens/new with ONLY the `gist` scope
+#      (Fine-grained PATs cannot write to gists today; Classic is required).
+#   2. Add it as a repo secret named GIST_TOKEN at
+#      https://github.com/bjoernch/immich-companion/settings/secrets/actions
+#   3. Push any PRIVACY.md edit to main; the workflow runs and updates the
+#      gist. Same URL, new content.
+#
+# If GIST_TOKEN is not configured, the workflow fails loud so the drift is
+# visible in the Actions tab — better than silently letting PRIVACY.md drift
+# from the published policy.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'PRIVACY.md'
+  workflow_dispatch:    # allow manual re-sync from the Actions tab
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update gist with current PRIVACY.md
+        env:
+          GH_TOKEN: ${{ secrets.GIST_TOKEN }}
+          # Hardcoded — same gist ID = same URL forever. Do not change this
+          # without also updating every store dashboard's privacy policy URL.
+          GIST_ID: d4b5faceb57ce2c1acd1986be729e7a0
+        run: |
+          if [ -z "${GH_TOKEN}" ]; then
+            echo "::error::GIST_TOKEN secret is not configured." \
+                 "See the comment at the top of this workflow file for setup steps."
+            exit 1
+          fi
+          if [ ! -f PRIVACY.md ]; then
+            echo "::error::PRIVACY.md was deleted; refusing to wipe the public gist."
+            exit 1
+          fi
+          gh gist edit "$GIST_ID" PRIVACY.md
+          echo "Synced PRIVACY.md to https://gist.github.com/bjoernch/${GIST_ID}"

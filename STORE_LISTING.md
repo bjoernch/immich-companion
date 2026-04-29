@@ -359,11 +359,15 @@ Public gist hosting the contents of PRIVACY.md:
 https://gist.github.com/bjoernch/d4b5faceb57ce2c1acd1986be729e7a0
 ```
 
-Paste that into the dashboard's "Privacy policy URL" field. Update the gist if PRIVACY.md ever changes:
+Paste that into the dashboard's "Privacy policy URL" field. The gist URL is permanent — it is never recreated, only updated.
+
+The [`sync-privacy-gist.yml`](.github/workflows/sync-privacy-gist.yml) workflow auto-pushes any change to `PRIVACY.md` on `main` into the gist via `gh gist edit`. Manual fallback if the workflow ever fails:
 
 ```
 gh gist edit d4b5faceb57ce2c1acd1986be729e7a0 PRIVACY.md
 ```
+
+Workflow setup (one time): create a Classic Personal Access Token with `gist` scope at <https://github.com/settings/tokens/new> and add it as a repo secret named `GIST_TOKEN`. Fine-grained PATs cannot write gists today — Classic is required. Without the secret the workflow fails loud (visible in the Actions tab), which is the desired signal.
 
 ## Data Usage form
 
