@@ -3,9 +3,21 @@
 </p>
 
 <p align="center">
-  <a href="#install"><img alt="Chrome Web Store — Coming soon" src="https://img.shields.io/badge/Chrome%20Web%20Store-Coming%20soon-9ca3af?style=for-the-badge&logo=googlechrome&logoColor=white"></a>
+  <!-- Real store-button images. Once a listing goes live, swap the href to its actual store URL. -->
+  <a href="#install" title="Chrome Web Store — pending review">
+    <img height="58" alt="Available in the Chrome Web Store"
+         src="https://storage.googleapis.com/web-dev-uploads/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/UV4C4ybeBTsZt43U4xis.png">
+  </a>
   &nbsp;
-  <a href="#install"><img alt="Firefox Add-ons — Coming soon" src="https://img.shields.io/badge/Firefox%20Add--ons-Coming%20soon-9ca3af?style=for-the-badge&logo=firefoxbrowser&logoColor=white"></a>
+  <a href="#install" title="Firefox Add-ons — pending review">
+    <img height="58" alt="Get the Firefox Add-on"
+         src="https://blog.mozilla.org/addons/files/2020/04/get-the-addon-fx-apr-2020.svg">
+  </a>
+  &nbsp;
+  <a href="#install" title="Microsoft Edge Add-ons — pending review">
+    <img height="58" alt="Available in the Microsoft Edge Add-ons store"
+         src="webstore-assets/edge-addons-badge.svg">
+  </a>
 </p>
 
 <p align="center">
@@ -14,7 +26,7 @@
 </p>
 
 <p align="center">
-  <em>The store listings are in review. While you're waiting, you can install the extension from the latest <a href="https://github.com/bjoernch/immich-companion/releases">release</a> — see <a href="#install">install instructions</a> below.</em>
+  <em>The store listings are pending review at the Chrome Web Store, Firefox Add-ons, and Microsoft Edge Add-ons. While you're waiting, you can install the extension from the latest <a href="https://github.com/bjoernch/immich-companion/releases">release</a> — see <a href="#install">install instructions</a> below.</em>
 </p>
 
 ---

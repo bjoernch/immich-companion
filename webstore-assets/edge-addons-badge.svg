@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="206" height="58" viewBox="0 0 206 58" role="img" aria-label="Available in the Microsoft Edge Add-ons store">
+  <title>Available in the Microsoft Edge Add-ons store</title>
+  <rect x="0.5" y="0.5" width="205" height="57" rx="6" fill="#ffffff" stroke="#dadce0"/>
+
+  <!-- Simplified Microsoft Edge swirl. Two overlapping arcs in the brand
+       blue→teal→green gradient, sized to roughly match the Chrome and
+       Firefox badge logo footprint. Not pixel-perfect to Microsoft's
+       official logo (which uses several layered Bezier paths) but
+       recognisable at this size and consistent with the other badges. -->
+  <defs>
+    <linearGradient id="edgeOuter" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F6CBD"/>
+      <stop offset="100%" stop-color="#00B5E2"/>
+    </linearGradient>
+    <linearGradient id="edgeInner" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3CD68F"/>
+      <stop offset="100%" stop-color="#0F6CBD"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(13, 13)">
+    <circle cx="16" cy="16" r="16" fill="url(#edgeOuter)"/>
+    <path d="M 16 32 A 16 16 0 0 0 31 22 A 13 13 0 0 1 20 29 A 11 11 0 0 0 16 32 Z" fill="url(#edgeInner)"/>
+    <path d="M 9 9 A 12 12 0 0 1 28 14 A 14 14 0 0 0 16 6 A 9 9 0 0 0 9 9 Z" fill="#ffffff" opacity="0.4"/>
+  </g>
+
+  <!-- Two-line label, mirrors the layout of the official Chrome Web Store
+       badge (small "Available in the" above larger store name). -->
+  <text x="60" y="23" font-family="Roboto, 'Segoe UI', -apple-system, system-ui, sans-serif" font-size="11" fill="#5f6368">Available in the</text>
+  <text x="60" y="42" font-family="Roboto, 'Segoe UI', -apple-system, system-ui, sans-serif" font-size="15" font-weight="500" fill="#3c4043">Microsoft Edge Add-ons</text>
+</svg>
