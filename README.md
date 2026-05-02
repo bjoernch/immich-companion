@@ -8,20 +8,20 @@
 </p>
 
 <p align="center">
-  <strong>Coming soon to the stores below.</strong> The Chrome Web Store, Firefox Add-ons, and Microsoft Edge Add-ons listings are still in review — the buttons below will become live links as each store approves the extension. Until then, install from the <a href="https://github.com/bjoernch/immich-companion/releases">latest release</a> (<a href="#install">instructions</a>).
+  Now live in the Chrome Web Store and Firefox Add-ons. The Microsoft Edge Add-ons listing is still in review — until it goes live the Edge button below points at the GitHub <a href="#install">install instructions</a>; Chromium-based browsers including Edge can also install directly from the Chrome Web Store.
 </p>
 
 <p align="center">
   <!-- Store-button images. All bundled locally in webstore-assets/ so the
-       README never depends on an external CDN. Once a listing goes live,
-       swap the href on the matching <a> to the actual store URL. -->
-  <a href="#install" title="Chrome Web Store — pending review">
-    <img height="58" alt="Available in the Chrome Web Store (pending review)"
+       README never depends on an external CDN. Edge is still pending; flip
+       its href to the live store URL once that listing is approved. -->
+  <a href="https://chromewebstore.google.com/detail/immich-companion/kdgjgohclpdgnhkifmlidoncogokjkkd" title="Install from the Chrome Web Store">
+    <img height="58" alt="Available in the Chrome Web Store"
          src="webstore-assets/chrome-webstore-badge.svg">
   </a>
   &nbsp;
-  <a href="#install" title="Firefox Add-ons — pending review">
-    <img height="58" alt="Get the Firefox Add-on (pending review)"
+  <a href="https://addons.mozilla.org/firefox/addon/immich-companion/" title="Install from Firefox Add-ons">
+    <img height="58" alt="Get the Firefox Add-on"
          src="webstore-assets/firefox-addons-badge.svg">
   </a>
   &nbsp;
@@ -63,18 +63,9 @@ The extension transmits data **only** to the Immich server you configure. No ana
 
 ## Install
 
-### Chrome / Edge / Brave / any Chromium browser
-
-1. Download `immich-companion-chrome-<version>.zip` from the latest [release](https://github.com/bjoernch/immich-companion/releases).
-2. Unzip it.
-3. Open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked**, and pick the unzipped folder.
-
-### Firefox
-
-1. Download `immich-companion-firefox-<version>.zip` from the latest [release](https://github.com/bjoernch/immich-companion/releases).
-2. Open `about:debugging` → **This Firefox** → **Load Temporary Add-on…** and pick the zip directly.
-
-> Firefox 121 or newer is required. Temporary add-ons are removed when you restart Firefox; for a permanent install, wait for the AMO listing to go live.
+- **[Chrome Web Store](https://chromewebstore.google.com/detail/immich-companion/kdgjgohclpdgnhkifmlidoncogokjkkd)** — also covers Edge, Brave, Vivaldi, Arc, Opera and other Chromium-based browsers.
+- **[Firefox Add-ons](https://addons.mozilla.org/firefox/addon/immich-companion/)** — Firefox 121 or newer.
+- **Microsoft Edge Add-ons** — *pending review.* While the dedicated Edge listing is approved, install via the Chrome Web Store link above; it works in Edge identically.
 
 ### After install
 
