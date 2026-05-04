@@ -8,36 +8,42 @@
 </p>
 
 <p align="center">
-  Click your browser to install. Chromium-based browsers (Chrome, Brave, Opera, plus Edge, Vivaldi, Arc, …) install from the Chrome Web Store. Firefox installs from Mozilla Add-ons. Safari installs as a self-built Xcode project — see <a href="SAFARI.md">SAFARI.md</a>.
+  Click your browser to install. Chromium-based browsers (Chrome, Edge, Brave, Opera, plus Vivaldi, Arc, …) install from the Chrome Web Store. Firefox installs from Mozilla Add-ons. Safari installs as a self-built Xcode project — see <a href="SAFARI.md">SAFARI.md</a>.
 </p>
 
 <table align="center">
   <tr>
-    <td align="center" width="120">
+    <td align="center" width="100">
       <a href="https://chromewebstore.google.com/detail/immich-companion/kdgjgohclpdgnhkifmlidoncogokjkkd" title="Install from the Chrome Web Store">
         <img src="webstore-assets/browser-icons/google-chrome.svg" width="64" height="64" alt="Chrome"/><br/>
         Chrome
       </a>
     </td>
-    <td align="center" width="120">
+    <td align="center" width="100">
+      <a href="https://chromewebstore.google.com/detail/immich-companion/kdgjgohclpdgnhkifmlidoncogokjkkd" title="Install from the Chrome Web Store (works directly in Edge)">
+        <img src="webstore-assets/browser-icons/microsoft-edge.svg" width="64" height="64" alt="Edge"/><br/>
+        Edge
+      </a>
+    </td>
+    <td align="center" width="100">
       <a href="https://chromewebstore.google.com/detail/immich-companion/kdgjgohclpdgnhkifmlidoncogokjkkd" title="Install from the Chrome Web Store (works in Brave)">
         <img src="webstore-assets/browser-icons/brave.svg" width="64" height="64" alt="Brave"/><br/>
         Brave
       </a>
     </td>
-    <td align="center" width="120">
+    <td align="center" width="100">
       <a href="https://chromewebstore.google.com/detail/immich-companion/kdgjgohclpdgnhkifmlidoncogokjkkd" title="Install from the Chrome Web Store (works in Opera with the Install Chrome Extensions add-on)">
         <img src="webstore-assets/browser-icons/opera.svg" width="64" height="64" alt="Opera"/><br/>
         Opera
       </a>
     </td>
-    <td align="center" width="120">
+    <td align="center" width="100">
       <a href="https://addons.mozilla.org/firefox/addon/immich-companion/" title="Install from Firefox Add-ons">
         <img src="webstore-assets/browser-icons/firefox.svg" width="64" height="64" alt="Firefox"/><br/>
         Firefox
       </a>
     </td>
-    <td align="center" width="120">
+    <td align="center" width="100">
       <a href="SAFARI.md" title="Build instructions for Safari (macOS, experimental)">
         <img src="webstore-assets/browser-icons/safari.svg" width="64" height="64" alt="Safari"/><br/>
         Safari
