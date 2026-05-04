@@ -74,6 +74,18 @@ Dark and light themes (with system-match), keyboard shortcut (`Ctrl+Shift+L` / `
 
 ---
 
+## Customising the new tab (or getting out of it)
+
+The "New tab as a memory feed" feature is opt-in for fresh installs (the welcome page asks). Once enabled, it owns every new tab — *every browser extension that overrides the new tab works this way; there is no API for an extension to release the override at runtime*. Closest you can get without uninstalling:
+
+- **Calmer photo background.** Pick a *Source for new tab photos* in **Settings → New Tab** that's an album of neutral wallpapers/landscapes (Immich → create an album → throw a few non-personal photos in it → select it from the dropdown).
+- **Hide the memory strip.** *Settings → New Tab* → toggle off **"On this day" memory strip**.
+- **Hide the EXIF row.** Same screen → toggle off **Show photo details**.
+- **No photo at all, just a clock.** *Settings → New Tab* → toggle **Replace new tab page** off. The tab now shows an explainer card with one-click options to redirect every new tab to a URL of your choice (Google, your own homepage, anywhere).
+- **Real browser default new tab.** Remove the extension at `chrome://extensions` / `about:addons`. There is no in-extension way to fully restore the browser's own new tab.
+
+---
+
 ## Privacy
 
 The extension transmits data **only** to the Immich server you configure. No analytics, no third-party services, no tracking. Your API key stays in `chrome.storage.local` on your device.
