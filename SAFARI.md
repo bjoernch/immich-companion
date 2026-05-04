@@ -1,10 +1,12 @@
 # Safari (macOS) — install and build
 
-> **Status:** experimental. The core flows (popup search, options, in-page toasts) work; some features (right-click *Save to Immich*, share-link toast, scheduled connection ping) are likely broken because Safari doesn't support `background.type: "module"` or the `notifications` permission. See *Known limitations* below.
+> **Status:** experimental. Core flows (popup search, options, in-page toasts) work. Safari ignores `options_ui.open_in_tab`, doesn't support the `notifications` permission, and requires a bundled non-module background script (handled in release builds; see *Known limitations* below).
 
 Initial Safari support was contributed by [@Tekkiech](https://github.com/Tekkiech) in [PR #5](https://github.com/bjoernch/immich-companion/pull/5). Rather than committing a duplicated copy of the extension source under a `Safari-Immich/` folder (which would silently drift from the Chrome/Firefox sources every release), the release workflow now generates a fresh Safari Xcode project from the same `dist/immich-companion-chrome-<version>.zip` that ships to the Chrome Web Store.
 
 The deliverable is the **Xcode project**, not a built `.app`. Apple won't let an unsigned `.app` register a Safari extension, and signing for distribution requires a paid Apple Developer Program membership ($99/year). Each user signs the project with their own free Apple ID and runs it locally instead.
+
+The Safari build step also rewrites the background service worker into a single non-module file (inlining `lib/immich.js` + `lib/browser-name.js`) and strips `background.type` from the manifest. If you generate a project locally from source, run `python3 scripts/prepare_safari_extension.py <unpacked-extension-dir>` before `safari-web-extension-converter`.
 
 ---
 
@@ -77,16 +79,16 @@ Apple's converter prints these warnings, all of which apply at runtime:
 
 | Manifest key | Safari support | Practical impact |
 |---|---|---|
-| `background.type: "module"` | Not supported | The background script's ES `import` statements fail. Anything triggered from the background — right-click *Save to Immich*, share-link toast, periodic connection ping, the Google-search inline card content-script bridge — will likely silently fail until we bundle imports into a single non-module `background.js`. |
+| `background.type: "module"` | Not supported | The Safari build strips `background.type` and bundles the background script (inlines `lib/immich.js` + `lib/browser-name.js`) into a single non-module file. If you build locally and skip the bundling step, background-triggered flows (context-menu save, share-link toast, periodic ping, Google inline card bridge) will fail. |
 | `options_ui.open_in_tab` | Ignored | The Settings page opens embedded in the wrapper app's window instead of in a Safari tab. Cosmetic; everything still works there. |
 | `notifications` permission | Not supported | The optional desktop-notification feature on upload completion is silently disabled. The in-page toast still fires (different code path). |
 | `chrome.downloads.download()` (Firefox-only path) | Not used in Safari build | Safari builds don't include the `downloads` permission anyway. The popup-side `<a download>.click()` works in Safari. |
 
-What **does** work without changes:
+What **does** work with the bundled background:
 
 - Toolbar popup: search, gallery, filter pills, video preview (inline + popup window), Maps quick-action, About-section bug-report flow, update banner.
 - Settings (options) page: full functionality.
-- Right-click → *Save to Immich* on a normal blog/news image where the source URL is plain `https://…/foo.jpg`. Will fail on blob: URLs and login-walled CDNs because the page-context fetch fallback relies on the `chrome.tabs.sendMessage` content-script bridge, which the Safari background can't reach until imports are bundled.
+- Context-menu Save to Immich / Save & share flows (including the share-link toast), plus the Google inline card when enabled.
 
 ---
 
@@ -104,7 +106,6 @@ Until the project funds either of #2 or #3, the Xcode-project-zip workflow above
 
 ## Roadmap
 
-- **Bundle the background module**: combine `lib/immich.js` + `lib/browser-name.js` + `background.js` into a single non-module file at build time, fixing the *Save to Immich* / share-link / ping flows on Safari.
 - **Optional**: explore whether running the Mac App Store submission is worth the $99/year for a small project.
 - **Document** any further compatibility shims discovered during real Safari use.
 
