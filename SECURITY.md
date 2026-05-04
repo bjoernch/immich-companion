@@ -11,7 +11,7 @@ If you believe you've found a security issue in Immich Companion, please **do no
 Instead:
 
 1. Open a [private security advisory](https://github.com/bjoernch/immich-companion/security/advisories/new) on the GitHub repo. Only the maintainer can see this.
-2. Or email `bjoernch@users.noreply.github.com` with a subject line starting with `[security]`.
+2. Or email `bjoern@felgner.ch` with a subject line starting with `[security]`.
 
 Please include:
 
