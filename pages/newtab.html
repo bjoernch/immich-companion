@@ -19,6 +19,29 @@
       </div>
     </div>
     <div id="toast" class="toast" hidden></div>
+
+    <!-- Shown when the user IS configured but the server is unreachable
+         (timeout, DNS failure, 5xx, etc.). Distinct from #setup which
+         covers the not-yet-configured state. -->
+    <div id="connError" class="setup" hidden>
+      <div class="card connection-error-card">
+        <div class="connection-error-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m2 2 20 20"/>
+            <path d="M5.78 5.78A7 7 0 0 0 9 19h8.5a4.5 4.5 0 0 0 1.31-.19"/>
+            <path d="M21.53 16.5A4.5 4.5 0 0 0 17.5 10h-1.79A7.01 7.01 0 0 0 10 5.07"/>
+          </svg>
+        </div>
+        <h1>Couldn't reach Immich</h1>
+        <p class="muted" id="connErrorDetail"></p>
+        <div class="connection-error-host" id="connErrorHost"></div>
+        <div class="setup-actions">
+          <button id="connErrorRetry" class="primary" type="button">Retry</button>
+          <button id="connErrorSettings" type="button">Open settings</button>
+        </div>
+      </div>
+    </div>
+
     <div id="setup" class="setup" hidden>
       <div class="card">
         <h1>Connect Immich</h1>
@@ -30,6 +53,7 @@
         </div>
       </div>
     </div>
+
     <script type="module" src="newtab.js"></script>
   </body>
 </html>

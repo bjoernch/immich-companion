@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Immich Companion",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description": "Save images and videos from any page to your self-hosted Immich and turn the new tab into a memory feed.",
   "minimum_chrome_version": "114",
   "browser_specific_settings": {

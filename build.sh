@@ -53,6 +53,15 @@ src.pop("minimum_chrome_version", None)
 sw = src.get("background", {}).get("service_worker")
 if sw:
     src["background"] = {"scripts": [sw], "type": "module"}
+# `downloads` permission — only added to the Firefox build. Chrome's
+# popup-context <a download>.click() works reliably so adding the
+# permission there would re-prompt every Chrome user on update for no
+# functional benefit. Firefox's popup loses focus mid-click and the
+# anchor fallback fails, so popup.js prefers chrome.downloads.download()
+# whenever the API is exposed — which only happens here.
+perms = src.setdefault("permissions", [])
+if "downloads" not in perms:
+    perms.append("downloads")
 pathlib.Path(sys.argv[1]).write_text(json.dumps(src, indent=2) + "\n")
 PY
 rm -f "$FIREFOX_ZIP"

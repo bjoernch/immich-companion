@@ -918,13 +918,24 @@ kbd {
   justify-content: flex-end;
   margin-top: 8px;
 }
+/* Subtle but recognisably-clickable button. Used for "Clear history" in
+   the Saved tab — destructive action, so the hover state turns red. */
 .link-button {
-  all: unset;
   cursor: pointer;
+  padding: 5px 11px;
   font-size: 12px;
+  font-weight: 500;
   color: var(--muted);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: color 120ms, border-color 120ms, background 120ms;
 }
-.link-button:hover { color: var(--accent); }
+.link-button:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+  background: var(--panel-3);
+}
 
 /* Drop zone (Upload tab) */
 .drop-zone {
@@ -1017,6 +1028,93 @@ kbd {
   font-size: 12px;
   opacity: 0.7;
 }
+
+/* Connection-error card shown in the popup's empty state when the Immich
+   server is unreachable (timeout, network failure, 5xx). */
+.popup .connection-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 26px 18px 22px;
+  text-align: center;
+}
+.popup .connection-error-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.12), rgba(255, 107, 107, 0.04));
+  border: 1px solid rgba(255, 107, 107, 0.30);
+  color: var(--danger);
+  display: grid;
+  place-items: center;
+  margin-bottom: 4px;
+}
+.popup .connection-error-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.1px;
+}
+.popup .connection-error-detail {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+  max-width: 320px;
+}
+.popup .connection-error-host {
+  font: 11.5px ui-monospace, "SF Mono", Menlo, monospace;
+  color: var(--muted);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 8px;
+}
+.popup .connection-error-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.popup .connection-error-actions button {
+  font-size: 12.5px;
+  padding: 7px 14px;
+}
+
+/* Connection-error overlay on the new-tab page. Reuses .setup as the
+   backdrop; the .connection-error-card class adapts the inner card. */
+.newtab .connection-error-card {
+  text-align: center;
+  padding: 32px 28px 24px;
+}
+.newtab .connection-error-card .connection-error-icon {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.14), rgba(255, 107, 107, 0.04));
+  border: 1px solid rgba(255, 107, 107, 0.35);
+  color: var(--danger);
+  display: grid;
+  place-items: center;
+  margin: 0 auto 14px;
+}
+.newtab .connection-error-card h1 {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 600;
+}
+.newtab .connection-error-card p { margin: 0 0 12px; font-size: 13.5px; line-height: 1.4; }
+.newtab .connection-error-card .connection-error-host {
+  display: inline-block;
+  font: 12px ui-monospace, "SF Mono", Menlo, monospace;
+  color: var(--muted);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  margin-bottom: 18px;
+  word-break: break-all;
+}
+.newtab .connection-error-card .connection-error-host[hidden] { display: none; }
 
 .popup .results a {
   display: block;

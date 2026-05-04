@@ -51,6 +51,7 @@ const TOGGLE_KEYS = [
   "featureNotifications",
   "featureGoogleInline",
   "clipboardCopyOriginal",
+  "archiveOnSave",
 ];
 const TEXT_KEYS = [
   "serverUrl",

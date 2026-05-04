@@ -169,19 +169,57 @@ function formatBytes(n) {
   return `${(n / 1024 / 1024 / 1024).toFixed(2)} GB`;
 }
 
+// Same heuristic as the popup: timeouts, generic network errors, 5xx server
+// responses. Triggers the dedicated overlay instead of a tiny pill toast.
+function isConnectionError(e) {
+  if (!e) return false;
+  if (e.name === "AbortError") return true;
+  if (e instanceof TypeError) return true;
+  const m = e.message || "";
+  if (/timed out|unreachable/i.test(m)) return true;
+  if (/Failed to fetch|NetworkError|net::ERR_/i.test(m)) return true;
+  if (/failed: 5\d\d/.test(m)) return true;
+  return false;
+}
+
+function showConnectionErrorOverlay(cfg, error) {
+  const overlay = $("connError");
+  if (!overlay) return;
+  $("connErrorDetail").textContent = error?.message || "Unknown error.";
+  let host = "";
+  try { if (cfg?.serverUrl) host = new URL(cfg.serverUrl).host; } catch {}
+  $("connErrorHost").textContent = host;
+  $("connErrorHost").hidden = !host;
+  overlay.hidden = false;
+}
+
+function hideConnectionErrorOverlay() {
+  const overlay = $("connError");
+  if (overlay) overlay.hidden = true;
+}
+
 async function loadBackground(cfg) {
   try {
     await pickAndRender(cfg);
+    hideConnectionErrorOverlay();
   } catch (e) {
-    showToast(`Background failed: ${e.message}`, {
-      label: "Settings",
-      onClick: () => chrome.runtime.openOptionsPage(),
-    });
+    if (isConnectionError(e)) {
+      showConnectionErrorOverlay(cfg, e);
+    } else {
+      showToast(`Background failed: ${e.message}`, {
+        label: "Settings",
+        onClick: () => chrome.runtime.openOptionsPage(),
+      });
+    }
   }
   if (cfg.newtabRotateSeconds && cfg.newtabRotateSeconds > 0) {
     clearInterval(rotateTimer);
     rotateTimer = setInterval(() => {
-      pickAndRender(cfg).catch(() => {});
+      pickAndRender(cfg)
+        .then(hideConnectionErrorOverlay)
+        .catch((e) => {
+          if (isConnectionError(e)) showConnectionErrorOverlay(cfg, e);
+        });
     }, cfg.newtabRotateSeconds * 1000);
   }
 }
@@ -221,12 +259,16 @@ async function loadOnThisDayStrip(cfg) {
 }
 
 function renderMinimal(cfg) {
+  // If the user set an explicit fallback URL, honor it. Otherwise show
+  // the minimal clock-only page. Browsers don't let an extension that
+  // declares chrome_url_overrides.newtab release the new tab back to the
+  // browser without being uninstalled — there's nothing we can do about
+  // that from inside the extension. The Settings page now spells this
+  // out in the toggle's description so the limitation is visible.
   if (cfg.newtabFallbackUrl) {
     location.replace(cfg.newtabFallbackUrl);
     return;
   }
-  // Minimal mode is just a clock now — no search bar. Users with
-  // "Replace new tab" turned off and no fallback URL set see this.
   document.body.classList.add("minimal");
 }
 
@@ -357,6 +399,13 @@ async function init() {
 
 $("openSettings").addEventListener("click", () => chrome.runtime.openOptionsPage());
 $("recheck").addEventListener("click", () => location.reload());
+
+// Connection-error overlay actions
+$("connErrorRetry")?.addEventListener("click", () => {
+  hideConnectionErrorOverlay();
+  location.reload();
+});
+$("connErrorSettings")?.addEventListener("click", () => chrome.runtime.openOptionsPage());
 
 chrome.storage.onChanged.addListener((_changes, area) => {
   if (area !== "sync") return;

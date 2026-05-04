@@ -149,6 +149,41 @@
       copyToClipboard(msg.text).then((ok) => sendResponse({ ok }));
       return true; // async
     }
+    if (msg?.type === "fetch-blob" && msg.url) {
+      // The background SW can't resolve blob: URLs (they're scoped to the
+      // page that created them). Fetch in the content script instead and
+      // ship the bytes back.
+      fetch(msg.url)
+        .then(async (r) => {
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          const buf = await r.arrayBuffer();
+          sendResponse({
+            ok: true,
+            contentType: r.headers.get("content-type") || "application/octet-stream",
+            data: Array.from(new Uint8Array(buf)),
+          });
+        })
+        .catch((e) => sendResponse({ ok: false, error: e.message || String(e) }));
+      return true; // async
+    }
+    if (msg?.type === "fetch-in-page" && msg.url) {
+      // Fallback path for cross-origin CDN fetches that the background SW
+      // can't make (e.g. cdninstagram.com requires the page's Referer +
+      // cookies). The content script runs in the page's origin so this
+      // request automatically carries them.
+      fetch(msg.url, { credentials: "include" })
+        .then(async (r) => {
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          const buf = await r.arrayBuffer();
+          sendResponse({
+            ok: true,
+            contentType: r.headers.get("content-type") || "application/octet-stream",
+            data: Array.from(new Uint8Array(buf)),
+          });
+        })
+        .catch((e) => sendResponse({ ok: false, error: e.message || String(e) }));
+      return true; // async
+    }
     return false;
   });
 

@@ -47,6 +47,8 @@ const ICON = {
   expand: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>',
   // Map-pin (Lucide MapPin) — opens the asset's GPS location in Google Maps
   maps: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+  // Cloud-with-slash (Lucide CloudOff) — connection failure illustration
+  cloudOff: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m2 2 20 20"/><path d="M5.78 5.78A7 7 0 0 0 9 19h8.5a4.5 4.5 0 0 0 1.31-.19"/><path d="M21.53 16.5A4.5 4.5 0 0 0 17.5 10h-1.79A7.01 7.01 0 0 0 10 5.07"/></svg>',
 };
 
 // Inline preview cap. Above this we refuse and tell the user to open in Immich
@@ -155,6 +157,71 @@ function emptyStateError(message) {
   div.style.color = "var(--danger)";
   div.textContent = message;
   return div;
+}
+
+// Detect "your server is unreachable" so we can show the dedicated card
+// instead of a one-liner. Covers timeouts (the AbortController abort path),
+// generic network errors (TypeError from fetch), and 5xx server errors.
+function isConnectionError(e) {
+  if (!e) return false;
+  if (e.name === "AbortError") return true;
+  if (e instanceof TypeError) return true;
+  const m = e.message || "";
+  if (/timed out|unreachable/i.test(m)) return true;
+  if (/Failed to fetch|NetworkError|net::ERR_/i.test(m)) return true;
+  if (/failed: 5\d\d/.test(m)) return true;
+  return false;
+}
+
+// Card shown in the popup's empty state when the Immich server can't be
+// reached. Big icon + headline + technical detail + retry/settings actions.
+// Mirrors the layout of the new-tab connection-error overlay.
+function connectionErrorNode(error, onRetry) {
+  const wrap = document.createElement("div");
+  wrap.className = "connection-error";
+
+  const iconEl = document.createElement("div");
+  iconEl.className = "connection-error-icon";
+  iconEl.appendChild(svgNode(ICON.cloudOff));
+  wrap.appendChild(iconEl);
+
+  const titleEl = document.createElement("div");
+  titleEl.className = "connection-error-title";
+  titleEl.textContent = "Couldn't reach your Immich server";
+  wrap.appendChild(titleEl);
+
+  const detailEl = document.createElement("div");
+  detailEl.className = "connection-error-detail";
+  detailEl.textContent = error?.message || "Unknown error.";
+  wrap.appendChild(detailEl);
+
+  const hostEl = document.createElement("div");
+  hostEl.className = "connection-error-host";
+  try {
+    if (currentCfg?.serverUrl) hostEl.textContent = new URL(currentCfg.serverUrl).host;
+  } catch {}
+  if (hostEl.textContent) wrap.appendChild(hostEl);
+
+  const actions = document.createElement("div");
+  actions.className = "connection-error-actions";
+
+  const retryBtn = document.createElement("button");
+  retryBtn.type = "button";
+  retryBtn.className = "primary";
+  retryBtn.textContent = "Retry";
+  retryBtn.addEventListener("click", () => {
+    if (typeof onRetry === "function") onRetry();
+  });
+  actions.appendChild(retryBtn);
+
+  const settingsBtn = document.createElement("button");
+  settingsBtn.type = "button";
+  settingsBtn.textContent = "Open settings";
+  settingsBtn.addEventListener("click", openOptions);
+  actions.appendChild(settingsBtn);
+
+  wrap.appendChild(actions);
+  return wrap;
 }
 function setResultsState() {
   empty.classList.remove("show");
@@ -297,7 +364,13 @@ async function loadPage(page) {
     if (nextPage) prefetchPage(parseInt(nextPage, 10));
   } catch (e) {
     if (myReq !== inflight) return;
-    setEmptyState(emptyStateError(e.message));
+    if (isConnectionError(e)) {
+      const retry = () => { pageCache.clear(); loadPage(page); };
+      setEmptyState(connectionErrorNode(e, retry));
+    } else {
+      setEmptyState(emptyStateError(e.message));
+    }
+    status.textContent = "";
   } finally {
     loadingPage = false;
   }
@@ -801,22 +874,61 @@ async function openMapsAction(asset, _btn) {
 }
 
 async function downloadOriginalAction(asset, _btn) {
-  // Fetch the original via the API (with x-api-key header) and trigger a
-  // download from the resulting blob — <a download> can't send the header.
+  const filename = asset.originalFileName || `immich-${asset.id}`;
+
+  // Firefox: ask the background script to do the download. The popup-side
+  // anchor click silently fails because the popup loses focus mid-fetch,
+  // tearing down before the download starts. Background pages don't have
+  // focus to lose, so chrome.downloads.download() from there is reliable.
+  // The background only handles this branch when chrome.downloads is
+  // available (i.e. the Firefox build, where we requested the permission);
+  // on Chrome it returns notSupported and we fall through to the anchor
+  // path that already works there.
+  try {
+    const res = await new Promise((resolve, reject) => {
+      chrome.runtime.sendMessage(
+        { type: "download-asset", assetId: asset.id, filename },
+        (r) => {
+          if (chrome.runtime.lastError) {
+            return reject(new Error(chrome.runtime.lastError.message));
+          }
+          resolve(r);
+        },
+      );
+    });
+    if (res?.ok) return;
+    if (!res?.notSupported) {
+      // Background tried and failed for a real reason — surface that
+      // rather than silently masking it with the anchor fallback (which
+      // would also fail on Firefox).
+      throw new Error(res?.error || "download failed");
+    }
+    // res.notSupported → Chrome path; fall through.
+  } catch (e) {
+    // sendMessage failed entirely — only happens if there's no listener.
+    // Fall through to the anchor approach.
+    if (e?.message && !/Receiving end does not exist/i.test(e.message)) {
+      throw e;
+    }
+  }
+
+  // Chrome path: fetch in the popup (we have the API key here) and
+  // trigger the download via an <a download> click. Works reliably here
+  // because Chrome keeps the popup open through synchronous clicks.
   const res = await fetch(
     `${currentCfg.serverUrl}/api/assets/${asset.id}/original`,
     { headers: { "x-api-key": currentCfg.apiKey } },
   );
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const blob = await res.blob();
-  const url = URL.createObjectURL(blob);
+  const blobUrl = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url;
-  a.download = asset.originalFileName || `immich-${asset.id}`;
+  a.href = blobUrl;
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
 }
 
 

@@ -3,6 +3,7 @@ import {
   isConfigured,
   uploadAsset,
   addAssetsToAlbum,
+  setAssetArchived,
   smartSearch,
   thumbnailUrl,
   shareUrl,
@@ -29,6 +30,18 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   if (details.reason === "install") {
     chrome.tabs.create({ url: chrome.runtime.getURL("pages/welcome.html") });
   } else if (details.reason === "update") {
+    // Default for `featureNewtab` flipped from true → false in this version.
+    // Existing users had the old default of true and may never have written
+    // an explicit value to storage; preserve their behavior by writing true
+    // exactly once during the upgrade. Fresh installs get the new default
+    // of false (no surprise new-tab takeover).
+    try {
+      const stored = await chrome.storage.local.get("featureNewtab");
+      if (typeof stored.featureNewtab === "undefined") {
+        await chrome.storage.local.set({ featureNewtab: true });
+      }
+    } catch {}
+
     // Soft-prompt only if user hasn't configured yet.
     const cfg = await getConfig();
     if (!isConfigured(cfg)) {
@@ -127,6 +140,129 @@ function ensureExtension(name, mime) {
   return name + (map[mime] || "");
 }
 
+// Fetch the asset bytes for a saved URL. blob: URLs only resolve in the
+// originating page, so for those we delegate to the page's content script
+// (which can fetch them in-page) instead of trying from the SW. Returns
+// { blob, mime } on success and throws a user-friendly Error on failure.
+async function fetchAssetBytes(url, tabId) {
+  if (!url) throw new Error("No URL");
+
+  // blob: URLs are page-scoped; the SW cannot fetch them. Ask the page.
+  if (url.startsWith("blob:")) {
+    const fromPage = await fetchBlobInTab(tabId, url);
+    if (!fromPage) {
+      throw new Error(
+        "This image is loaded dynamically by the page (blob: URL). " +
+        "The page may have already revoked it, or the page blocks " +
+        "extensions from reading it. Try right-clicking a different " +
+        "version of the image (e.g. open it in a new tab first)."
+      );
+    }
+    return fromPage;
+  }
+
+  // data: URLs are inline and fetchable from anywhere.
+  if (url.startsWith("data:")) {
+    const res = await fetch(url);
+    return { blob: await res.blob(), mime: res.headers.get("content-type") || "" };
+  }
+
+  // Standard http(s) URLs. Try the source page's content script FIRST when
+  // we have a tab id — page-context fetch carries the page's Referer +
+  // cookies, which is what most CDNs (cdninstagram, login-walled images,
+  // etc.) actually require. Fall back to the SW fetch only if the page
+  // can't satisfy the request.
+  //
+  // This order also dodges a Firefox quirk where background-script fetches
+  // sometimes fail with TypeError ("NetworkError when attempting to fetch
+  // resource") on URLs the user can load fine in a normal tab.
+  if (tabId) {
+    const fromPage = await fetchInTab(tabId, url);
+    if (fromPage) return fromPage;
+  }
+
+  let swErr = null;
+  try {
+    const res = await fetch(url, { credentials: "omit" });
+    if (res.ok) {
+      return {
+        blob: await res.blob(),
+        mime: res.headers.get("content-type") || "application/octet-stream",
+      };
+    }
+    swErr = new Error(`Fetch failed: ${res.status}`);
+  } catch (e) {
+    swErr = e;
+  }
+
+  // Re-throw with friendly framing. Detect network-class failures both by
+  // class (TypeError) and by message text — Firefox's exact wording is
+  // "NetworkError when attempting to fetch resource"; Chromium is
+  // "Failed to fetch" / "net::ERR_…".
+  const errMsg = swErr?.message || String(swErr || "");
+  if (swErr instanceof TypeError || /NetworkError|Failed to fetch|net::ERR_|CORS/i.test(errMsg)) {
+    throw new Error(
+      "Couldn't reach the image — the page or its CDN blocks extension " +
+      "fetches even though the URL loads in a normal tab. Save the image " +
+      "to disk and upload via the popup's Upload tab as a workaround."
+    );
+  }
+  throw swErr;
+}
+
+// Same shape as fetchBlobInTab but uses the "fetch-in-page" channel for
+// regular http(s) URLs instead of blob: URLs.
+function fetchInTab(tabId, url) {
+  if (!tabId) return Promise.resolve(null);
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (v) => { if (!settled) { settled = true; resolve(v); } };
+    try {
+      chrome.tabs.sendMessage(tabId, { type: "fetch-in-page", url }, (res) => {
+        void chrome.runtime.lastError;
+        if (!res?.ok || !res?.data) return finish(null);
+        try {
+          const bytes = new Uint8Array(res.data);
+          const mime = res.contentType || "application/octet-stream";
+          finish({ blob: new Blob([bytes], { type: mime }), mime });
+        } catch {
+          finish(null);
+        }
+      });
+    } catch {
+      finish(null);
+    }
+    setTimeout(() => finish(null), 8000);
+  });
+}
+
+// Sends a "fetch-blob" message to the source tab's content script, which
+// resolves the blob: URL in-page and returns the bytes. Resolves to
+// { blob, mime } or null on any failure / timeout.
+function fetchBlobInTab(tabId, blobUrl) {
+  if (!tabId) return Promise.resolve(null);
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (v) => { if (!settled) { settled = true; resolve(v); } };
+    try {
+      chrome.tabs.sendMessage(tabId, { type: "fetch-blob", url: blobUrl }, (res) => {
+        void chrome.runtime.lastError;
+        if (!res?.ok || !res?.data) return finish(null);
+        try {
+          const bytes = new Uint8Array(res.data);
+          const mime = res.contentType || "application/octet-stream";
+          finish({ blob: new Blob([bytes], { type: mime }), mime });
+        } catch {
+          finish(null);
+        }
+      });
+    } catch {
+      finish(null);
+    }
+    setTimeout(() => finish(null), 8000);
+  });
+}
+
 async function saveUrlToImmich(url, tabId, { share = false } = {}) {
   if (!url) throw new Error("No URL");
   const cfg = await getConfig();
@@ -147,10 +283,7 @@ async function saveUrlToImmich(url, tabId, { share = false } = {}) {
   });
 
   try {
-    const res = await fetch(url, { credentials: "omit" });
-    if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
-    const mime = res.headers.get("content-type") || "application/octet-stream";
-    const blob = await res.blob();
+    const { blob, mime } = await fetchAssetBytes(url, tabId);
     const filename = ensureExtension(filenameInitial, mime);
 
     const now = new Date().toISOString();
@@ -166,6 +299,28 @@ async function saveUrlToImmich(url, tabId, { share = false } = {}) {
 
     if (cfg.defaultAlbumId && result?.id && !isDup) {
       try { await addAssetsToAlbum(cfg.defaultAlbumId, [result.id]); } catch {}
+    }
+    // Optional archive-on-save (hides from main timeline; albums still show
+    // it). Only for fresh uploads — re-archiving a duplicate would surprise
+    // the user if they had un-archived it on Immich. Errors are surfaced in
+    // the success toast rather than silently swallowed: the most common
+    // failure is the API key missing the `asset.update` scope, and a silent
+    // skip looked like the toggle was broken.
+    let archiveStatus = null; // null = not attempted, "ok" = archived, "<msg>" = error
+    if (cfg.archiveOnSave && result?.id && !isDup) {
+      try {
+        await setAssetArchived(result.id, true);
+        archiveStatus = "ok";
+      } catch (e) {
+        const msg = e?.message || String(e);
+        if (/\b403\b|forbidden/i.test(msg)) {
+          archiveStatus = "API key missing asset.update scope";
+        } else if (/\b404\b/.test(msg)) {
+          archiveStatus = "Immich version too old for archive";
+        } else {
+          archiveStatus = msg.slice(0, 90);
+        }
+      }
     }
 
     let sharedLinkUrl = null;
@@ -191,11 +346,19 @@ async function saveUrlToImmich(url, tabId, { share = false } = {}) {
         });
       }
     } else {
+      const parts = [filename];
+      if (cfg.defaultAlbumId && !isDup) parts.push("added to album");
+      if (archiveStatus === "ok") parts.push("archived");
+      else if (archiveStatus) parts.push(`archive failed: ${archiveStatus}`);
       toast(tabId, {
         id: toastId,
-        kind: isDup ? "info" : "success",
+        // If the archive call errored, downgrade to "info" so the toast
+        // doesn't claim full success.
+        kind: archiveStatus && archiveStatus !== "ok"
+          ? "info"
+          : isDup ? "info" : "success",
         title: isDup ? "Already in Immich" : "Saved to Immich",
-        message: `${filename}${cfg.defaultAlbumId && !isDup ? " · added to album" : ""}`,
+        message: parts.join(" · "),
       });
     }
 
@@ -290,9 +453,25 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       if (msg?.type === "thumb") {
         const cfg = await getConfig();
         if (!isConfigured(cfg)) throw new Error("not configured");
-        const res = await fetch(thumbnailUrl(cfg.serverUrl, msg.assetId, msg.size || "preview"), {
-          headers: { "x-api-key": cfg.apiKey },
-        });
+        // Same timeout policy as lib/immich.js so unreachable servers don't
+        // hang the popup / new-tab indefinitely. 15s is long enough for a
+        // slow home-lab Immich, short enough to fail visibly.
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 15000);
+        let res;
+        try {
+          res = await fetch(thumbnailUrl(cfg.serverUrl, msg.assetId, msg.size || "preview"), {
+            headers: { "x-api-key": cfg.apiKey },
+            signal: ctrl.signal,
+          });
+        } catch (e) {
+          if (e?.name === "AbortError") {
+            throw new Error("Immich server unreachable (thumbnail fetch timed out after 15s)");
+          }
+          throw e;
+        } finally {
+          clearTimeout(timer);
+        }
         const buf = await res.arrayBuffer();
         sendResponse({
           ok: res.ok,
@@ -303,6 +482,102 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       } else if (msg?.type === "smart-search") {
         const r = await smartSearch(msg.query, msg.size || 10);
         sendResponse({ ok: true, data: r });
+      } else if (msg?.type === "download-asset" && msg.assetId) {
+        // Background-driven download for Firefox. chrome.downloads is
+        // only granted in the Firefox build (we don't ask Chrome users
+        // to re-approve a permission they don't need — the popup-side
+        // <a download> path works fine on Chrome).
+        //
+        // We tried passing `headers: [{x-api-key}]` to chrome.downloads
+        // .download but Firefox silently strips auth-shaped headers from
+        // download requests, so Immich responds 403 (SERVER_FORBIDDEN).
+        // Instead: fetch the bytes here in the background (which works —
+        // that's how thumbnails load), wrap in a blob URL, and hand that
+        // to the download manager. No headers needed because the bytes
+        // are already in hand.
+        const TAG = "[immich-companion download]";
+        if (!chrome.downloads?.download) {
+          console.debug(TAG, "chrome.downloads not available, telling caller to fall back");
+          sendResponse({ ok: false, notSupported: true });
+        } else {
+          const cfg = await getConfig();
+          if (!isConfigured(cfg)) {
+            console.warn(TAG, "extension not configured");
+            throw new Error("not configured");
+          }
+          const url = `${cfg.serverUrl}/api/assets/${msg.assetId}/original`;
+          const filename = msg.filename || `immich-${msg.assetId}`;
+          console.debug(TAG, "fetching", { assetId: msg.assetId, filename, url });
+
+          let blobUrl = null;
+          try {
+            const fetchRes = await fetch(url, {
+              headers: { "x-api-key": cfg.apiKey },
+            });
+            if (!fetchRes.ok) {
+              // Log Immich's actual response body — usually a JSON
+              // {message,statusCode,error} that names the missing scope.
+              const body = await fetchRes.text().catch(() => "");
+              console.error(TAG, `HTTP ${fetchRes.status}`, "response body:", body.slice(0, 500));
+              if (fetchRes.status === 403) {
+                throw new Error(
+                  `Immich returned 403 — the API key likely lacks the asset.download scope. ` +
+                  `Regenerate your key in Immich → Account Settings → API Keys and tick asset.download.`
+                );
+              }
+              throw new Error(`HTTP ${fetchRes.status}`);
+            }
+            const blob = await fetchRes.blob();
+            console.debug(TAG, "fetched", { size: blob.size, type: blob.type });
+            blobUrl = URL.createObjectURL(blob);
+            console.debug(TAG, "blob URL", blobUrl);
+
+            const id = await new Promise((resolve, reject) => {
+              chrome.downloads.download(
+                { url: blobUrl, filename, saveAs: false },
+                (downloadId) => {
+                  if (chrome.runtime.lastError) {
+                    return reject(new Error(chrome.runtime.lastError.message));
+                  }
+                  if (downloadId === undefined) {
+                    return reject(new Error("downloadId undefined"));
+                  }
+                  resolve(downloadId);
+                },
+              );
+            });
+            console.debug(TAG, "queued, id=", id);
+
+            // Watch the lifecycle so we can revoke the blob URL the moment
+            // the download finishes (or fails) and surface the failure
+            // reason if any. Without this the URL would leak.
+            const heldBlobUrl = blobUrl;
+            blobUrl = null; // ownership transferred to listener
+            const onChanged = (delta) => {
+              if (delta.id !== id) return;
+              console.debug(TAG, `#${id} change`, delta);
+              const finalState = delta.state?.current;
+              if (finalState === "complete" || finalState === "interrupted") {
+                chrome.downloads.onChanged.removeListener(onChanged);
+                try { URL.revokeObjectURL(heldBlobUrl); } catch {}
+                if (finalState === "interrupted") {
+                  chrome.downloads.search({ id }, (items) => {
+                    const it = items?.[0];
+                    console.error(TAG, `#${id} interrupted: error=${it?.error} bytesReceived=${it?.bytesReceived} totalBytes=${it?.totalBytes}`);
+                  });
+                }
+              }
+            };
+            chrome.downloads.onChanged.addListener(onChanged);
+
+            sendResponse({ ok: true, id });
+          } catch (err) {
+            console.error(TAG, "failed:", err);
+            // Failed before the listener took ownership — revoke now.
+            if (blobUrl) { try { URL.revokeObjectURL(blobUrl); } catch {} }
+            sendResponse({ ok: false, error: err?.message || String(err) });
+          }
+        }
       } else if (msg?.type === "config-updated") {
         await rebuildContextMenus();
         await updateBadge();

@@ -78,7 +78,11 @@
               </div>
               <div class="perm-row" data-copy="asset.read">
                 <code>asset.read</code>
-                <span class="muted">search results, thumbnails, downloads, and video playback</span>
+                <span class="muted">search results, thumbnails, and video playback</span>
+              </div>
+              <div class="perm-row" data-copy="asset.download">
+                <code>asset.download</code>
+                <span class="muted">download originals from the popup's quick actions</span>
               </div>
               <div class="perm-row" data-copy="asset.view">
                 <code>asset.view</code>
@@ -91,6 +95,10 @@
               <div class="perm-row" data-copy="albumAsset.create">
                 <code>albumAsset.create</code>
                 <span class="muted">add saved items to your default album (optional)</span>
+              </div>
+              <div class="perm-row" data-copy="asset.update">
+                <code>asset.update</code>
+                <span class="muted">archive saved items so they don't clutter your timeline (optional)</span>
               </div>
               <div class="perm-row" data-copy="sharedLink.create">
                 <code>sharedLink.create</code>
@@ -133,6 +141,15 @@
             </div>
             <small class="muted">If set, every saved item is added to this album.</small>
           </label>
+
+          <label class="toggle">
+            <input id="archiveOnSave" type="checkbox" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">
+              <strong>Archive after save</strong>
+              <small class="muted">Each saved item is automatically archived in Immich, so it doesn't clutter the main timeline. It still appears in the default album above (if set) and remains searchable. Off by default.</small>
+            </span>
+          </label>
         </section>
 
         <!-- New Tab -->
@@ -148,17 +165,14 @@
             <span class="toggle-label">
               <strong>Replace <span data-browser>Chrome</span>'s new tab page</strong>
               <small class="muted">
-                <span data-browser>Chrome</span> doesn't allow extensions to give back the original new tab without uninstalling.
-                When off, the new tab shows a minimal clock-only page — or
-                redirects to the URL below if you set one. To fully restore <span data-browser>Chrome</span>'s default new tab,
-                disable the extension at <code data-extensions-url>chrome://extensions</code>.
+                When on, every new tab shows a random photo from your library plus an "On this day" memory strip. When off, every new tab shows a minimal clock-only page (or whatever URL you set below as fallback). <strong>Browser limitation:</strong> once an extension declares a new-tab override in its manifest, the browser routes every new tab through it — there is no way for the extension to "release" the new tab back to the browser's default at runtime. To fully restore the browser's own new tab, remove the extension at <code data-extensions-url>chrome://extensions</code>.
               </small>
             </span>
           </label>
 
           <label>
             <span>Fallback URL (used when "Replace new tab" is off)</span>
-            <input id="newtabFallbackUrl" type="url" placeholder="https://google.com (leave empty for clock + search)" />
+            <input id="newtabFallbackUrl" type="url" placeholder="https://google.com (leave empty for clock)" />
           </label>
 
           <hr />
