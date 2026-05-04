@@ -8,22 +8,43 @@
 </p>
 
 <p align="center">
-  Now live in the Chrome Web Store and Firefox Add-ons. Chromium-based browsers including Edge, Brave, Vivaldi, Arc, and Opera can install directly from the Chrome Web Store link below.
+  Click your browser to install. Chromium-based browsers (Chrome, Brave, Opera, plus Edge, Vivaldi, Arc, …) install from the Chrome Web Store. Firefox installs from Mozilla Add-ons. Safari installs as a self-built Xcode project — see <a href="SAFARI.md">SAFARI.md</a>.
 </p>
 
-<p align="center">
-  <!-- Store-button images bundled locally in webstore-assets/ so the
-       README never depends on an external CDN. -->
-  <a href="https://chromewebstore.google.com/detail/immich-companion/kdgjgohclpdgnhkifmlidoncogokjkkd" title="Install from the Chrome Web Store">
-    <img height="58" alt="Available in the Chrome Web Store"
-         src="webstore-assets/chrome-webstore-badge.svg">
-  </a>
-  &nbsp;
-  <a href="https://addons.mozilla.org/firefox/addon/immich-companion/" title="Install from Firefox Add-ons">
-    <img height="58" alt="Get the Firefox Add-on"
-         src="webstore-assets/firefox-addons-badge.svg">
-  </a>
-</p>
+<table align="center">
+  <tr>
+    <td align="center" width="120">
+      <a href="https://chromewebstore.google.com/detail/immich-companion/kdgjgohclpdgnhkifmlidoncogokjkkd" title="Install from the Chrome Web Store">
+        <img src="webstore-assets/browser-icons/google-chrome.svg" width="64" height="64" alt="Chrome"/><br/>
+        Chrome
+      </a>
+    </td>
+    <td align="center" width="120">
+      <a href="https://chromewebstore.google.com/detail/immich-companion/kdgjgohclpdgnhkifmlidoncogokjkkd" title="Install from the Chrome Web Store (works in Brave)">
+        <img src="webstore-assets/browser-icons/brave.svg" width="64" height="64" alt="Brave"/><br/>
+        Brave
+      </a>
+    </td>
+    <td align="center" width="120">
+      <a href="https://chromewebstore.google.com/detail/immich-companion/kdgjgohclpdgnhkifmlidoncogokjkkd" title="Install from the Chrome Web Store (works in Opera with the Install Chrome Extensions add-on)">
+        <img src="webstore-assets/browser-icons/opera.svg" width="64" height="64" alt="Opera"/><br/>
+        Opera
+      </a>
+    </td>
+    <td align="center" width="120">
+      <a href="https://addons.mozilla.org/firefox/addon/immich-companion/" title="Install from Firefox Add-ons">
+        <img src="webstore-assets/browser-icons/firefox.svg" width="64" height="64" alt="Firefox"/><br/>
+        Firefox
+      </a>
+    </td>
+    <td align="center" width="120">
+      <a href="SAFARI.md" title="Build instructions for Safari (macOS, experimental)">
+        <img src="webstore-assets/browser-icons/safari.svg" width="64" height="64" alt="Safari"/><br/>
+        Safari
+      </a>
+    </td>
+  </tr>
+</table>
 
 ---
 
@@ -59,6 +80,7 @@ The extension transmits data **only** to the Immich server you configure. No ana
 
 - **[Chrome Web Store](https://chromewebstore.google.com/detail/immich-companion/kdgjgohclpdgnhkifmlidoncogokjkkd)** — also covers Edge, Brave, Vivaldi, Arc, Opera and other Chromium-based browsers.
 - **[Firefox Add-ons](https://addons.mozilla.org/firefox/addon/immich-companion/)** — Firefox 121 or newer.
+- **Safari (macOS)** — experimental, self-built. See [SAFARI.md](SAFARI.md) for the Xcode steps.
 
 ### After install
 
