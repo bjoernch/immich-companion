@@ -1,0 +1,399 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Immich Companion — Settings</title>
+    <link rel="stylesheet" href="shared.css" />
+  </head>
+  <body class="options-body">
+    <div class="options-layout">
+      <aside class="sidebar">
+        <div class="brand">
+          <img src="../icons/icon-48.png" width="32" height="32" alt="" />
+          <div>
+            <div class="brand-name">Immich Companion</div>
+            <div class="brand-version" id="versionLabel">v0.1</div>
+          </div>
+        </div>
+        <nav id="nav">
+          <button class="nav-item active" data-section="connection">
+            <span class="nav-dot"></span> Connection
+          </button>
+          <button class="nav-item" data-section="save">
+            <span class="nav-dot"></span> Save to Immich
+          </button>
+          <button class="nav-item" data-section="newtab">
+            <span class="nav-dot"></span> New Tab
+          </button>
+          <button class="nav-item" data-section="search">
+            <span class="nav-dot"></span> Search &amp; Share
+          </button>
+          <button class="nav-item" data-section="features">
+            <span class="nav-dot"></span> Features
+          </button>
+          <button class="nav-item" data-section="about">
+            <span class="nav-dot"></span> About
+          </button>
+        </nav>
+        <div class="sidebar-footer">
+          <span id="connStatus" class="conn-status">Not connected</span>
+        </div>
+      </aside>
+
+      <main class="content">
+        <!-- Connection -->
+        <section id="section-connection" class="section active">
+          <header>
+            <h1>Connection</h1>
+            <p class="muted">Point the extension at your Immich server.</p>
+          </header>
+          <div class="grid two">
+            <label>
+              <span>Server URL</span>
+              <input id="serverUrl" type="url" placeholder="https://immich.example.com" autocomplete="off" />
+              <small class="muted">No trailing slash. Don't include <code>/api</code>.</small>
+            </label>
+            <label>
+              <span>API key</span>
+              <input id="apiKey" type="password" placeholder="••••••••••••••••" autocomplete="off" />
+              <small class="muted">Immich → Account Settings → API Keys.</small>
+            </label>
+          </div>
+
+          <div class="perm-card">
+            <div class="perm-card-header">
+              <strong>Required API key permissions</strong>
+              <span class="muted">click a row to copy the scope name</span>
+            </div>
+
+            <div class="perm-tabs">
+              <button class="perm-tab active" data-tab="minimal" type="button">Minimal (recommended)</button>
+              <button class="perm-tab" data-tab="all" type="button">Easiest (All)</button>
+            </div>
+
+            <div id="perm-minimal" class="perm-list active">
+              <div class="perm-row" data-copy="asset.upload">
+                <code>asset.upload</code>
+                <span class="muted">save images and videos to your library</span>
+              </div>
+              <div class="perm-row" data-copy="asset.read">
+                <code>asset.read</code>
+                <span class="muted">search results, thumbnails, and video playback</span>
+              </div>
+              <div class="perm-row" data-copy="asset.download">
+                <code>asset.download</code>
+                <span class="muted">download originals from the popup's quick actions</span>
+              </div>
+              <div class="perm-row" data-copy="asset.view">
+                <code>asset.view</code>
+                <span class="muted">open assets when clicked (older Immich builds)</span>
+              </div>
+              <div class="perm-row" data-copy="album.read">
+                <code>album.read</code>
+                <span class="muted">list albums in the settings dropdowns</span>
+              </div>
+              <div class="perm-row" data-copy="albumAsset.create">
+                <code>albumAsset.create</code>
+                <span class="muted">add saved items to your default album (optional)</span>
+              </div>
+              <div class="perm-row" data-copy="asset.update">
+                <code>asset.update</code>
+                <span class="muted">archive saved items so they don't clutter your timeline (optional)</span>
+              </div>
+              <div class="perm-row" data-copy="sharedLink.create">
+                <code>sharedLink.create</code>
+                <span class="muted">"Save &amp; share" — create a public link on the spot</span>
+              </div>
+            </div>
+
+            <div id="perm-all" class="perm-list">
+              <div class="perm-row" data-copy="all">
+                <code>Select all</code>
+                <span class="muted">simplest — full read/write to your account. The extension still only uses the scopes listed under "Minimal".</span>
+              </div>
+            </div>
+
+            <small class="muted perm-footnote">
+              In Immich → Account Settings → API Keys → <strong>+ New API Key</strong>. Older Immich builds (≤ 1.106) had a single all-or-nothing key — if you don't see scopes, the key has full access by default.
+            </small>
+          </div>
+
+          <div class="row">
+            <button id="save" class="primary">Save</button>
+            <button id="test" type="button">Test connection</button>
+            <span id="status" class="status"></span>
+          </div>
+        </section>
+
+        <!-- Save to Immich -->
+        <section id="section-save" class="section">
+          <header>
+            <h1>Save to Immich</h1>
+            <p class="muted">Right-click any image, video, or link to upload it.</p>
+          </header>
+          <label>
+            <span>Default album (optional)</span>
+            <div class="inline">
+              <select id="defaultAlbumId">
+                <option value="">— none —</option>
+              </select>
+              <button id="refreshAlbums" type="button">Refresh</button>
+            </div>
+            <small class="muted">If set, every saved item is added to this album.</small>
+          </label>
+
+          <label class="toggle">
+            <input id="archiveOnSave" type="checkbox" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">
+              <strong>Archive after save</strong>
+              <small class="muted">Each saved item is automatically archived in Immich, so it doesn't clutter the main timeline. It still appears in the default album above (if set) and remains searchable. Off by default.</small>
+            </span>
+          </label>
+        </section>
+
+        <!-- New Tab -->
+        <section id="section-newtab" class="section">
+          <header>
+            <h1>New Tab</h1>
+            <p class="muted">Random photo from your library, with an "On this day" memory strip.</p>
+          </header>
+
+          <label class="toggle">
+            <input id="featureNewtab" type="checkbox" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">
+              <strong>Replace <span data-browser>Chrome</span>'s new tab page</strong>
+              <small class="muted">
+                When on, every new tab shows a random photo from your library plus an "On this day" memory strip. When off, every new tab shows a minimal clock-only page (or whatever URL you set below as fallback). <strong>Browser limitation:</strong> once an extension declares a new-tab override in its manifest, the browser routes every new tab through it — there is no way for the extension to "release" the new tab back to the browser's default at runtime. To fully restore the browser's own new tab, remove the extension at <code data-extensions-url>chrome://extensions</code>.
+              </small>
+            </span>
+          </label>
+
+          <label>
+            <span>Fallback URL (used when "Replace new tab" is off)</span>
+            <input id="newtabFallbackUrl" type="url" placeholder="https://google.com (leave empty for clock)" />
+          </label>
+
+          <hr />
+
+          <label class="toggle">
+            <input id="newtabBackground" type="checkbox" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">
+              <strong>Photo background</strong>
+              <small class="muted">A random photo from your library fills the background.</small>
+            </span>
+          </label>
+
+          <label>
+            <span>Source for new tab photos</span>
+            <div class="inline">
+              <select id="newtabAlbumId">
+                <option value="">All photos</option>
+              </select>
+              <button id="refreshAlbums2" type="button">Refresh</button>
+            </div>
+            <small class="muted">Pick a specific album, or leave on "All photos" for full library randomness.</small>
+          </label>
+
+          <label>
+            <span>Auto-rotate background every</span>
+            <select id="newtabRotateSeconds">
+              <option value="0">Once per new tab (no auto-rotate)</option>
+              <option value="30">30 seconds</option>
+              <option value="60">1 minute</option>
+              <option value="300">5 minutes</option>
+              <option value="900">15 minutes</option>
+            </select>
+          </label>
+
+          <hr />
+
+          <label class="toggle">
+            <input id="newtabOnThisDay" type="checkbox" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">
+              <strong>"On this day" memory strip</strong>
+              <small class="muted">Photos taken on this date in past years, shown along the bottom.</small>
+            </span>
+          </label>
+
+          <label class="toggle">
+            <input id="newtabShowMetadata" type="checkbox" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">
+              <strong>Show photo details</strong>
+              <small class="muted">Under the date in the corner: camera, lens, ISO, aperture, shutter, focal length, dimensions, file size — whatever EXIF data Immich has for the current photo.</small>
+            </span>
+          </label>
+        </section>
+
+        <!-- Search & Share -->
+        <section id="section-search" class="section">
+          <header>
+            <h1>Search &amp; Share</h1>
+          </header>
+          <label>
+            <span>Hosts to treat as Immich (for share toolbar)</span>
+            <input id="sharePathHosts" type="text" placeholder="immich.example.com, photos.example.org" />
+            <small class="muted">
+              Comma-separated. The Slideshow / Download-all toolbar appears on
+              <code>/share/...</code> URLs at these hosts. The host of your Server URL is included automatically.
+            </small>
+          </label>
+        </section>
+
+        <!-- Features -->
+        <section id="section-features" class="section">
+          <header>
+            <h1>Features</h1>
+            <p class="muted">Turn individual features off if you don't use them.</p>
+          </header>
+          <label>
+            <span>Theme</span>
+            <select id="theme">
+              <option value="auto">Match system</option>
+              <option value="dark">Dark</option>
+              <option value="light">Light</option>
+            </select>
+          </label>
+          <label class="toggle">
+            <input id="featureContextMenus" type="checkbox" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">
+              <strong>Right-click menus</strong>
+              <small class="muted">"Save to Immich" and "Find similar" on images, videos, and links.</small>
+            </span>
+          </label>
+          <label class="toggle">
+            <input id="featureShareToolbar" type="checkbox" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">
+              <strong>Share-album toolbar</strong>
+              <small class="muted">Slideshow + Download-all on Immich share pages.</small>
+            </span>
+          </label>
+          <label class="toggle">
+            <input id="featureNotifications" type="checkbox" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">
+              <strong>Desktop notifications</strong>
+              <small class="muted">Confirmations when an upload finishes.</small>
+            </span>
+          </label>
+          <label class="toggle">
+            <input id="featureGoogleInline" type="checkbox" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">
+              <strong>Show Immich matches on Google</strong>
+              <small class="muted">When you search Google, photos from your library that match the query appear in a card at the top of the results. Runs only on Google search pages.</small>
+            </span>
+          </label>
+          <label class="toggle">
+            <input id="clipboardCopyOriginal" type="checkbox" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-label">
+              <strong>Copy originals to clipboard</strong>
+              <small class="muted">When using "Copy image to clipboard" in the popup, copy the full-resolution original instead of the medium-size preview. Off (preview) is recommended — originals can be very large and may fail to write to the clipboard if they're HEIC, RAW, or other unsupported formats.</small>
+            </span>
+          </label>
+          <label>
+            <span>Open in Maps</span>
+            <select id="mapsProvider">
+              <option value="off">Off (no button)</option>
+              <option value="google">Google Maps</option>
+              <option value="apple" data-macos-only>Apple Maps (macOS only)</option>
+            </select>
+            <small class="muted">Adds a map-pin button next to Share / Download on each photo. Click it to open the photo's GPS coordinates in the chosen maps app. Only the latitude and longitude are sent (in the URL); no other data leaves your device. Apple Maps opens the macOS Maps.app via the <code>maps://</code> URL scheme — the option is disabled on other operating systems. Photos without GPS info show a brief error.</small>
+          </label>
+        </section>
+
+        <!-- About -->
+        <section id="section-about" class="section">
+          <header>
+            <h1>About</h1>
+          </header>
+          <p>Companion extension for self-hosted Immich.</p>
+          <ul class="features-list">
+            <li><strong>Save to Immich</strong> — right-click any image or video.</li>
+            <li><strong>Popup search</strong> — toolbar button → smart search of your library.</li>
+            <li><strong>New tab</strong> — random photo + "On this day".</li>
+            <li><strong>Share toolbar</strong> — Slideshow + Download-all on share pages.</li>
+          </ul>
+
+          <button id="issueCard" type="button" class="issue-card">
+            <div class="issue-card-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                <line x1="12" y1="7" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+            </div>
+            <div class="issue-card-body">
+              <div class="issue-card-title">Found a bug or have an idea?</div>
+              <div class="issue-card-sub">Report it on GitHub — bug reports and feature requests welcome.</div>
+            </div>
+            <svg class="issue-card-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="7" y1="17" x2="17" y2="7"/>
+              <polyline points="7 7 17 7 17 17"/>
+            </svg>
+          </button>
+
+          <div class="row">
+            <a href="https://github.com/bjoernch/immich-companion" target="_blank" rel="noopener" class="github-btn">
+              <svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+              <span>View source on GitHub</span>
+            </a>
+            <a href="https://github.com/bjoernch/immich-companion/blob/main/PRIVACY.md" target="_blank" rel="noopener" class="link-text">Privacy policy</a>
+          </div>
+
+          <hr />
+
+          <h2>Reset</h2>
+          <p class="muted">
+            Wipe every saved setting (server URL, API key, recent uploads, feature toggles)
+            and start over from the welcome page. Your Immich server is not touched.
+          </p>
+          <div class="row">
+            <button id="resetAll" class="danger" type="button">Reset all data and reopen onboarding</button>
+            <span id="resetStatus" class="status"></span>
+          </div>
+        </section>
+
+        <footer class="content-footer">
+          <button id="saveAll" class="primary">Save all changes</button>
+          <span id="globalStatus" class="status"></span>
+        </footer>
+      </main>
+    </div>
+
+    <!-- Bug-report consent modal: previews the system info that will be added
+         to the prefilled GitHub issue. The user can confirm, skip the prefill,
+         or cancel. The modal lives at the body level so its z-index can sit
+         above the sticky sidebar/footer. -->
+    <div id="bugReportModal" class="modal" hidden>
+      <div class="modal-backdrop" data-close></div>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="bugReportTitle">
+        <h2 id="bugReportTitle">Report a bug</h2>
+        <p class="muted">The following information will be added to the GitHub issue form. You can edit any of it on the form before submitting.</p>
+        <ul class="bug-report-list">
+          <li><span>Extension version</span><code id="brExt">…</code></li>
+          <li><span>Browser</span><code id="brBrowser">…</code></li>
+          <li><span>Operating system</span><code id="brOs">…</code></li>
+          <li><span>Immich server</span><code id="brImmich">…</code></li>
+        </ul>
+        <p class="muted small">
+          By clicking <strong>Continue</strong>, you agree this information will be sent to GitHub. Your <strong>API key and Immich server URL are never included</strong>.
+        </p>
+        <div class="modal-actions">
+          <button type="button" id="brCancel" data-close>Cancel</button>
+          <button type="button" id="brSkip" class="link-text">Continue without info</button>
+          <button type="button" id="brContinue" class="primary">Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

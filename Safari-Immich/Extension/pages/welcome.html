@@ -1,0 +1,161 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Welcome to Immich Companion</title>
+    <link rel="stylesheet" href="shared.css" />
+  </head>
+  <body class="welcome-body">
+    <div class="welcome">
+      <header class="welcome-hero">
+        <img src="../icons/icon-128.png" width="64" height="64" alt="" />
+        <h1>Welcome to Immich Companion</h1>
+        <p class="muted">Save photos and videos from any browser tab to your self-hosted Immich, search your library from the toolbar popup, and turn the new tab into a memory feed.</p>
+      </header>
+
+      <ol class="steps">
+        <li class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h2>Open your Immich server</h2>
+            <p class="muted">You need a working <a href="https://immich.app" target="_blank" rel="noopener">Immich</a> instance you can sign into. The companion never talks to anyone else.</p>
+          </div>
+        </li>
+
+        <li class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h2>Create an API key</h2>
+            <p>In Immich:</p>
+            <ol class="sub">
+              <li>Click your profile picture (top right) → <strong>Account Settings</strong></li>
+              <li>Open the <strong>API Keys</strong> section</li>
+              <li>Click <strong>+ New API Key</strong> and name it <code>Browser Extension</code></li>
+              <li>Pick the permissions below, then <strong>Create</strong></li>
+              <li>Copy the key — Immich shows it only once</li>
+            </ol>
+
+            <div class="perm-card">
+              <div class="perm-card-header">
+                <strong>Permissions to grant</strong>
+                <span class="muted">click the row to copy the scope name</span>
+              </div>
+
+              <div class="perm-tabs">
+                <button class="perm-tab active" data-tab="minimal">Minimal (recommended)</button>
+                <button class="perm-tab" data-tab="all">Easiest (All)</button>
+              </div>
+
+              <div id="perm-minimal" class="perm-list active">
+                <div class="perm-row" data-copy="asset.upload">
+                  <code>asset.upload</code>
+                  <span class="muted">save images and videos to your library</span>
+                </div>
+                <div class="perm-row" data-copy="asset.read">
+                  <code>asset.read</code>
+                  <span class="muted">show search results, thumbnails, and new-tab background</span>
+                </div>
+                <div class="perm-row" data-copy="asset.download">
+                  <code>asset.download</code>
+                  <span class="muted">download originals from the popup's quick actions</span>
+                </div>
+                <div class="perm-row" data-copy="asset.view">
+                  <code>asset.view</code>
+                  <span class="muted">open assets when clicked</span>
+                </div>
+                <div class="perm-row" data-copy="album.read">
+                  <code>album.read</code>
+                  <span class="muted">list albums in the settings dropdowns</span>
+                </div>
+                <div class="perm-row" data-copy="albumAsset.create">
+                  <code>albumAsset.create</code>
+                  <span class="muted">add saved items to your default album (optional)</span>
+                </div>
+                <div class="perm-row" data-copy="asset.update">
+                  <code>asset.update</code>
+                  <span class="muted">archive saved items so they don't clutter your timeline (optional)</span>
+                </div>
+                <div class="perm-row" data-copy="sharedLink.create">
+                  <code>sharedLink.create</code>
+                  <span class="muted">"Save & share" — create a public link on the spot</span>
+                </div>
+              </div>
+
+              <div id="perm-all" class="perm-list">
+                <div class="perm-row" data-copy="all">
+                  <code>Select all</code>
+                  <span class="muted">simplest — full read/write to your account. The extension still only uses the scopes listed under "Minimal".</span>
+                </div>
+              </div>
+
+              <small class="muted perm-footnote">
+                Older Immich builds (≤ 1.106) had a single all-or-nothing key. If you don't see scopes, the key has full access by default.
+              </small>
+            </div>
+          </div>
+        </li>
+
+        <li class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h2>Connect</h2>
+            <div class="grid two">
+              <label>
+                <span>Server URL</span>
+                <input id="serverUrl" type="url" placeholder="https://immich.example.com" autocomplete="off" />
+                <small class="muted">No trailing slash. Don't include <code>/api</code>.</small>
+              </label>
+              <label>
+                <span>API key</span>
+                <input id="apiKey" type="password" placeholder="paste your API key" autocomplete="off" />
+              </label>
+            </div>
+            <div class="row">
+              <button id="connect" class="primary">Connect</button>
+              <button id="skip" type="button">Skip for now</button>
+              <span id="status" class="status"></span>
+            </div>
+          </div>
+        </li>
+
+        <li class="step" id="step-done" hidden>
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <h2>You're set ✨</h2>
+            <p class="muted">A few quick toggles you can flip later in Settings:</p>
+            <label class="toggle">
+              <input id="featureNewtab" type="checkbox" checked />
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+              <span class="toggle-label">
+                <strong>Replace <span data-browser>Chrome</span>'s new tab</strong>
+                <small class="muted">Random photo from your library + "On this day" memories.</small>
+              </span>
+            </label>
+            <label class="toggle">
+              <input id="featureContextMenus" type="checkbox" checked />
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+              <span class="toggle-label">
+                <strong>Right-click "Save to Immich" menus</strong>
+                <small class="muted">Save and share images / videos from any page.</small>
+              </span>
+            </label>
+            <label class="toggle">
+              <input id="featureNotifications" type="checkbox" checked />
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+              <span class="toggle-label">
+                <strong>Desktop notifications</strong>
+                <small class="muted">In addition to the in-page upload toasts.</small>
+              </span>
+            </label>
+            <div class="row">
+              <button id="finish" class="primary">Open settings</button>
+              <button id="finishClose" type="button">Close this tab</button>
+              <span class="muted shortcut-hint">Tip: <kbd id="shortcutHint">Ctrl + Shift + L</kbd> opens the popup</span>
+            </div>
+          </div>
+        </li>
+      </ol>
+    </div>
+    <script type="module" src="welcome.js"></script>
+  </body>
+</html>

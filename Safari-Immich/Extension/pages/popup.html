@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="shared.css" />
+  </head>
+  <body class="popup">
+    <div id="updateBanner" class="update-banner" hidden>
+      <span class="update-banner-icon" aria-hidden="true">✨</span>
+      <div class="update-banner-body">
+        <span id="updateBannerText" class="update-banner-text">Updated</span>
+        <a id="updateBannerLink" target="_blank" rel="noopener" class="update-banner-link">Release notes →</a>
+      </div>
+      <button id="updateBannerDismiss" type="button" class="update-banner-dismiss" aria-label="Dismiss">×</button>
+    </div>
+    <div class="popup-tabs">
+      <button class="popup-tab active" data-tab="search">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"/>
+          <path d="m21 21-4.3-4.3"/>
+        </svg>
+        <span>Search</span>
+      </button>
+      <button class="popup-tab" data-tab="recent">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span>Saved</span>
+        <span id="recentCount" class="badge"></span>
+      </button>
+      <button class="popup-tab" data-tab="upload">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <span>Upload</span>
+      </button>
+    </div>
+
+    <!-- Search panel -->
+    <div class="popup-panel active" data-panel="search">
+      <div class="search-row">
+        <input id="q" type="search" placeholder="Search your library…" autofocus />
+        <button id="open" type="button" title="Open these results in Immich" aria-label="Open in Immich">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 3h6v6"/>
+            <path d="M10 14 21 3"/>
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+          </svg>
+        </button>
+      </div>
+      <div id="typeFilter" class="type-filter" role="tablist" aria-label="Filter by type">
+        <button class="type-pill active" data-type="all" type="button" role="tab" aria-selected="true">All</button>
+        <button class="type-pill" data-type="image" type="button" role="tab" aria-selected="false">Photos</button>
+        <button class="type-pill" data-type="video" type="button" role="tab" aria-selected="false">Videos</button>
+      </div>
+      <div id="empty" class="results-state show">
+        <div>Type to search your library.</div>
+        <div class="hint">Smart search uses CLIP — try "dog at the beach" or "red sunset".</div>
+      </div>
+      <div id="gallery" class="gallery" hidden>
+        <div id="results" class="results"></div>
+        <aside id="timeline" class="timeline" aria-label="Timeline"></aside>
+      </div>
+      <div id="pagination" class="pagination" hidden></div>
+    </div>
+
+    <!-- Recent uploads panel -->
+    <div class="popup-panel" data-panel="recent">
+      <div id="recentEmpty" class="results-state show">
+        <div>Nothing saved yet.</div>
+        <div class="hint">Right-click any image on the web → "Save to Immich".</div>
+      </div>
+      <ul id="recentList" class="recent-list" hidden></ul>
+      <div class="recent-footer">
+        <button id="clearRecent" type="button" class="link-button" hidden>Clear history</button>
+      </div>
+    </div>
+
+    <!-- Upload panel -->
+    <div class="popup-panel" data-panel="upload">
+      <div id="dropZone" class="drop-zone">
+        <div class="drop-icon">⬆</div>
+        <div class="drop-title">Drop files here to upload</div>
+        <div class="drop-hint">…or click to choose</div>
+        <input id="fileInput" type="file" multiple accept="image/*,video/*" hidden />
+      </div>
+      <ul id="uploadList" class="upload-list"></ul>
+    </div>
+
+    <div class="footer">
+      <span id="status"></span>
+      <div class="footer-actions">
+        <button id="github" type="button" class="icon-button compact" title="View source on GitHub" aria-label="GitHub">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+        </button>
+        <button id="settings" type="button" class="icon-button" title="Settings">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Settings</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Whole-popup drop overlay (active during dragenter on any tab) -->
+    <div id="dropOverlay" class="drop-overlay" hidden>
+      <div class="drop-overlay-card">
+        <div class="drop-icon">⬆</div>
+        <div>Release to upload to Immich</div>
+      </div>
+    </div>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

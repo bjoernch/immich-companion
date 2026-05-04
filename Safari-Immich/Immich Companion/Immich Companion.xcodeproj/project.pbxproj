@@ -1,0 +1,1007 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		8EFB24B82FA88FA70079549F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EFB24B72FA88FA70079549F /* AppDelegate.swift */; };
+		8EFB24BA2FA88FA70079549F /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EFB24B92FA88FA70079549F /* SceneDelegate.swift */; };
+		8EFB24BD2FA88FA70079549F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB24BB2FA88FA70079549F /* LaunchScreen.storyboard */; };
+		8EFB24C02FA88FA70079549F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB24BE2FA88FA70079549F /* Main.storyboard */; };
+		8EFB24C92FA88FA70079549F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EFB24C82FA88FA70079549F /* AppDelegate.swift */; };
+		8EFB24CC2FA88FA70079549F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB24CA2FA88FA70079549F /* Main.storyboard */; };
+		8EFB24D32FA88FA70079549F /* Immich Companion Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 8EFB24D22FA88FA70079549F /* Immich Companion Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		8EFB24DD2FA88FA70079549F /* Immich Companion Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 8EFB24DC2FA88FA70079549F /* Immich Companion Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		8EFB24E22FA88FA70079549F /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB24A72FA88FA60079549F /* Main.html */; };
+		8EFB24E32FA88FA70079549F /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB24A72FA88FA60079549F /* Main.html */; };
+		8EFB24E42FA88FA70079549F /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB24A92FA88FA60079549F /* Icon.png */; };
+		8EFB24E52FA88FA70079549F /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB24A92FA88FA60079549F /* Icon.png */; };
+		8EFB24E62FA88FA70079549F /* Style.css in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB24AA2FA88FA60079549F /* Style.css */; };
+		8EFB24E72FA88FA70079549F /* Style.css in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB24AA2FA88FA60079549F /* Style.css */; };
+		8EFB24E82FA88FA70079549F /* Script.js in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB24AB2FA88FA60079549F /* Script.js */; };
+		8EFB24E92FA88FA70079549F /* Script.js in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB24AB2FA88FA60079549F /* Script.js */; };
+		8EFB24EA2FA88FA70079549F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EFB24AC2FA88FA60079549F /* ViewController.swift */; };
+		8EFB24EB2FA88FA70079549F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EFB24AC2FA88FA60079549F /* ViewController.swift */; };
+		8EFB24EC2FA88FA70079549F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB24AD2FA88FA70079549F /* Assets.xcassets */; };
+		8EFB24ED2FA88FA70079549F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB24AD2FA88FA70079549F /* Assets.xcassets */; };
+		8EFB24EE2FA88FA70079549F /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EFB24AF2FA88FA70079549F /* SafariWebExtensionHandler.swift */; };
+		8EFB24EF2FA88FA70079549F /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EFB24AF2FA88FA70079549F /* SafariWebExtensionHandler.swift */; };
+		8EFB25092FA88FA70079549F /* content.css in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB25012FA88FA70079549F /* content.css */; };
+		8EFB250A2FA88FA70079549F /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB25022FA88FA70079549F /* background.js */; };
+		8EFB250B2FA88FA70079549F /* webstore-assets in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB25032FA88FA70079549F /* webstore-assets */; };
+		8EFB250C2FA88FA70079549F /* icons in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB25042FA88FA70079549F /* icons */; };
+		8EFB250D2FA88FA70079549F /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB25052FA88FA70079549F /* manifest.json */; };
+		8EFB250E2FA88FA70079549F /* lib in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB25062FA88FA70079549F /* lib */; };
+		8EFB250F2FA88FA70079549F /* content.js in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB25072FA88FA70079549F /* content.js */; };
+		8EFB25102FA88FA70079549F /* pages in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB25082FA88FA70079549F /* pages */; };
+		8EFB25112FA88FA70079549F /* content.css in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB25012FA88FA70079549F /* content.css */; };
+		8EFB25122FA88FA70079549F /* background.js in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB25022FA88FA70079549F /* background.js */; };
+		8EFB25132FA88FA70079549F /* webstore-assets in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB25032FA88FA70079549F /* webstore-assets */; };
+		8EFB25142FA88FA70079549F /* icons in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB25042FA88FA70079549F /* icons */; };
+		8EFB25152FA88FA70079549F /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB25052FA88FA70079549F /* manifest.json */; };
+		8EFB25162FA88FA70079549F /* lib in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB25062FA88FA70079549F /* lib */; };
+		8EFB25172FA88FA70079549F /* content.js in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB25072FA88FA70079549F /* content.js */; };
+		8EFB25182FA88FA70079549F /* pages in Resources */ = {isa = PBXBuildFile; fileRef = 8EFB25082FA88FA70079549F /* pages */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		8EFB24D42FA88FA70079549F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8EFB24A12FA88FA60079549F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8EFB24D12FA88FA70079549F;
+			remoteInfo = "Immich Companion Extension (iOS)";
+		};
+		8EFB24DE2FA88FA70079549F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8EFB24A12FA88FA60079549F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8EFB24DB2FA88FA70079549F;
+			remoteInfo = "Immich Companion Extension (macOS)";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		8EFB24F52FA88FA70079549F /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				8EFB24D32FA88FA70079549F /* Immich Companion Extension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8EFB24FC2FA88FA70079549F /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				8EFB24DD2FA88FA70079549F /* Immich Companion Extension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		8EFB24A82FA88FA60079549F /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = Base; path = Base.lproj/Main.html; sourceTree = "<group>"; };
+		8EFB24A92FA88FA60079549F /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
+		8EFB24AA2FA88FA60079549F /* Style.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = Style.css; sourceTree = "<group>"; };
+		8EFB24AB2FA88FA60079549F /* Script.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Script.js; sourceTree = "<group>"; };
+		8EFB24AC2FA88FA60079549F /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		8EFB24AD2FA88FA70079549F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		8EFB24AF2FA88FA70079549F /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
+		8EFB24B42FA88FA70079549F /* Immich Companion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Immich Companion.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8EFB24B72FA88FA70079549F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		8EFB24B92FA88FA70079549F /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		8EFB24BC2FA88FA70079549F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		8EFB24BF2FA88FA70079549F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		8EFB24C12FA88FA70079549F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8EFB24C62FA88FA70079549F /* Immich Companion.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Immich Companion.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8EFB24C82FA88FA70079549F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		8EFB24CB2FA88FA70079549F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		8EFB24CD2FA88FA70079549F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8EFB24D22FA88FA70079549F /* Immich Companion Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Immich Companion Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8EFB24D72FA88FA70079549F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8EFB24DC2FA88FA70079549F /* Immich Companion Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Immich Companion Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8EFB24E12FA88FA70079549F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8EFB25012FA88FA70079549F /* content.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; name = content.css; path = ../../Extension/content.css; sourceTree = "<group>"; };
+		8EFB25022FA88FA70079549F /* background.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = background.js; path = ../../Extension/background.js; sourceTree = "<group>"; };
+		8EFB25032FA88FA70079549F /* webstore-assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "webstore-assets"; path = "../../Extension/webstore-assets"; sourceTree = "<group>"; };
+		8EFB25042FA88FA70079549F /* icons */ = {isa = PBXFileReference; lastKnownFileType = folder; name = icons; path = ../../Extension/icons; sourceTree = "<group>"; };
+		8EFB25052FA88FA70079549F /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = ../../Extension/manifest.json; sourceTree = "<group>"; };
+		8EFB25062FA88FA70079549F /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; name = lib; path = ../../Extension/lib; sourceTree = "<group>"; };
+		8EFB25072FA88FA70079549F /* content.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = content.js; path = ../../Extension/content.js; sourceTree = "<group>"; };
+		8EFB25082FA88FA70079549F /* pages */ = {isa = PBXFileReference; lastKnownFileType = folder; name = pages; path = ../../Extension/pages; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8EFB24B12FA88FA70079549F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8EFB24C32FA88FA70079549F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8EFB24CF2FA88FA70079549F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8EFB24D92FA88FA70079549F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		8EFB24A02FA88FA60079549F = {
+			isa = PBXGroup;
+			children = (
+				8EFB24A52FA88FA60079549F /* Shared (App) */,
+				8EFB24AE2FA88FA70079549F /* Shared (Extension) */,
+				8EFB24B62FA88FA70079549F /* iOS (App) */,
+				8EFB24C72FA88FA70079549F /* macOS (App) */,
+				8EFB24D62FA88FA70079549F /* iOS (Extension) */,
+				8EFB24E02FA88FA70079549F /* macOS (Extension) */,
+				8EFB24B52FA88FA70079549F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		8EFB24A52FA88FA60079549F /* Shared (App) */ = {
+			isa = PBXGroup;
+			children = (
+				8EFB24AC2FA88FA60079549F /* ViewController.swift */,
+				8EFB24AD2FA88FA70079549F /* Assets.xcassets */,
+				8EFB24A62FA88FA60079549F /* Resources */,
+			);
+			path = "Shared (App)";
+			sourceTree = "<group>";
+		};
+		8EFB24A62FA88FA60079549F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				8EFB24A72FA88FA60079549F /* Main.html */,
+				8EFB24A92FA88FA60079549F /* Icon.png */,
+				8EFB24AA2FA88FA60079549F /* Style.css */,
+				8EFB24AB2FA88FA60079549F /* Script.js */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		8EFB24AE2FA88FA70079549F /* Shared (Extension) */ = {
+			isa = PBXGroup;
+			children = (
+				8EFB25002FA88FA70079549F /* Resources */,
+				8EFB24AF2FA88FA70079549F /* SafariWebExtensionHandler.swift */,
+			);
+			path = "Shared (Extension)";
+			sourceTree = "<group>";
+		};
+		8EFB24B52FA88FA70079549F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8EFB24B42FA88FA70079549F /* Immich Companion.app */,
+				8EFB24C62FA88FA70079549F /* Immich Companion.app */,
+				8EFB24D22FA88FA70079549F /* Immich Companion Extension.appex */,
+				8EFB24DC2FA88FA70079549F /* Immich Companion Extension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		8EFB24B62FA88FA70079549F /* iOS (App) */ = {
+			isa = PBXGroup;
+			children = (
+				8EFB24B72FA88FA70079549F /* AppDelegate.swift */,
+				8EFB24B92FA88FA70079549F /* SceneDelegate.swift */,
+				8EFB24BB2FA88FA70079549F /* LaunchScreen.storyboard */,
+				8EFB24BE2FA88FA70079549F /* Main.storyboard */,
+				8EFB24C12FA88FA70079549F /* Info.plist */,
+			);
+			path = "iOS (App)";
+			sourceTree = "<group>";
+		};
+		8EFB24C72FA88FA70079549F /* macOS (App) */ = {
+			isa = PBXGroup;
+			children = (
+				8EFB24C82FA88FA70079549F /* AppDelegate.swift */,
+				8EFB24CA2FA88FA70079549F /* Main.storyboard */,
+				8EFB24CD2FA88FA70079549F /* Info.plist */,
+			);
+			path = "macOS (App)";
+			sourceTree = "<group>";
+		};
+		8EFB24D62FA88FA70079549F /* iOS (Extension) */ = {
+			isa = PBXGroup;
+			children = (
+				8EFB24D72FA88FA70079549F /* Info.plist */,
+			);
+			path = "iOS (Extension)";
+			sourceTree = "<group>";
+		};
+		8EFB24E02FA88FA70079549F /* macOS (Extension) */ = {
+			isa = PBXGroup;
+			children = (
+				8EFB24E12FA88FA70079549F /* Info.plist */,
+			);
+			path = "macOS (Extension)";
+			sourceTree = "<group>";
+		};
+		8EFB25002FA88FA70079549F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				8EFB25012FA88FA70079549F /* content.css */,
+				8EFB25022FA88FA70079549F /* background.js */,
+				8EFB25032FA88FA70079549F /* webstore-assets */,
+				8EFB25042FA88FA70079549F /* icons */,
+				8EFB25052FA88FA70079549F /* manifest.json */,
+				8EFB25062FA88FA70079549F /* lib */,
+				8EFB25072FA88FA70079549F /* content.js */,
+				8EFB25082FA88FA70079549F /* pages */,
+			);
+			name = Resources;
+			path = "Shared (Extension)";
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8EFB24B32FA88FA70079549F /* Immich Companion (iOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8EFB24F62FA88FA70079549F /* Build configuration list for PBXNativeTarget "Immich Companion (iOS)" */;
+			buildPhases = (
+				8EFB24B02FA88FA70079549F /* Sources */,
+				8EFB24B12FA88FA70079549F /* Frameworks */,
+				8EFB24B22FA88FA70079549F /* Resources */,
+				8EFB24F52FA88FA70079549F /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8EFB24D52FA88FA70079549F /* PBXTargetDependency */,
+			);
+			name = "Immich Companion (iOS)";
+			packageProductDependencies = (
+			);
+			productName = "Immich Companion (iOS)";
+			productReference = 8EFB24B42FA88FA70079549F /* Immich Companion.app */;
+			productType = "com.apple.product-type.application";
+		};
+		8EFB24C52FA88FA70079549F /* Immich Companion (macOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8EFB24FD2FA88FA70079549F /* Build configuration list for PBXNativeTarget "Immich Companion (macOS)" */;
+			buildPhases = (
+				8EFB24C22FA88FA70079549F /* Sources */,
+				8EFB24C32FA88FA70079549F /* Frameworks */,
+				8EFB24C42FA88FA70079549F /* Resources */,
+				8EFB24FC2FA88FA70079549F /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8EFB24DF2FA88FA70079549F /* PBXTargetDependency */,
+			);
+			name = "Immich Companion (macOS)";
+			packageProductDependencies = (
+			);
+			productName = "Immich Companion (macOS)";
+			productReference = 8EFB24C62FA88FA70079549F /* Immich Companion.app */;
+			productType = "com.apple.product-type.application";
+		};
+		8EFB24D12FA88FA70079549F /* Immich Companion Extension (iOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8EFB24F22FA88FA70079549F /* Build configuration list for PBXNativeTarget "Immich Companion Extension (iOS)" */;
+			buildPhases = (
+				8EFB24CE2FA88FA70079549F /* Sources */,
+				8EFB24CF2FA88FA70079549F /* Frameworks */,
+				8EFB24D02FA88FA70079549F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Immich Companion Extension (iOS)";
+			packageProductDependencies = (
+			);
+			productName = "Immich Companion Extension (iOS)";
+			productReference = 8EFB24D22FA88FA70079549F /* Immich Companion Extension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		8EFB24DB2FA88FA70079549F /* Immich Companion Extension (macOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8EFB24F92FA88FA70079549F /* Build configuration list for PBXNativeTarget "Immich Companion Extension (macOS)" */;
+			buildPhases = (
+				8EFB24D82FA88FA70079549F /* Sources */,
+				8EFB24D92FA88FA70079549F /* Frameworks */,
+				8EFB24DA2FA88FA70079549F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Immich Companion Extension (macOS)";
+			packageProductDependencies = (
+			);
+			productName = "Immich Companion Extension (macOS)";
+			productReference = 8EFB24DC2FA88FA70079549F /* Immich Companion Extension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		8EFB24A12FA88FA60079549F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2640;
+				LastUpgradeCheck = 2640;
+				TargetAttributes = {
+					8EFB24B32FA88FA70079549F = {
+						CreatedOnToolsVersion = 26.4.1;
+					};
+					8EFB24C52FA88FA70079549F = {
+						CreatedOnToolsVersion = 26.4.1;
+					};
+					8EFB24D12FA88FA70079549F = {
+						CreatedOnToolsVersion = 26.4.1;
+					};
+					8EFB24DB2FA88FA70079549F = {
+						CreatedOnToolsVersion = 26.4.1;
+					};
+				};
+			};
+			buildConfigurationList = 8EFB24A42FA88FA60079549F /* Build configuration list for PBXProject "Immich Companion" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 8EFB24A02FA88FA60079549F;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 8EFB24B52FA88FA70079549F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8EFB24B32FA88FA70079549F /* Immich Companion (iOS) */,
+				8EFB24C52FA88FA70079549F /* Immich Companion (macOS) */,
+				8EFB24D12FA88FA70079549F /* Immich Companion Extension (iOS) */,
+				8EFB24DB2FA88FA70079549F /* Immich Companion Extension (macOS) */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8EFB24B22FA88FA70079549F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8EFB24E42FA88FA70079549F /* Icon.png in Resources */,
+				8EFB24BD2FA88FA70079549F /* LaunchScreen.storyboard in Resources */,
+				8EFB24E22FA88FA70079549F /* Main.html in Resources */,
+				8EFB24E82FA88FA70079549F /* Script.js in Resources */,
+				8EFB24EC2FA88FA70079549F /* Assets.xcassets in Resources */,
+				8EFB24C02FA88FA70079549F /* Main.storyboard in Resources */,
+				8EFB24E62FA88FA70079549F /* Style.css in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8EFB24C42FA88FA70079549F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8EFB24E52FA88FA70079549F /* Icon.png in Resources */,
+				8EFB24E72FA88FA70079549F /* Style.css in Resources */,
+				8EFB24CC2FA88FA70079549F /* Main.storyboard in Resources */,
+				8EFB24E92FA88FA70079549F /* Script.js in Resources */,
+				8EFB24ED2FA88FA70079549F /* Assets.xcassets in Resources */,
+				8EFB24E32FA88FA70079549F /* Main.html in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8EFB24D02FA88FA70079549F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8EFB25162FA88FA70079549F /* lib in Resources */,
+				8EFB25122FA88FA70079549F /* background.js in Resources */,
+				8EFB25142FA88FA70079549F /* icons in Resources */,
+				8EFB25152FA88FA70079549F /* manifest.json in Resources */,
+				8EFB25132FA88FA70079549F /* webstore-assets in Resources */,
+				8EFB25182FA88FA70079549F /* pages in Resources */,
+				8EFB25172FA88FA70079549F /* content.js in Resources */,
+				8EFB25112FA88FA70079549F /* content.css in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8EFB24DA2FA88FA70079549F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8EFB250E2FA88FA70079549F /* lib in Resources */,
+				8EFB250A2FA88FA70079549F /* background.js in Resources */,
+				8EFB250C2FA88FA70079549F /* icons in Resources */,
+				8EFB250D2FA88FA70079549F /* manifest.json in Resources */,
+				8EFB250B2FA88FA70079549F /* webstore-assets in Resources */,
+				8EFB25102FA88FA70079549F /* pages in Resources */,
+				8EFB250F2FA88FA70079549F /* content.js in Resources */,
+				8EFB25092FA88FA70079549F /* content.css in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8EFB24B02FA88FA70079549F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8EFB24EA2FA88FA70079549F /* ViewController.swift in Sources */,
+				8EFB24B82FA88FA70079549F /* AppDelegate.swift in Sources */,
+				8EFB24BA2FA88FA70079549F /* SceneDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8EFB24C22FA88FA70079549F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8EFB24EB2FA88FA70079549F /* ViewController.swift in Sources */,
+				8EFB24C92FA88FA70079549F /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8EFB24CE2FA88FA70079549F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8EFB24EE2FA88FA70079549F /* SafariWebExtensionHandler.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8EFB24D82FA88FA70079549F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8EFB24EF2FA88FA70079549F /* SafariWebExtensionHandler.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		8EFB24D52FA88FA70079549F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8EFB24D12FA88FA70079549F /* Immich Companion Extension (iOS) */;
+			targetProxy = 8EFB24D42FA88FA70079549F /* PBXContainerItemProxy */;
+		};
+		8EFB24DF2FA88FA70079549F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8EFB24DB2FA88FA70079549F /* Immich Companion Extension (macOS) */;
+			targetProxy = 8EFB24DE2FA88FA70079549F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		8EFB24A72FA88FA60079549F /* Main.html */ = {
+			isa = PBXVariantGroup;
+			children = (
+				8EFB24A82FA88FA60079549F /* Base */,
+			);
+			name = Main.html;
+			sourceTree = "<group>";
+		};
+		8EFB24BB2FA88FA70079549F /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				8EFB24BC2FA88FA70079549F /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		8EFB24BE2FA88FA70079549F /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				8EFB24BF2FA88FA70079549F /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		8EFB24CA2FA88FA70079549F /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				8EFB24CB2FA88FA70079549F /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		8EFB24F02FA88FA70079549F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 839WS8VSFX;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		8EFB24F12FA88FA70079549F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 839WS8VSFX;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		8EFB24F32FA88FA70079549F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Immich Companion Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.yourCompany.Immich-Companion.Extension";
+				PRODUCT_NAME = "Immich Companion Extension";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		8EFB24F42FA88FA70079549F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Immich Companion Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.yourCompany.Immich-Companion.Extension";
+				PRODUCT_NAME = "Immich Companion Extension";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		8EFB24F72FA88FA70079549F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "iOS (App)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Immich Companion";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.yourCompany.Immich-Companion";
+				PRODUCT_NAME = "Immich Companion";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		8EFB24F82FA88FA70079549F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "iOS (App)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Immich Companion";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.yourCompany.Immich-Companion";
+				PRODUCT_NAME = "Immich Companion";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		8EFB24FA2FA88FA70079549F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "macOS (Extension)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Immich Companion Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.yourCompany.Immich-Companion.Extension";
+				PRODUCT_NAME = "Immich Companion Extension";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		8EFB24FB2FA88FA70079549F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "macOS (Extension)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Immich Companion Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.yourCompany.Immich-Companion.Extension";
+				PRODUCT_NAME = "Immich Companion Extension";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		8EFB24FE2FA88FA70079549F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "macOS (App)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Immich Companion";
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.yourCompany.Immich-Companion";
+				PRODUCT_NAME = "Immich Companion";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		8EFB24FF2FA88FA70079549F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "macOS (App)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Immich Companion";
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.yourCompany.Immich-Companion";
+				PRODUCT_NAME = "Immich Companion";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		8EFB24A42FA88FA60079549F /* Build configuration list for PBXProject "Immich Companion" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8EFB24F02FA88FA70079549F /* Debug */,
+				8EFB24F12FA88FA70079549F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8EFB24F22FA88FA70079549F /* Build configuration list for PBXNativeTarget "Immich Companion Extension (iOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8EFB24F32FA88FA70079549F /* Debug */,
+				8EFB24F42FA88FA70079549F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8EFB24F62FA88FA70079549F /* Build configuration list for PBXNativeTarget "Immich Companion (iOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8EFB24F72FA88FA70079549F /* Debug */,
+				8EFB24F82FA88FA70079549F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8EFB24F92FA88FA70079549F /* Build configuration list for PBXNativeTarget "Immich Companion Extension (macOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8EFB24FA2FA88FA70079549F /* Debug */,
+				8EFB24FB2FA88FA70079549F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8EFB24FD2FA88FA70079549F /* Build configuration list for PBXNativeTarget "Immich Companion (macOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8EFB24FE2FA88FA70079549F /* Debug */,
+				8EFB24FF2FA88FA70079549F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 8EFB24A12FA88FA60079549F /* Project object */;
+}
