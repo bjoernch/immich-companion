@@ -1,10 +1,16 @@
 name: Release
 
 # Triggered when you push a tag like v0.7.0. Builds the Chrome and Firefox
-# zips and attaches them to the matching GitHub Release. Publishing to the
-# stores is intentionally manual — download the zip from the release page
-# (or the Actions artifact) and upload it via the Chrome Web Store / Firefox
-# AMO dashboards yourself.
+# zips on Linux, plus a Safari Xcode project zip on macOS, and attaches
+# all three to the matching GitHub Release. Publishing to the stores is
+# intentionally manual — download the zip from the release page (or the
+# Actions artifact) and upload it via the Chrome Web Store / Firefox AMO
+# dashboards yourself.
+#
+# The Safari deliverable is the *Xcode project*, not a built `.app`. We
+# can't ship a runnable `.app` without a paid Apple Developer ID and
+# notarization. Users open the project in Xcode, sign it with their own
+# free Apple ID, and click Run. See SAFARI.md for the exact steps.
 
 on:
   push:
@@ -66,3 +72,73 @@ jobs:
             dist/${{ steps.meta.outputs.chrome_zip }}
             dist/${{ steps.meta.outputs.firefox_zip }}
           generate_release_notes: true
+
+  safari:
+    # Only build the Safari project on tag pushes. PR / manual builds skip
+    # this — the macOS runner is slow and the artifact isn't useful unless
+    # there's a release to attach it to.
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: macos-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version
+        id: meta
+        run: |
+          VERSION=$(python3 -c "import json; print(json.load(open('manifest.json'))['version'])")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "chrome_zip=immich-companion-chrome-${VERSION}.zip" >> "$GITHUB_OUTPUT"
+          echo "safari_zip=immich-companion-safari-${VERSION}.zip" >> "$GITHUB_OUTPUT"
+
+      - name: Download Chrome zip from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: immich-companion-chrome-${{ steps.meta.outputs.version }}.zip
+          path: dist/
+
+      - name: Generate Safari Xcode project from Chrome zip
+        run: |
+          # Apple's safari-web-extension-converter takes an unpacked
+          # extension directory + spits out an Xcode project that wraps
+          # it. Using --copy-resources here makes the Xcode project
+          # self-contained — the user can unzip the project anywhere
+          # without referencing the original extension bytes.
+          mkdir -p safari-build
+          unzip -q "dist/${{ steps.meta.outputs.chrome_zip }}" -d safari-build/extension
+
+          xcrun safari-web-extension-converter \
+            --project-location safari-build/safari \
+            --app-name "Immich Companion" \
+            --bundle-identifier "dev.bjoernch.immich-companion" \
+            --macos-only \
+            --copy-resources \
+            --no-prompt \
+            --no-open \
+            safari-build/extension
+
+      - name: Pack the Xcode project as a release artifact
+        run: |
+          # The user opens the .xcodeproj inside this zip in Xcode,
+          # signs with their own free Apple ID, and clicks Run.
+          # See SAFARI.md.
+          mkdir -p dist
+          (cd safari-build/safari && zip -qr "../../dist/${{ steps.meta.outputs.safari_zip }}" .)
+          ls -la dist/
+
+      - name: Upload Safari artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.meta.outputs.safari_zip }}
+          path: dist/${{ steps.meta.outputs.safari_zip }}
+          if-no-files-found: error
+
+      - name: Attach Safari zip to the GitHub Release
+        # `gh release upload` appends to an existing release without
+        # touching the body or other assets — safer than running
+        # softprops/action-gh-release a second time.
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          gh release upload "$TAG" "dist/${{ steps.meta.outputs.safari_zip }}" --clobber
