@@ -1,10 +1,10 @@
 name: Sync privacy policy gist
 
 # Mirrors PRIVACY.md from this repo into the public gist that the store
-# listings (Chrome Web Store, Firefox AMO, Microsoft Edge Add-ons) point at
-# as their "privacy policy URL". The gist ID is hardcoded so the public URL
-# never changes — `gh gist edit` updates the existing gist in place; it
-# cannot create a new one.
+# listings (Chrome Web Store, Firefox AMO) point at as their "privacy
+# policy URL". The gist ID is hardcoded so the public URL never changes —
+# `gh gist edit` updates the existing gist in place; it cannot create a
+# new one.
 #
 # Manual setup (one time):
 #   1. Create a Classic Personal Access Token at

@@ -8,13 +8,12 @@
 </p>
 
 <p align="center">
-  Now live in the Chrome Web Store and Firefox Add-ons. The Microsoft Edge Add-ons listing is still in review — until it goes live the Edge button below points at the GitHub <a href="#install">install instructions</a>; Chromium-based browsers including Edge can also install directly from the Chrome Web Store.
+  Now live in the Chrome Web Store and Firefox Add-ons. Chromium-based browsers including Edge, Brave, Vivaldi, Arc, and Opera can install directly from the Chrome Web Store link below.
 </p>
 
 <p align="center">
-  <!-- Store-button images. All bundled locally in webstore-assets/ so the
-       README never depends on an external CDN. Edge is still pending; flip
-       its href to the live store URL once that listing is approved. -->
+  <!-- Store-button images bundled locally in webstore-assets/ so the
+       README never depends on an external CDN. -->
   <a href="https://chromewebstore.google.com/detail/immich-companion/kdgjgohclpdgnhkifmlidoncogokjkkd" title="Install from the Chrome Web Store">
     <img height="58" alt="Available in the Chrome Web Store"
          src="webstore-assets/chrome-webstore-badge.svg">
@@ -23,11 +22,6 @@
   <a href="https://addons.mozilla.org/firefox/addon/immich-companion/" title="Install from Firefox Add-ons">
     <img height="58" alt="Get the Firefox Add-on"
          src="webstore-assets/firefox-addons-badge.svg">
-  </a>
-  &nbsp;
-  <a href="#install" title="Microsoft Edge Add-ons — pending review">
-    <img height="58" alt="Available in the Microsoft Edge Add-ons store (pending review)"
-         src="webstore-assets/edge-addons-badge.svg">
   </a>
 </p>
 
@@ -65,7 +59,6 @@ The extension transmits data **only** to the Immich server you configure. No ana
 
 - **[Chrome Web Store](https://chromewebstore.google.com/detail/immich-companion/kdgjgohclpdgnhkifmlidoncogokjkkd)** — also covers Edge, Brave, Vivaldi, Arc, Opera and other Chromium-based browsers.
 - **[Firefox Add-ons](https://addons.mozilla.org/firefox/addon/immich-companion/)** — Firefox 121 or newer.
-- **Microsoft Edge Add-ons** — *pending review.* While the dedicated Edge listing is approved, install via the Chrome Web Store link above; it works in Edge identically.
 
 ### After install
 

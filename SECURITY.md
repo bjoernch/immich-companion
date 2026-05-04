@@ -23,7 +23,7 @@ Please include:
 You can expect:
 
 - An acknowledgement within **3 business days**.
-- A coordinated disclosure timeline. Typical patching window for a confirmed issue is **7–14 days** depending on severity; we aim to ship a fix to all three stores (Chrome Web Store, Firefox Add-ons, Microsoft Edge Add-ons) before public disclosure.
+- A coordinated disclosure timeline. Typical patching window for a confirmed issue is **7–14 days** depending on severity; we aim to ship a fix to both stores (Chrome Web Store, Firefox Add-ons) before public disclosure.
 - Credit in the release notes when the fix ships, unless you'd rather stay anonymous.
 
 We don't currently offer a paid bug bounty. The project is single-maintainer and unfunded.
