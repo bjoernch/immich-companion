@@ -1,4 +1,10 @@
-import { ping, setConfig, getConfig } from "../lib/immich.js";
+import {
+  ping,
+  setConfig,
+  getConfig,
+  createApiKeyFromSession,
+  RECOMMENDED_API_KEY_SCOPES,
+} from "../lib/immich.js";
 import { applyBrowserPlaceholders } from "../lib/browser-name.js";
 
 applyBrowserPlaceholders();
@@ -63,6 +69,74 @@ function revealDone() {
 $("connect").addEventListener("click", tryConnect);
 $("apiKey").addEventListener("keydown", (e) => { if (e.key === "Enter") tryConnect(); });
 $("serverUrl").addEventListener("keydown", (e) => { if (e.key === "Enter") tryConnect(); });
+
+// ---- Auto-key creation flow ---------------------------------------------
+//
+// "Use my existing Immich session" — works for OAuth, SSO, and password
+// users alike. createApiKeyFromSession() (in lib/immich.js) does the
+// actual work; this is just the welcome-page UI wiring around it.
+function setSessionStatus(content, kind = "", elId = "sessionStatus") {
+  const el = $(elId);
+  if (!el) return;
+  el.replaceChildren();
+  if (typeof content === "string") {
+    el.appendChild(document.createTextNode(content));
+  } else if (content) {
+    el.appendChild(content);
+  }
+  el.className = `status ${kind}`;
+}
+
+function notSignedInNode(serverUrl) {
+  const wrap = document.createElement("span");
+  wrap.appendChild(document.createTextNode("Not signed in at "));
+  const link = document.createElement("a");
+  try { link.textContent = new URL(serverUrl).host; } catch { link.textContent = serverUrl; }
+  link.href = serverUrl;
+  link.target = "_blank";
+  link.rel = "noopener";
+  wrap.appendChild(link);
+  wrap.appendChild(document.createTextNode(" — sign in there in any tab, then click again."));
+  return wrap;
+}
+
+async function autoUseSession() {
+  const rawUrl = $("autoServerUrl").value;
+  if (!rawUrl?.trim()) return setSessionStatus("Server URL required.", "err");
+
+  setSessionStatus("Checking your Immich session…");
+  $("autoUseSession").disabled = true;
+
+  try {
+    const { secret: apiKey, serverUrl } = await createApiKeyFromSession(rawUrl, {
+      scopes: RECOMMENDED_API_KEY_SCOPES,
+    });
+
+    await setConfig({ serverUrl, apiKey });
+    $("serverUrl").value = serverUrl;
+    $("apiKey").value = apiKey;
+
+    setSessionStatus("Verifying…");
+    try {
+      await ping();
+      setSessionStatus("Done — connected ✓", "ok");
+      chrome.runtime.sendMessage({ type: "config-updated" }).catch(() => {});
+      revealDone();
+    } catch (e) {
+      setSessionStatus(`Saved key but ping failed: ${e.message}`, "err");
+    }
+  } catch (e) {
+    if (e?.status === 401 && e?.serverUrl) {
+      setSessionStatus(notSignedInNode(e.serverUrl), "err");
+    } else {
+      setSessionStatus(e?.message || String(e), "err");
+    }
+  } finally {
+    $("autoUseSession").disabled = false;
+  }
+}
+
+$("autoUseSession")?.addEventListener("click", autoUseSession);
 $("skip").addEventListener("click", () => {
   chrome.runtime.openOptionsPage();
   window.close();

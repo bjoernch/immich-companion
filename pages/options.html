@@ -60,6 +60,15 @@
             </label>
           </div>
 
+          <div class="auto-key-card">
+            <strong>Generate a new key from your Immich session</strong>
+            <p class="muted">If you're signed into Immich in any browser tab — OAuth, SSO, or password — the extension can mint a fresh scoped API key without asking for credentials and replace the one above. Useful when rotating the key, after a server reset, or if your current key was revoked.</p>
+            <div class="row">
+              <button id="settingsGenerateKey" type="button" class="primary">Generate key from my session</button>
+              <span id="settingsSessionStatus" class="status"></span>
+            </div>
+          </div>
+
           <div class="perm-card">
             <div class="perm-card-header">
               <strong>Required API key permissions</strong>

@@ -585,12 +585,48 @@ button.issue-card {
 }
 .step-body ol.sub li { margin: 4px 0; }
 
-.perm-card {
+.perm-card,
+.auto-key-card {
   background: var(--panel-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 14px;
   margin-top: 14px;
+}
+.auto-key-card {
+  border-color: rgba(124, 140, 255, 0.35);
+  background:
+    linear-gradient(180deg, rgba(124, 140, 255, 0.08), rgba(124, 140, 255, 0.02)),
+    var(--panel-2);
+}
+.auto-key-card > strong { display: block; font-weight: 600; font-size: 14.5px; }
+.auto-key-card > p { margin: 4px 0 12px; line-height: 1.5; }
+.auto-key-card > label { margin-top: 4px; }
+.auto-key-card > p.small,
+.auto-key-card > .muted.small { font-size: 12.5px; margin-top: 10px; }
+.auto-key-card .row { margin-top: 12px; }
+.auto-key-card .status a {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* "or do it manually" divider sits between the auto-card and the manual
+   instructions in step 2 of the welcome flow. */
+.auto-key-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 22px 0 18px;
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+.auto-key-divider::before,
+.auto-key-divider::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid var(--border);
 }
 .perm-card-header {
   display: flex;

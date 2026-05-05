@@ -74,6 +74,27 @@ Defensive structural property: the **bug-report consent flow** in [`pages/option
 
 The privacy policy ([PRIVACY.md](PRIVACY.md)) goes through the same enumeration with concrete file paths.
 
+### Generating an API key from an existing browser session
+
+The welcome page and Settings → Connection both expose a "Generate key from my session" button that mints a scoped API key against the user's Immich without asking for a password. The implementation is in [`createApiKeyFromSession()`](lib/immich.js).
+
+How it works:
+
+- The user signs into Immich normally — via password, OAuth, SSO, whatever method their Immich is configured for. The browser receives an `httpOnly` session cookie scoped to the Immich host.
+- The extension performs `fetch(serverUrl + "/api/api-keys", { method: "POST", credentials: "include", body: { permissions: [...] } })`.
+- Because the manifest declares `<all_urls>` host permissions, the browser bypasses the usual cross-origin restrictions for that fetch and forwards the existing cookie. The extension's JavaScript **does not see, read, or copy the cookie** — `httpOnly` cookies are not readable by any JavaScript, including extension code.
+- Immich validates the session cookie server-side and returns a new API key secret.
+- The extension stores the API key in `chrome.storage.local` and uses `x-api-key` from then on.
+
+Security properties:
+
+- **The user's Immich password is never seen by the extension.** No password input field, no `POST /auth/login` call, no in-memory copy.
+- **The session cookie is never seen by the extension.** It's `httpOnly`; we can only trigger fetches that the browser annotates with it.
+- **The session cookie is not stored by the extension** — it remains where the browser put it, scoped to the Immich host. The cookie's lifetime is controlled by Immich, not us.
+- **Only the resulting API key is persisted** in `chrome.storage.local`, in the same place a manually-pasted key would land. Same security profile as the manual paste flow.
+- **The created key has only the scopes listed in [`RECOMMENDED_API_KEY_SCOPES`](lib/immich.js)** — it cannot be a "full access" key by mistake. The list is `Object.freeze`d at module import time.
+- **The key is revocable** at any time via *Immich → Account Settings → API Keys*; revocation is independent of the extension.
+
 ---
 
 ## Server URL handling

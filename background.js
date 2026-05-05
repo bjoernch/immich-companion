@@ -10,6 +10,7 @@ import {
   ping,
   createShareLink,
   recordUpload,
+  randomAssets,
 } from "./lib/immich.js";
 
 const MENU = {
@@ -30,18 +31,6 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   if (details.reason === "install") {
     chrome.tabs.create({ url: chrome.runtime.getURL("pages/welcome.html") });
   } else if (details.reason === "update") {
-    // Default for `featureNewtab` flipped from true → false in this version.
-    // Existing users had the old default of true and may never have written
-    // an explicit value to storage; preserve their behavior by writing true
-    // exactly once during the upgrade. Fresh installs get the new default
-    // of false (no surprise new-tab takeover).
-    try {
-      const stored = await chrome.storage.local.get("featureNewtab");
-      if (typeof stored.featureNewtab === "undefined") {
-        await chrome.storage.local.set({ featureNewtab: true });
-      }
-    } catch {}
-
     // Soft-prompt only if user hasn't configured yet.
     const cfg = await getConfig();
     if (!isConfigured(cfg)) {
@@ -578,6 +567,14 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
             sendResponse({ ok: false, error: err?.message || String(err) });
           }
         }
+      } else if (msg?.type === "newtab-precache") {
+        // Top up the new-tab background cache. Lives here in the SW
+        // (rather than in newtab.js) because new tabs unload as soon as
+        // the user navigates away — the page-side fire-and-forget
+        // Promise was getting killed mid-fetch, so the cache stayed
+        // empty. The SW persists until its work completes.
+        await topUpNewtabBgCache();
+        sendResponse({ ok: true });
       } else if (msg?.type === "config-updated") {
         await rebuildContextMenus();
         await updateBadge();
@@ -594,6 +591,127 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   })();
   return true;
 });
+
+// --- New-tab background pre-cache ----------------------------------------
+//
+// pages/newtab.js renders from a queue of pre-fetched preview images and
+// fires `chrome.runtime.sendMessage({type: "newtab-precache"})` after
+// each render to refill the queue. The work happens here in the SW
+// because new-tab pages unload the moment the user types a URL or
+// clicks a result, and a fire-and-forget Promise on the page side was
+// getting killed mid-fetch. The SW's lifecycle persists across the
+// document closing.
+//
+// Storage layout (mirrors the constants in pages/newtab.js):
+//   chrome.storage.local["newtabBgCache"] = { queue: [{assetId, asset, cachedAt}] }
+//   caches.open("immich-newtab-bg-v1") holds the actual blob bytes,
+//     keyed by https://immich-companion.invalid/newtab-bg/<assetId>
+//     — a deliberately fake DNS name, see newtabBgCacheKey() below.
+//
+// Soft caps: BG_MAX_QUEUED entries × ~500 KB preview ≈ 1.5 MB worst case.
+
+const NEWTAB_BG_CACHE_NAME = "immich-newtab-bg-v1";
+const NEWTAB_BG_META_KEY = "newtabBgCache";
+const NEWTAB_BG_MAX_QUEUED = 3;
+
+// Cache API only accepts http(s) request URLs. The chrome-extension://
+// scheme is rejected with "Request scheme 'chrome-extension' is
+// unsupported". `.invalid` is RFC 2606-reserved (DNS resolvers refuse to
+// resolve it) so this is a safe-by-design dummy URL — the Cache API just
+// treats it as a string key, no network ever happens. Both the SW (here)
+// and the new-tab page MUST use the same URL pattern.
+function newtabBgCacheKey(assetId) {
+  return `https://immich-companion.invalid/newtab-bg/${assetId}`;
+}
+
+async function topUpNewtabBgCache() {
+  const TAG = "[immich-companion newtab-cache]";
+  try {
+    console.log(TAG, "topUp called");
+    const cfg = await getConfig();
+    if (!isConfigured(cfg)) {
+      console.warn(TAG, "skipping: extension not configured (no serverUrl/apiKey)");
+      return;
+    }
+    if (cfg.featureNewtab === false) {
+      console.log(TAG, "skipping: featureNewtab off");
+      return;
+    }
+    if (cfg.newtabBackground === false) {
+      console.log(TAG, "skipping: newtabBackground off");
+      return;
+    }
+
+    const r = await chrome.storage.local.get(NEWTAB_BG_META_KEY);
+    const meta = r?.[NEWTAB_BG_META_KEY] && Array.isArray(r[NEWTAB_BG_META_KEY].queue)
+      ? r[NEWTAB_BG_META_KEY]
+      : { queue: [] };
+    console.log(TAG, "current queue length:", meta.queue.length);
+
+    if (meta.queue.length >= NEWTAB_BG_MAX_QUEUED) {
+      console.log(TAG, "queue already at cap, nothing to do");
+      return;
+    }
+
+    console.log(TAG, "fetching random asset…");
+    const items = await randomAssets({ count: 1, albumId: cfg.newtabAlbumId || "" });
+    const asset = Array.isArray(items) ? items[0] : items?.assets?.items?.[0];
+    if (!asset?.id) {
+      console.warn(TAG, "randomAssets returned no asset", items);
+      return;
+    }
+    console.log(TAG, "got asset id:", asset.id);
+    if (meta.queue.some((e) => e.assetId === asset.id)) {
+      console.log(TAG, "asset already queued, skipping");
+      return;
+    }
+
+    if (cfg.newtabShowMetadata !== false) {
+      const exif = asset.exifInfo;
+      const sparse = !exif || Object.keys(exif).length === 0 ||
+        (!exif.make && !exif.model && !exif.iso && !exif.fNumber);
+      if (sparse) {
+        try {
+          const detail = await fetch(`${cfg.serverUrl}/api/assets/${asset.id}`, {
+            headers: { "x-api-key": cfg.apiKey, Accept: "application/json" },
+          }).then((res) => (res.ok ? res.json() : null));
+          if (detail) Object.assign(asset, detail);
+        } catch (e) {
+          console.warn(TAG, "exif hydration failed (non-fatal):", e?.message || e);
+        }
+      }
+    }
+
+    console.log(TAG, "fetching preview bytes…");
+    const thumbRes = await fetch(thumbnailUrl(cfg.serverUrl, asset.id, "preview"), {
+      headers: { "x-api-key": cfg.apiKey },
+    });
+    if (!thumbRes.ok) {
+      console.warn(TAG, "thumbnail fetch failed:", thumbRes.status);
+      return;
+    }
+    const blob = await thumbRes.blob();
+    console.log(TAG, "fetched blob:", blob.size, "bytes,", blob.type);
+
+    const cache = await caches.open(NEWTAB_BG_CACHE_NAME);
+    await cache.put(newtabBgCacheKey(asset.id), new Response(blob, {
+      headers: { "Content-Type": blob.type || "image/jpeg" },
+    }));
+    console.log(TAG, "cache.put done");
+
+    meta.queue.push({ assetId: asset.id, asset, cachedAt: Date.now() });
+
+    while (meta.queue.length > NEWTAB_BG_MAX_QUEUED) {
+      const oldest = meta.queue.shift();
+      try { await cache.delete(newtabBgCacheKey(oldest.assetId)); } catch {}
+    }
+
+    await chrome.storage.local.set({ [NEWTAB_BG_META_KEY]: meta });
+    console.log(TAG, "DONE — queue length now:", meta.queue.length);
+  } catch (e) {
+    console.warn(TAG, "top-up failed:", e?.message || e, e?.stack);
+  }
+}
 
 // First-run badge check.
 updateBadge();

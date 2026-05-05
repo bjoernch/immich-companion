@@ -1,4 +1,14 @@
-import { listAlbums, ping, whoAmI, getConfig, setConfig, serverVersion, isConfigured } from "../lib/immich.js";
+import {
+  listAlbums,
+  ping,
+  whoAmI,
+  getConfig,
+  setConfig,
+  serverVersion,
+  isConfigured,
+  createApiKeyFromSession,
+  RECOMMENDED_API_KEY_SCOPES,
+} from "../lib/immich.js";
 import { applyBrowserPlaceholders, isMacOS } from "../lib/browser-name.js";
 
 applyBrowserPlaceholders();
@@ -448,6 +458,71 @@ function modalKeyHandler(e) {
 $("issueCard")?.addEventListener("click", (e) => {
   e.preventDefault();
   openBugReportModal().catch(() => {});
+});
+
+// ---- "Generate key from session" in Settings → Connection ---------------
+//
+// Same flow as the welcome page: piggyback on the user's existing Immich
+// session cookie to mint a new scoped API key. Used here as a "rotate
+// the key" path or a recovery path when the existing key was revoked.
+
+function setSettingsSessionStatus(content, kind = "") {
+  const el = $("settingsSessionStatus");
+  if (!el) return;
+  el.replaceChildren();
+  if (typeof content === "string") {
+    el.appendChild(document.createTextNode(content));
+  } else if (content) {
+    el.appendChild(content);
+  }
+  el.className = `status ${kind}`;
+}
+
+$("settingsGenerateKey")?.addEventListener("click", async () => {
+  const rawUrl = $("serverUrl").value;
+  if (!rawUrl?.trim()) {
+    return setSettingsSessionStatus("Set the Server URL above first.", "err");
+  }
+
+  setSettingsSessionStatus("Checking your Immich session…");
+  $("settingsGenerateKey").disabled = true;
+
+  try {
+    const { secret: apiKey, serverUrl } = await createApiKeyFromSession(rawUrl, {
+      scopes: RECOMMENDED_API_KEY_SCOPES,
+    });
+    // Persist + reflect in the form so user sees the new key landed.
+    await setConfig({ serverUrl, apiKey });
+    $("serverUrl").value = serverUrl;
+    $("apiKey").value = apiKey;
+    chrome.runtime.sendMessage({ type: "config-updated" }).catch(() => {});
+
+    setSettingsSessionStatus("Verifying…");
+    try {
+      await ping();
+      setSettingsSessionStatus("New key saved and connected ✓", "ok");
+      await refreshConnStatus();
+    } catch (e) {
+      setSettingsSessionStatus(`Saved but ping failed: ${e.message}`, "err");
+    }
+  } catch (e) {
+    if (e?.status === 401 && e?.serverUrl) {
+      const wrap = document.createElement("span");
+      wrap.appendChild(document.createTextNode("Not signed in at "));
+      const link = document.createElement("a");
+      try { link.textContent = new URL(e.serverUrl).host; } catch { link.textContent = e.serverUrl; }
+      link.href = e.serverUrl;
+      link.target = "_blank";
+      link.rel = "noopener";
+      wrap.appendChild(link);
+      wrap.appendChild(document.createTextNode(" — sign in there in any tab, then click again."));
+      setSettingsSessionStatus(wrap, "err");
+    } else {
+      setSettingsSessionStatus(e?.message || String(e), "err");
+    }
+  } finally {
+    $("settingsGenerateKey").disabled = false;
+  }
 });
 
 // Backdrop / Cancel button — anything with data-close.

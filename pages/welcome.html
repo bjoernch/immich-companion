@@ -26,6 +26,26 @@
           <div class="step-num">2</div>
           <div class="step-body">
             <h2>Create an API key</h2>
+
+            <div class="auto-key-card">
+              <strong>Have the extension generate it for you</strong>
+              <p class="muted">A scoped API key with exactly the permissions listed below — no copy-paste, no credentials in the extension. Works with <strong>OAuth, SSO, and password</strong> Immich logins. We piggyback on the session cookie your browser already has from when you signed into Immich.</p>
+
+              <label>
+                <span>Server URL</span>
+                <input id="autoServerUrl" type="url" placeholder="https://immich.example.com" autocomplete="off" />
+              </label>
+
+              <p class="muted small">Make sure you're signed into Immich in some browser tab. Then click below — the extension uses that existing session to mint the key.</p>
+
+              <div class="row">
+                <button id="autoUseSession" type="button" class="primary">Generate key from my session</button>
+                <span id="sessionStatus" class="status"></span>
+              </div>
+            </div>
+
+            <div class="auto-key-divider"><span>or do it manually</span></div>
+
             <p>In Immich:</p>
             <ol class="sub">
               <li>Click your profile picture (top right) → <strong>Account Settings</strong></li>

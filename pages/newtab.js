@@ -51,45 +51,149 @@ function showToast(msg, link) {
 
 let rotateTimer;
 
-async function pickAndRender(cfg) {
-  const items = await randomAssets({ count: 1, albumId: cfg.newtabAlbumId || "" });
-  const asset = Array.isArray(items) ? items[0] : items?.assets?.items?.[0];
-  if (!asset) {
-    if (cfg.newtabAlbumId) {
-      showToast("Selected album has no photos.", {
-        label: "Change album",
-        onClick: () => chrome.runtime.openOptionsPage(),
-      });
-    }
-    return;
-  }
+// ---- Background-image cache --------------------------------------------
+//
+// Pre-fetches the next few random previews into the browser's Cache API
+// so each new-tab open can paint the background instantly instead of
+// waiting on the network. Strategy:
+//
+//   - On every new-tab open: try to pop one entry from the queue and
+//     display it immediately. Then asynchronously top up the queue back
+//     to BG_MAX_QUEUED so the next open is also instant.
+//   - The queue lives in chrome.storage.local (small JSON: assetId, asset
+//     metadata, cachedAt). Image bytes go into the Cache API which is
+//     designed for blob storage and managed by the browser.
+//   - Each consume removes the displayed entry, so a user never sees the
+//     same cached image twice in a row.
+//   - Stale entries (>24h) are evicted on init. New ones are only kept
+//     up to BG_MAX_QUEUED. Worst-case disk usage: ~1.5 MB (3 × ~500 KB
+//     preview JPEGs).
 
-  // /search/random is lightweight — Immich often returns a thin asset
-  // record without exifInfo. Fetch the full asset detail so the photo
-  // metadata block in the corner has something to show.
-  if (cfg.newtabShowMetadata !== false) {
-    const exif = asset.exifInfo;
-    const sparse = !exif || Object.keys(exif).length === 0 ||
-      (!exif.make && !exif.model && !exif.iso && !exif.fNumber);
-    if (sparse) {
+const BG_CACHE_NAME = "immich-newtab-bg-v1";
+const BG_META_KEY = "newtabBgCache";
+const BG_MAX_QUEUED = 3;
+const BG_STALE_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+// MUST match background.js's newtabBgCacheKey(). Cache API rejects
+// chrome-extension:// scheme, so we use a deliberately-non-resolving
+// .invalid URL as a string key — both contexts have to agree on it.
+function bgCacheKey(assetId) {
+  return `https://immich-companion.invalid/newtab-bg/${assetId}`;
+}
+
+async function getBgMeta() {
+  try {
+    const r = await chrome.storage.local.get(BG_META_KEY);
+    const m = r?.[BG_META_KEY];
+    return m && Array.isArray(m.queue) ? m : { queue: [] };
+  } catch {
+    return { queue: [] };
+  }
+}
+async function setBgMeta(meta) {
+  try { await chrome.storage.local.set({ [BG_META_KEY]: meta }); } catch {}
+}
+
+// Take one entry off the queue + Cache, return its asset metadata + blob.
+// Returns null if the queue is empty or the cache is out of sync.
+async function consumeCachedBg() {
+  // Run storage.get and caches.open in parallel — they're independent.
+  // Saves ~10-30 ms vs awaiting them serially.
+  const [meta, cache] = await Promise.all([
+    getBgMeta(),
+    caches.open(BG_CACHE_NAME).catch(() => null),
+  ]);
+  if (!meta.queue.length || !cache) return null;
+  while (meta.queue.length) {
+    const entry = meta.queue.shift();
+    const key = bgCacheKey(entry.assetId);
+    let response;
+    try { response = await cache.match(key); } catch {}
+    if (response) {
+      try { await cache.delete(key); } catch {}
+      await setBgMeta(meta);
       try {
-        const detail = await fetchAssetDetail(cfg, asset.id);
-        if (detail) Object.assign(asset, detail);
-      } catch {}
+        return { asset: entry.asset, blob: await response.blob() };
+      } catch {
+        // unreadable response — try the next entry
+      }
     }
   }
+  await setBgMeta(meta);
+  return null;
+}
 
-  const url = await loadThumbViaBg(asset.id, "preview");
+// Ask the background service worker to top up the cache. Fire-and-forget
+// — must NOT happen on the new-tab page itself, because new tabs unload
+// the moment the user types a URL or clicks a result and any in-flight
+// fetch/storage write gets killed mid-flight. The SW persists across the
+// document closing.
+function requestPrecacheTopUp() {
+  try {
+    chrome.runtime.sendMessage({ type: "newtab-precache" }).catch(() => {});
+  } catch {}
+}
+
+// Drop entries older than BG_STALE_MS. Called once at init.
+async function evictStaleBg() {
+  const meta = await getBgMeta();
+  if (!meta.queue.length) return;
+  const now = Date.now();
+  const fresh = [];
+  let evicted = 0;
+  let cache;
+  try { cache = await caches.open(BG_CACHE_NAME); } catch { return; }
+  for (const entry of meta.queue) {
+    if (!entry.cachedAt || (now - entry.cachedAt) > BG_STALE_MS) {
+      try { await cache.delete(bgCacheKey(entry.assetId)); } catch {}
+      evicted++;
+    } else {
+      fresh.push(entry);
+    }
+  }
+  if (evicted > 0) {
+    meta.queue = fresh;
+    await setBgMeta(meta);
+  }
+}
+
+// Tracks whether we've painted at least one background. The first paint
+// of the page goes straight to opacity:1 with no fade — fade-in adds 600ms
+// of perceived load time, which makes the new tab feel slow even when
+// the image came from cache. Auto-rotate cycles still get the fade
+// because there it's actually a nice transition between two visible
+// photos rather than from blank → photo.
+let _firstPaintDone = false;
+
+// Renders the asset's preview as the new-tab background and populates the
+// metadata corner. Shared by both the cached-hit and live-fetch paths.
+function renderNewtabBackground(asset, blobUrl, cfg) {
   const bg = $("bg");
-  bg.style.opacity = "0";
-  setTimeout(() => {
-    bg.style.backgroundImage = `url("${url}")`;
+  if (!_firstPaintDone) {
+    // First paint: instant. Skip the opacity dance entirely.
+    bg.style.transition = "none";
+    bg.style.backgroundImage = `url("${blobUrl}")`;
     bg.style.opacity = "1";
-  }, 50);
+    // Force a reflow before re-enabling transitions so the next rotation
+    // animates rather than snapping.
+    void bg.offsetHeight;
+    bg.style.transition = "";
+    _firstPaintDone = true;
+  } else {
+    // Auto-rotate: keep the smooth fade between visible photos.
+    bg.style.opacity = "0";
+    setTimeout(() => {
+      bg.style.backgroundImage = `url("${blobUrl}")`;
+      bg.style.opacity = "1";
+    }, 50);
+  }
 
   const exif = asset.exifInfo || {};
   const date = exif.dateTimeOriginal || asset.fileCreatedAt;
-  const place = [exif.city, exif.country].filter(Boolean).join(", ");
+  // Include the state/region so e.g. "Boulder, Colorado, United States"
+  // renders instead of "Boulder, United States". Immich populates this
+  // from EXIF GPS reverse-geocoding into exifInfo.state.
+  const place = [exif.city, exif.state, exif.country].filter(Boolean).join(", ");
   const meta = $("meta");
   meta.replaceChildren();
 
@@ -124,6 +228,54 @@ async function pickAndRender(cfg) {
   link.target = "_blank";
   link.rel = "noopener";
   meta.appendChild(link);
+}
+
+async function pickAndRender(cfg) {
+  // Cached path — instant, no network involved at all.
+  const cached = await consumeCachedBg();
+  if (cached) {
+    const blobUrl = URL.createObjectURL(cached.blob);
+    renderNewtabBackground(cached.asset, blobUrl, cfg);
+    // Refill the cache for the next new-tab open. Fire-and-forget so we
+    // don't block the displayed page.
+    requestPrecacheTopUp();
+    return;
+  }
+
+  // Cache miss — fall back to the original live-fetch path.
+  const items = await randomAssets({ count: 1, albumId: cfg.newtabAlbumId || "" });
+  const asset = Array.isArray(items) ? items[0] : items?.assets?.items?.[0];
+  if (!asset) {
+    if (cfg.newtabAlbumId) {
+      showToast("Selected album has no photos.", {
+        label: "Change album",
+        onClick: () => chrome.runtime.openOptionsPage(),
+      });
+    }
+    return;
+  }
+
+  // /search/random is lightweight — Immich often returns a thin asset
+  // record without exifInfo. Fetch the full asset detail so the photo
+  // metadata block in the corner has something to show.
+  if (cfg.newtabShowMetadata !== false) {
+    const exif = asset.exifInfo;
+    const sparse = !exif || Object.keys(exif).length === 0 ||
+      (!exif.make && !exif.model && !exif.iso && !exif.fNumber);
+    if (sparse) {
+      try {
+        const detail = await fetchAssetDetail(cfg, asset.id);
+        if (detail) Object.assign(asset, detail);
+      } catch {}
+    }
+  }
+
+  const url = await loadThumbViaBg(asset.id, "preview");
+  renderNewtabBackground(asset, url, cfg);
+
+  // Pre-cache for next time even on the cache-miss path. After a cold
+  // start, every subsequent new tab is instant.
+  requestPrecacheTopUp();
 }
 
 async function fetchAssetDetail(cfg, assetId) {
@@ -390,6 +542,11 @@ async function init() {
     );
     return;
   }
+
+  // Prune any cached entries older than 24h before the rest of the
+  // pipeline runs. Cheap (a single chrome.storage read + a Cache.delete
+  // per stale entry) and only writes if anything actually evicted.
+  evictStaleBg().catch(() => {});
 
   const tasks = [];
   if (cfg.newtabBackground !== false) tasks.push(loadBackground(cfg));
