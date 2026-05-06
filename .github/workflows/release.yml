@@ -15,11 +15,11 @@ name: Release
 on:
   push:
     tags:
-      - 'v*.*.*'
-  workflow_dispatch:    # allow manual runs from the Actions tab
+      - "v*.*.*"
+  workflow_dispatch: # allow manual runs from the Actions tab
 
 permissions:
-  contents: write       # to create the GitHub Release
+  contents: write # to create the GitHub Release
 
 jobs:
   build:
@@ -106,6 +106,7 @@ jobs:
           # without referencing the original extension bytes.
           mkdir -p safari-build
           unzip -q "dist/${{ steps.meta.outputs.chrome_zip }}" -d safari-build/extension
+          python3 scripts/prepare_safari_extension.py safari-build/extension
 
           xcrun safari-web-extension-converter \
             --project-location safari-build/safari \
