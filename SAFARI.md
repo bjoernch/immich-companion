@@ -67,7 +67,17 @@ If Safari refuses to load the extension and you don't see it in the Extensions l
 - Safari → **Settings…** → **Advanced** → tick **"Show features for web developers"**.
 - Then in Safari's menu bar: **Develop** → **Web Extension** → **Allow Unsigned Extensions** → enter your password.
 
-Apple resets *Allow Unsigned Extensions* every Safari restart while your extension is signed only with a free Apple ID. There's no fix without upgrading to a paid Developer Program ($99/year).
+Apple resets *Allow Unsigned Extensions* every Safari restart while your extension is signed only with a free Apple ID. There's no fix from inside the extension itself.
+
+**There is, however, a one-Mac workaround** that survives Safari restarts and the 24-hour Apple-ID re-trust window: generate a **self-signed code-signing certificate** in Keychain Access, mark it trusted on your own machine, and build the Xcode project with that certificate as the Signing Identity. Safari treats the resulting `.app` like a properly-signed extension and stops re-prompting. Full step-by-step on Stack Overflow: [How can I sign a Safari extension for just one computer?](https://stackoverflow.com/questions/62748163/how-can-i-sign-a-safari-extension-for-just-one-computer/62748969#62748969). Credit to [@Tekkiech](https://github.com/Tekkiech) for surfacing this in [issue #6](https://github.com/bjoernch/immich-companion/issues/6).
+
+Caveats — same limitations as any self-signed setup:
+
+- The trust is **per-Mac**. Other people who download your built `.app` from elsewhere will hit a "developer cannot be verified" warning unless they import the same cert and trust it (which is itself an unwise thing to ask anyone to do).
+- It does **not** replace the need for proper signing if you ever want to distribute the extension to other people. For that the only real path is the paid Developer Program ($99/year) and Apple notarisation.
+- If you ever delete the certificate from Keychain or change its trust settings, Safari starts re-prompting again.
+
+For a single-Mac local install where you just want the extension to keep working across Safari restarts, this is the cleanest option short of paying Apple.
 
 ---
 
